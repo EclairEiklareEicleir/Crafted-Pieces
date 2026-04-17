@@ -6,7 +6,7 @@ use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
 
-class auth-modal extends Component
+class NavBar extends Component
 {
     /**
      * Create a new component instance.
@@ -21,6 +21,6 @@ class auth-modal extends Component
      */
     public function render(): View|Closure|string
     {
-        return view('components.auth-modal');
+        return view('components.nav-bar');
     }
 }

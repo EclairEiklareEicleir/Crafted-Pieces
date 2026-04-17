@@ -1,3 +1,1 @@
-<div>
-    <!-- Well begun is half done. - Aristotle -->
-</div>
+@include('partials.store-footer')

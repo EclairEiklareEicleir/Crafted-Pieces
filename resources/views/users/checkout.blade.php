@@ -8,8 +8,8 @@
     <section class="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
         <div class="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
             <div class="rounded-[2rem] border border-[#eadfd7] bg-white p-6 shadow-sm">
-                <p class="text-xs font-semibold uppercase tracking-[0.2em] text-[#a86b57]">Cart review</p>
-                <h1 class="mt-2 font-display text-4xl font-semibold text-[#4d3028]">Your Cart</h1>
+                <p class="text-xs font-semibold uppercase tracking-[0.2em] text-[#a86b57]">Checkout</p>
+                <h1 class="mt-2 font-display text-4xl font-semibold text-[#4d3028]">Complete Your Order</h1>
                 <div class="mt-8 divide-y divide-[#efe3da]">
                     @foreach ($cartItems as $item)
                         <div class="flex items-center justify-between gap-4 py-4 first:pt-0 last:pb-0">
@@ -38,7 +38,18 @@
                         <span>PHP {{ number_format($subtotal) }}</span>
                     </div>
                 </div>
-                <a href="{{ route('checkout') }}" class="mt-6 block rounded-full bg-[#b8745f] px-5 py-3 text-center text-sm font-semibold text-white shadow-md transition hover:-translate-y-0.5">Proceed to checkout</a>
+                <form class="mt-6 space-y-4" method="POST" action="#">
+                    @csrf
+                    <input class="w-full rounded-2xl border border-[#eadfd7] px-4 py-3" placeholder="Full name">
+                    <input class="w-full rounded-2xl border border-[#eadfd7] px-4 py-3" placeholder="Email address">
+                    <textarea class="w-full rounded-2xl border border-[#eadfd7] px-4 py-3" rows="4" placeholder="Shipping address"></textarea>
+                    <select class="w-full rounded-2xl border border-[#eadfd7] px-4 py-3">
+                        <option>GCash</option>
+                        <option>Maya</option>
+                        <option>Bank Transfer</option>
+                    </select>
+                    <button type="submit" class="w-full rounded-full bg-[#5d342b] px-5 py-3 text-sm font-semibold text-white shadow-md transition hover:-translate-y-0.5">Place order</button>
+                </form>
             </div>
         </div>
     </section>
