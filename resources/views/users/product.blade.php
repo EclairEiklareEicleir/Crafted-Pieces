@@ -32,10 +32,22 @@
                     </div>
                 </div>
                 <div class="mt-8 rounded-[1.75rem] border border-[#eadfd7] bg-white p-6">
+                    @php
+                        $currentUser = auth()->user();
+                        $canAddToCart = $currentUser && $currentUser->role === 'customer';
+                    @endphp
                     <h2 class="font-display text-2xl font-semibold text-[#4d3028]">Order notes</h2>
                     <p class="mt-3 text-sm leading-6 text-[#6f5a51]">Need adjustments? Request a custom version for this design and we can tailor size and colors.</p>
                     <div class="mt-5 flex flex-wrap gap-3">
-                        <a href="{{ route('cart') }}" class="rounded-full bg-[#b8745f] px-5 py-3 text-sm font-semibold text-white shadow-md transition hover:-translate-y-0.5">Add to cart</a>
+                        @if ($canAddToCart)
+                            <form method="POST" action="{{ route('cart.add', $product['slug']) }}">
+                                @csrf
+                                <input type="hidden" name="quantity" value="1">
+                                <button type="submit" class="rounded-full bg-[#b8745f] px-5 py-3 text-sm font-semibold text-white shadow-md transition hover:-translate-y-0.5">Add to cart</button>
+                            </form>
+                        @else
+                            <button type="button" data-auth-modal-open class="rounded-full bg-[#b8745f] px-5 py-3 text-sm font-semibold text-white shadow-md transition hover:-translate-y-0.5">Add to cart</button>
+                        @endif
                         <a href="{{ route('custom-order') }}" class="rounded-full border border-[#eadfd7] bg-white px-5 py-3 text-sm font-semibold text-[#5d342b] transition hover:-translate-y-0.5">Request custom version</a>
                     </div>
                 </div>

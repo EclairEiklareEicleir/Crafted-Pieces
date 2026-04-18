@@ -18,15 +18,52 @@
                 </div>
             </div>
             <div class="rounded-[2rem] border border-[#eadfd7] bg-white p-6 shadow-sm">
-                <form class="grid gap-4 sm:grid-cols-2" method="POST" action="#">
+                @php
+                    $currentUser = auth()->user();
+                    $canSubmitCustomOrder = $currentUser && $currentUser->role === 'customer';
+                @endphp
+
+                @if (! $canSubmitCustomOrder)
+                    <p class="mb-4 text-sm text-[#6f5a51]">Log in as a customer to submit a quotation request.</p>
+                @endif
+
+                <form class="grid gap-4 sm:grid-cols-2" method="POST" action="{{ $canSubmitCustomOrder ? route('custom-order.submit') : '#' }}">
                     @csrf
-                    <input class="rounded-2xl border border-[#eadfd7] px-4 py-3" name="name" placeholder="Full name">
-                    <input class="rounded-2xl border border-[#eadfd7] px-4 py-3" name="email" placeholder="Email address">
-                    <input class="rounded-2xl border border-[#eadfd7] px-4 py-3 sm:col-span-2" name="item_type" placeholder="Item type">
-                    <input class="rounded-2xl border border-[#eadfd7] px-4 py-3" name="design_theme" placeholder="Design theme">
-                    <input class="rounded-2xl border border-[#eadfd7] px-4 py-3" name="preferred_size" placeholder="Preferred size">
-                    <textarea class="rounded-2xl border border-[#eadfd7] px-4 py-3 sm:col-span-2" name="description" rows="5" placeholder="Describe your idea"></textarea>
-                    <button type="submit" class="rounded-full bg-[#5d342b] px-5 py-3 text-sm font-semibold text-white shadow-md transition hover:-translate-y-0.5 sm:col-span-2">Send quotation request</button>
+                    <input class="rounded-2xl border border-[#eadfd7] px-4 py-3" name="name" value="{{ old('name', $currentUser?->name) }}" placeholder="Full name">
+                    @error('name')
+                        <p class="text-sm text-red-700 sm:col-span-2">{{ $message }}</p>
+                    @enderror
+
+                    <input class="rounded-2xl border border-[#eadfd7] px-4 py-3" name="email" value="{{ old('email', $currentUser?->email) }}" placeholder="Email address">
+                    @error('email')
+                        <p class="text-sm text-red-700 sm:col-span-2">{{ $message }}</p>
+                    @enderror
+
+                    <input class="rounded-2xl border border-[#eadfd7] px-4 py-3 sm:col-span-2" name="item_type" value="{{ old('item_type') }}" placeholder="Item type">
+                    @error('item_type')
+                        <p class="text-sm text-red-700 sm:col-span-2">{{ $message }}</p>
+                    @enderror
+
+                    <input class="rounded-2xl border border-[#eadfd7] px-4 py-3" name="design_theme" value="{{ old('design_theme') }}" placeholder="Design theme">
+                    @error('design_theme')
+                        <p class="text-sm text-red-700 sm:col-span-2">{{ $message }}</p>
+                    @enderror
+
+                    <input class="rounded-2xl border border-[#eadfd7] px-4 py-3" name="preferred_size" value="{{ old('preferred_size') }}" placeholder="Preferred size">
+                    @error('preferred_size')
+                        <p class="text-sm text-red-700 sm:col-span-2">{{ $message }}</p>
+                    @enderror
+
+                    <textarea class="rounded-2xl border border-[#eadfd7] px-4 py-3 sm:col-span-2" name="description" rows="5" placeholder="Describe your idea">{{ old('description') }}</textarea>
+                    @error('description')
+                        <p class="text-sm text-red-700 sm:col-span-2">{{ $message }}</p>
+                    @enderror
+
+                    @if ($canSubmitCustomOrder)
+                        <button type="submit" class="rounded-full bg-[#5d342b] px-5 py-3 text-sm font-semibold text-white shadow-md transition hover:-translate-y-0.5 sm:col-span-2">Send quotation request</button>
+                    @else
+                        <button type="button" data-auth-modal-open class="rounded-full bg-[#5d342b] px-5 py-3 text-sm font-semibold text-white shadow-md transition hover:-translate-y-0.5 sm:col-span-2">Send quotation request</button>
+                    @endif
                 </form>
             </div>
         </div>

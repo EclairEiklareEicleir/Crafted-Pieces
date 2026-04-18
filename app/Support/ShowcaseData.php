@@ -75,7 +75,7 @@ class ShowcaseData
                 'slug' => 'mushroom-plushie',
                 'short_description' => 'Soft amigurumi mushroom plushie.',
                 'description' => 'A cozy desk buddy with hand-sewn details and premium stuffing.',
-                'image' => '/images/products/Mushroom Plushie.jpg',
+                'image' => '/images/products/Custom Amigurumi Character.jpg',
                 'category' => 'Plushies',
                 'price' => 300,
                 'tags' => ['Customizable'],

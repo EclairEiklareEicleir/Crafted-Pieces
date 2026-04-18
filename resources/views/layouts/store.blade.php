@@ -17,6 +17,7 @@
     </main>
 
     @include('partials.store-footer')
+    @include('partials.auth-required-modal')
     @include('partials.chatbot-widget')
 </body>
 </html>

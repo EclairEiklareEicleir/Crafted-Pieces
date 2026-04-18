@@ -18,7 +18,14 @@
                         <p class="text-xs font-semibold uppercase tracking-[0.2em] text-[#8f6a5d]">Admin</p>
                         <h1 class="font-display text-2xl font-semibold text-[#5d342b]">{{ $pageTitle ?? 'Dashboard' }}</h1>
                     </div>
-                    <a href="{{ route('home') }}" class="rounded-full border border-[#e7d6cb] bg-white px-4 py-2 text-sm font-medium text-[#5d342b] shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">Open Store</a>
+                    <div class="flex items-center gap-3">
+                        <p class="hidden text-sm font-medium text-[#6f5a51] sm:block">{{ auth()->user()->name }}</p>
+                        <a href="{{ route('home') }}" class="rounded-full border border-[#e7d6cb] bg-white px-4 py-2 text-sm font-medium text-[#5d342b] shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">Open Store</a>
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit" class="rounded-full border border-[#e7d6cb] bg-white px-4 py-2 text-sm font-medium text-[#5d342b] shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">Log Out</button>
+                        </form>
+                    </div>
                 </div>
             </header>
 
