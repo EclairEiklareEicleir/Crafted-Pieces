@@ -70,4 +70,13 @@
 - Added filtering by category and status
 - Combined admin filters into single query system
 
-## 21/04/26: 
+## 21/04/26: Major Remake Part 1:
+- Remade Routing Structure
+- Remade Role System (added role to users table: user, owner, created RoleMiddleware)
+- Remade centralized layout system (layouts.store)
+- Remade Navigation Bar (dynamic rendering based on auth state and roles)
+- Login and Register now use a single auth-modal component
+- Improved Authentication UX (modal, transitions, blur background, better UI)
+- Added animated form switching (login ↔ register) with reset and auto-open on validation errors
+- Added required privacy policy and terms checkbox with disabled register button until checked
+- Removed duplicate / unused files
