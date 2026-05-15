@@ -80,3 +80,46 @@
 - Added animated form switching (login ↔ register) with reset and auto-open on validation errors
 - Added required privacy policy and terms checkbox with disabled register button until checked
 - Removed duplicate / unused files
+
+## 28/04/26: Major Remake Part 2:
+- Expanded Laravel application architecture and routing structure
+- Added controller system for account management, storefront/shop handling, cart management
+- Added storefront pages: Home, Shop, Product View, Cart
+- Remade reusable Blade components: Navbar, Product Cards, Cart Items, Authentication Modal
+- Improved navigation rendering based on authentication state and user roles
+- Remade Eloquent Model: Product, Category, Cart, CartItem
+
+## 02/05/26: Major Remake Part 3:
+- Added storefront pages: Account
+- Remade shopping cart infrastructure: carts, cart items, dynamic quantity handling, session/user cart handling
+- Remade product and category database system
+- Remade order infrastructure: orders, order items, checkout flow, payment flow, order success handling, order tracking system
+- Remade database migrations for categories, products, carts, cart items
+- Fixed 403 authorization conflicts during commission acceptance flow
+
+## 06/05/26: Major Remake Part 4:
+- Remade admin pages: Dashboard, Commission Management, Order Management, Custom Commision Management
+- Added storefront pages: Checkout, Payment, Order Tracking, Order History, Custom Commission Pages
+- Improved backend validation consistency across controllers
+- Improved route grouping and middleware organization
+- Added Eloquent models: Order, OrderItem, CustomOrderRequest, CustomOrderMessage
+
+## 09/05/26: Major Remake Part 5:
+- Added database migrations for orders, order items, custom commission: requests, commission messages, quotation fields, and payment deadline support
+- Added database seeders: products, categories, users, analytics/demo data
+- Added custom commission infrastructure: commission requests, commission messaging/chat system, quotation handling, admin notes, payment workflow, commission status lifecycle
+- Added controller system and UI for checkout/payment processing, order tracking, custom commission workflow, admin commission handling, admin order management, and admin dashboard analytics
+
+## 15/05/26: Major Remake Part 5:
+- Added customer ↔ owner messaging/chat system for commission discussions
+- Added centralized commission statuses: pending, quoted, awaiting_confirmation, awaiting_payment, paid, in_progress, completed, rejected
+- Added universal payment processing system for regular orders and custom commissions
+- Added payment computation system: platform fee calculation, deposit calculation, remaining balance calculation
+- Added payment deadline system for custom commissions with automatic expiration/rejection handling
+- Added paid timestamp tracking and payment validity helper methods
+- Added secure authorization handling for payment access, ticket ownership, order ownership, and admin-only routes
+- Added admin-side quotation approval and commission acceptance workflow
+- Improved storefront UI consistency, reusable layouts, and authentication-integrated UI behavior
+- Improved cart/product rendering components and overall frontend maintainability
+- Refactored multiple Blade views, backend flows, and route handling for maintainability
+- Removed duplicate and unused files/components/routes

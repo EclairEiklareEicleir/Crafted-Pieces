@@ -1,131 +1,206 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>the_crafted_pieces</title>
+@extends('layouts.store')
 
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-</head>
+@section('content')
 
-<body class="bg-gray-50">
+    {{-- HERO --}}
+    <section class="mx-auto max-w-7xl px-4 pb-4 pt-14 sm:px-6 lg:px-8">
 
-    {{-- NAVBAR --}}
-    <x-navbar />
+        <div class="overflow-hidden rounded-[2rem] border border-white/70 bg-white/85 shadow-[0_24px_80px_rgba(90,53,33,0.10)]">
 
-    {{-- PAGE CONTENT --}}
-    @yield('content')
+            <div class="grid gap-10 px-6 py-14 lg:grid-cols-[1.15fr_0.85fr] lg:px-12">
 
-    {{-- AUTH MODAL --}}
-    <x-auth-modal />
+                <div>
 
-    {{-- AUTO OPEN MODAL ON ERROR --}}
-    @if ($errors->any())
-        <script>
-            window.addEventListener('DOMContentLoaded', () => {
-                openAuthModal();
-                showLogin();
-            });
-        </script>
-    @endif
+                    <p class="text-sm font-semibold uppercase tracking-[0.24em] text-[#a86b57]">
+                        Handmade Crochet Art
+                    </p>
 
-    {{-- GLOBAL SCRIPTS --}}
-    <script>
-        let authState = 'login'; // "login" | "register"
+                    <h1 class="mt-4 max-w-2xl font-display text-4xl font-semibold leading-tight text-[#4d3028] sm:text-5xl lg:text-6xl">
+                        Every Stitch, Crafted with Love
+                    </h1>
 
-        function openAuthModal() {
-            const modal = document.getElementById('auth-modal');
-            modal.classList.remove('hidden');
+                    <p class="mt-6 max-w-2xl text-base leading-7 text-[#6f5a51]">
+                        Welcome to the_crafted_pieces, your destination for handmade crochet creations and custom pieces.
+                    </p>
 
-            requestAnimationFrame(() => {
-                modal.classList.add('opacity-100');
-                modal.classList.remove('opacity-0');
-            });
+                    <div class="mt-8 flex flex-wrap gap-3">
 
-            renderAuth();
-        }
+                        <a href="{{ route('shop') }}"
+                           class="rounded-full bg-[#b8745f] px-6 py-3 text-sm font-semibold text-white shadow-md shadow-[#b8745f]/20 transition hover:-translate-y-0.5 hover:bg-[#a96550]">
+                            Shop Crochet
+                        </a>
 
-        function closeAuthModal() {
-            const modal = document.getElementById('auth-modal');
+                        <a href="{{ route('custom-order') }}"
+                           class="rounded-full border border-[#e7d6cb] bg-white px-6 py-3 text-sm font-semibold text-[#5d342b] shadow-sm transition hover:-translate-y-0.5 hover:border-[#d8b6a2]">
+                            Request Custom Crochet
+                        </a>
 
-            modal.classList.remove('opacity-100');
-            modal.classList.add('opacity-0');
+                    </div>
 
-            setTimeout(() => {
-                modal.classList.add('hidden');
-            }, 200);
-        }
+                </div>
 
-        function resetForm(formId) {
-            const form = document.getElementById(formId);
-            if (form) form.reset();
-        }
+                <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
 
-        function renderAuth() {
-            const login = document.getElementById('login-form');
-            const register = document.getElementById('register-form');
+                    <div class="rounded-[1.75rem] bg-gradient-to-br from-[#f4e4d9] to-[#f8f1eb] p-6">
+                        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-[#a86b57]">Bestsellers</p>
+                        <p class="mt-3 font-display text-2xl font-semibold text-[#4d3028]">
+                            Handmade pieces with strong character.
+                        </p>
+                    </div>
 
-            if (authState === 'login') {
+                    <div class="rounded-[1.75rem] bg-gradient-to-br from-[#efe8ff] to-[#f7f3ff] p-6">
+                        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-[#8a6ad1]">Custom Work</p>
+                        <p class="mt-3 font-display text-2xl font-semibold text-[#4d3028]">
+                            One-of-one crochet gifts made to order.
+                        </p>
+                    </div>
 
-                register.classList.add('hidden', 'opacity-0', 'translate-x-6');
-                login.classList.remove('hidden');
+                </div>
 
-                requestAnimationFrame(() => {
-                    login.classList.remove('opacity-0', '-translate-x-6');
-                    login.classList.add('opacity-100', 'translate-x-0');
-                });
+            </div>
 
-            } else {
+        </div>
 
-                login.classList.add('hidden', 'opacity-0', '-translate-x-6');
-                register.classList.remove('hidden');
+    </section>
 
-                requestAnimationFrame(() => {
-                    register.classList.remove('opacity-0', 'translate-x-6');
-                    register.classList.add('opacity-100', 'translate-x-0');
-                });
-            }
-        }
+    {{-- SHOP ENTRY (CATEGORIES) --}}
+    <section class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
 
-        function showLogin() {
-            authState = 'login';
+        <div class="flex items-end justify-between gap-4">
 
-            resetForm('register-form');
-            renderAuth();
-        }
+            <div>
+                <p class="text-xs font-semibold uppercase tracking-[0.2em] text-[#a86b57]">
+                    Start exploring
+                </p>
+                <h2 class="mt-2 font-display text-3xl font-semibold text-[#4d3028]">
+                    Browse categories
+                </h2>
+            </div>
 
-        function showRegister() {
-            authState = 'register';
+            <a href="{{ route('shop') }}"
+               class="text-sm font-semibold text-[#a86b57] transition hover:text-[#8d5848]">
+                View all
+            </a>
 
-            resetForm('login-form');
-            renderAuth();
-            initRegisterGuard();
-        }
+        </div>
 
-        function initRegisterGuard() {
-            const checkbox = document.getElementById('privacy-check');
-            const button = document.getElementById('register-btn');
+        <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
 
-            if (!checkbox || !button) return;
+            @foreach ($categories as $category)
 
-            function updateButtonState() {
-                button.disabled = !checkbox.checked;
+                <a href="{{ route('shop', ['category' => $category['slug']]) }}"
+                   class="rounded-3xl border border-[#eadfd7] bg-white p-6 text-center shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
 
-                if (checkbox.checked) {
-                    button.classList.remove('opacity-50', 'cursor-not-allowed');
-                } else {
-                    button.classList.add('opacity-50', 'cursor-not-allowed');
-                }
-            }
+                    <p class="font-semibold text-[#4d3028]">
+                        {{ $category['name'] }}
+                    </p>
 
-            checkbox.addEventListener('change', updateButtonState);
-            updateButtonState();
-        }
+                    <p class="mt-1 text-xs text-[#847166]">
+                        {{ $category['count'] }} items
+                    </p>
 
-        document.addEventListener('DOMContentLoaded', () => {
-            initRegisterGuard();
-        });
-    </script>
+                </a>
 
-</body>
-</html>
+            @endforeach
+
+        </div>
+
+    </section>
+
+    {{-- FEATURED PRODUCTS --}}
+    <section class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+
+        <div class="flex items-end justify-between gap-4">
+
+            <div>
+                <p class="text-xs font-semibold uppercase tracking-[0.2em] text-[#a86b57]">
+                    Featured
+                </p>
+                <h2 class="mt-2 font-display text-3xl font-semibold text-[#4d3028]">
+                    Bestsellers
+                </h2>
+            </div>
+
+            <a href="{{ route('shop') }}"
+               class="text-sm font-semibold text-[#a86b57] transition hover:text-[#8d5848]">
+                Shop all
+            </a>
+
+        </div>
+
+        <div class="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+
+            @foreach ($featuredProducts as $product)
+                <x-product-card :product="$product" />
+            @endforeach
+
+        </div>
+
+    </section>
+
+    {{-- TRUST SECTION (COMBINED: STEPS + TESTIMONIALS) --}}
+    <section class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+
+        <div class="rounded-[2rem] border border-[#eadfd7] bg-white p-6 shadow-sm sm:p-8">
+
+            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-[#a86b57]">
+                How it works
+            </p>
+
+            <h2 class="mt-2 font-display text-3xl font-semibold text-[#4d3028]">
+                Ordering & Reviews
+            </h2>
+
+            {{-- STEPS --}}
+            <div class="mt-8 grid gap-5 md:grid-cols-4">
+
+                @foreach ($steps as $step)
+
+                    <div class="rounded-3xl bg-[#fbf7f3] p-5">
+
+                        <h3 class="font-semibold text-[#4d3028]">
+                            {{ $step['title'] }}
+                        </h3>
+
+                        <p class="mt-2 text-sm leading-6 text-[#6f5a51]">
+                            {{ $step['desc'] }}
+                        </p>
+
+                    </div>
+
+                @endforeach
+
+            </div>
+
+            {{-- TESTIMONIALS --}}
+            <div class="mt-10 grid gap-5 md:grid-cols-3">
+
+                @foreach ($testimonials as $testimonial)
+
+                    <div class="rounded-3xl border border-[#f0e4db] bg-[#fcfaf8] p-5">
+
+                        <div class="flex gap-1 text-[#d6a74a]">
+                            @for ($i = 0; $i < $testimonial['rating']; $i++)
+                                <span>*</span>
+                            @endfor
+                        </div>
+
+                        <p class="mt-4 text-sm leading-6 text-[#5d4a43]">
+                            {{ $testimonial['text'] }}
+                        </p>
+
+                        <p class="mt-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#8f6a5d]">
+                            {{ $testimonial['name'] }}
+                        </p>
+
+                    </div>
+
+                @endforeach
+
+            </div>
+
+        </div>
+
+    </section>
+
+@endsection
