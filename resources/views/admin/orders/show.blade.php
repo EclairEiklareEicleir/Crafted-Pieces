@@ -83,8 +83,20 @@
                     Processing
                 </option>
 
-                <option value="completed" {{ $order->status === 'completed' ? 'selected' : '' }}>
-                    Completed
+                <option value="shipped" {{ $order->status === 'shipped' ? 'selected' : '' }}>
+                    Shipped
+                </option>
+
+                <option value="out_for_delivery" {{ $order->status === 'out_for_delivery' ? 'selected' : '' }}>
+                    Out for Delivery
+                </option>
+
+                <option value="delivered" {{ $order->status === 'delivered' ? 'selected' : '' }}>
+                    Delivered
+                </option>
+
+                <option value="received" {{ $order->status === 'received' ? 'selected' : '' }}>
+                    Received
                 </option>
 
                 <option value="cancelled" {{ $order->status === 'cancelled' ? 'selected' : '' }}>
@@ -99,6 +111,27 @@
             </button>
 
         </form>
+
+        {{-- QUICK ACTION BUTTONS (optional UX upgrade) --}}
+        <div class="mt-6 space-y-2">
+
+            <form method="POST" action="{{ route('admin.orders.status', $order->id) }}">
+                @csrf
+                <input type="hidden" name="status" value="shipped">
+                <button class="w-full rounded-xl bg-blue-600 py-2 text-white">
+                    Mark as Shipped
+                </button>
+            </form>
+
+            <form method="POST" action="{{ route('admin.orders.status', $order->id) }}">
+                @csrf
+                <input type="hidden" name="status" value="delivered">
+                <button class="w-full rounded-xl bg-green-600 py-2 text-white">
+                    Mark as Delivered
+                </button>
+            </form>
+
+        </div>
 
     </div>
 

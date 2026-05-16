@@ -102,10 +102,6 @@ Route::middleware(['auth', 'role:user'])->group(function () {
     |--------------------------------------------------------------------------
     | 💳 PAYMENT SYSTEM (RESTORED - SAFE ADDITION)
     |--------------------------------------------------------------------------
-    |
-    | NOTE: expanded middleware to ONLY 'auth'
-    | so admin redirect does NOT get blocked later
-    |
     */
 
     Route::middleware(['auth'])->group(function () {
@@ -146,6 +142,16 @@ Route::middleware(['auth', 'role:owner'])->group(function () {
     Route::post('/custom-order/{customOrder}/reject', [AdminCustomOrderController::class, 'reject'])
         ->name('admin.custom.reject');
 
+    
+    Route::get('/admin/orders/create', [AdminOrderController::class, 'create'])
+        ->name('admin.orders.create');
+
+    /*
+    |--------------------------------------------------------------------------
+    | ORDERS ADMIN
+    |--------------------------------------------------------------------------
+    */
+
     Route::get('/admin/orders', [AdminOrderController::class, 'index'])
         ->name('admin.orders.index');
 
@@ -154,6 +160,26 @@ Route::middleware(['auth', 'role:owner'])->group(function () {
 
     Route::post('/admin/orders/{order}/status', [AdminOrderController::class, 'updateStatus'])
         ->name('admin.orders.status');
+
+    Route::delete('/admin/orders/{order}', [AdminOrderController::class, 'destroy'])
+        ->name('admin.orders.destroy');
+
+    /*
+    |--------------------------------------------
+    | ✅ BULK ACTION (FIXED)
+    |--------------------------------------------
+    */
+    Route::post('/admin/orders/bulk', [AdminOrderController::class, 'bulkAction'])
+        ->name('admin.orders.bulk');
+
+    /*
+    |--------------------------------------------
+    | ✅ MANUAL ORDER CREATION (PROF REQUIREMENT)
+    |--------------------------------------------
+    */
+    Route::post('/admin/orders/manual', [AdminOrderController::class, 'store'])
+        ->name('admin.orders.store');
+
 });
 
 /*

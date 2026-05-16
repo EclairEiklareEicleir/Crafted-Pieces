@@ -9,51 +9,62 @@ use Carbon\Carbon;
 
 class AnalyticSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        // =========================
-        // LAST MONTH BASE DATE
-        // =========================
-        $lastMonth = Carbon::now()->subMonth();
+        $base = Carbon::now()->subMonths(2);
 
         // =========================
-        // FAKE ORDERS (LAST MONTH)
+        // ORDERS (REALISTIC FLOW)
         // =========================
-        for ($i = 1; $i <= 10; $i++) {
+        $statuses = [
+            'pending',
+            'shipped',
+            'delivered',
+            'received',
+            'cancelled'
+        ];
+
+        for ($i = 1; $i <= 20; $i++) {
 
             Order::create([
                 'user_id' => null,
-                'full_name' => "Test Customer $i",
-                'email' => "test$i@example.com",
-                'shipping_address' => "Test Address $i",
+                'full_name' => "Seed Customer $i",
+                'email' => "seed$i@example.com",
+                'shipping_address' => "Sample Address $i",
                 'payment_method' => 'GCash',
-                'total_amount' => rand(500, 3000),
-                'status' => 'completed',
-                'created_at' => $lastMonth->copy()->addDays(rand(0, 27)),
-                'updated_at' => $lastMonth->copy()->addDays(rand(0, 27)),
+                'total_amount' => rand(300, 3500),
+                'status' => $statuses[array_rand($statuses)],
+                'created_at' => $base->copy()->addDays(rand(0, 60)),
+                'updated_at' => now(),
             ]);
         }
 
         // =========================
-        // FAKE CUSTOM REQUESTS (LAST MONTH)
+        // CUSTOM ORDERS (REAL FLOW)
         // =========================
-        for ($i = 1; $i <= 6; $i++) {
+        $customStatuses = [
+            'pending',
+            'in_discussion',
+            'awaiting_payment',
+            'paid',
+            'rejected',
+            'completed'
+        ];
+
+        for ($i = 1; $i <= 10; $i++) {
 
             CustomOrderRequest::create([
                 'user_id' => null,
-                'name' => "Client $i",
-                'email' => "client$i@example.com",
+                'name' => "Client Seed $i",
+                'email' => "clientseed$i@example.com",
                 'item_type' => 'Crochet Item',
                 'design_theme' => 'Aesthetic',
                 'preferred_size' => '20cm',
-                'description' => 'Test commission request',
-                'estimated_price' => rand(800, 2500),
-                'status' => 'completed',
-                'created_at' => $lastMonth->copy()->addDays(rand(0, 27)),
-                'updated_at' => $lastMonth->copy()->addDays(rand(0, 27)),
+                'description' => 'Seeded commission request',
+                'estimated_price' => rand(500, 3000),
+                'status' => $customStatuses[array_rand($customStatuses)],
+                'created_at' => $base->copy()->addDays(rand(0, 60)),
+                'updated_at' => now(),
             ]);
         }
     }

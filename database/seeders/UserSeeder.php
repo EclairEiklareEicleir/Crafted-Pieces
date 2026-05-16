@@ -3,17 +3,14 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
+        // OWNER / ADMIN
         User::updateOrCreate(
             [
                 'email' => 'admin@craftedpieces.com'
@@ -22,6 +19,42 @@ class UserSeeder extends Seeder
                 'name' => 'Admin Owner',
                 'password' => Hash::make('password123'),
                 'role' => 'owner',
+            ]
+        );
+
+        // USER 1
+        User::updateOrCreate(
+            [
+                'email' => 'demoniczeno@gmail.com'
+            ],
+            [
+                'name' => 'leklek',
+                'password' => Hash::make('12'),
+                'role' => 'user',
+            ]
+        );
+
+        // USER 2
+        User::updateOrCreate(
+            [
+                'email' => 'charlesBenito@gmail.com'
+            ],
+            [
+                'name' => 'charles',
+                'password' => Hash::make('123'),
+                'role' => 'user',
+            ]
+        );
+
+        // USER 3
+        User::updateOrCreate(
+            [
+                'email' => 'toto@gmail.com'
+            ],
+            [
+                'name' => 'toto',
+                'password' => Hash::make('toto'),
+                'role' => 'user',
             ]
         );
     }

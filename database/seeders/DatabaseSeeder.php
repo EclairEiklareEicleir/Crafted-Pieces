@@ -1,39 +1,32 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace Database\Seeders;
 
-use App\Models\Order;
-use Illuminate\Http\Request;
+use App\Models\User;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Seeder;
 
-class AdminOrderController extends Controller
+class DatabaseSeeder extends Seeder
 {
-    // LIST ORDERS
-    public function index()
+    use WithoutModelEvents;
+
+    /**
+     * Seed the application's database.
+     */
+    public function run(): void
     {
-        $orders = Order::latest()->get();
+        // User::factory(10)->create();
 
-        return view('admin.orders.index', compact('orders'));
-    }
+        // User::factory()->create([
+        //     'name' => 'Test User',
+        //     'email' => 'test@example.com',
+        // ]);
 
-    // SHOW SINGLE ORDER
-    public function show(Order $order)
-    {
-        $order->load('items.product');
-
-        return view('admin.orders.show', compact('order'));
-    }
-
-    // UPDATE STATUS
-    public function updateStatus(Request $request, Order $order)
-    {
-        $request->validate([
-            'status' => 'required|string'
+        $this->call([
+            UserSeeder::class,
+            CategorySeeder::class,
+            ProductSeeder::class,
+            AnalyticSeeder::class,
         ]);
-
-        $order->update([
-            'status' => $request->status
-        ]);
-
-        return back()->with('success', 'Order status updated.');
     }
 }

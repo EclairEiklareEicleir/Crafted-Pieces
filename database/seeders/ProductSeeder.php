@@ -2,15 +2,12 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\Product;
 use App\Models\Category;
+
 class ProductSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
         $bouquets = Category::where('slug', 'bouquets')->first();
@@ -28,6 +25,7 @@ class ProductSeeder extends Seeder
                 'image' => 'https://placehold.co/600x600/png',
                 'product_type' => 'standard',
                 'category_id' => $bouquets?->id,
+                'is_active' => true,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
@@ -41,6 +39,7 @@ class ProductSeeder extends Seeder
                 'image' => 'https://placehold.co/600x600/png',
                 'product_type' => 'standard',
                 'category_id' => $plushies?->id,
+                'is_active' => true,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
@@ -54,6 +53,7 @@ class ProductSeeder extends Seeder
                 'image' => 'https://placehold.co/600x600/png',
                 'product_type' => 'custom',
                 'category_id' => $accessories?->id,
+                'is_active' => true,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],

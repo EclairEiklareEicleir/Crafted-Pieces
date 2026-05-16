@@ -4,6 +4,13 @@
 
 @php
     $status = strtolower($request->status);
+
+    $isLocked = in_array($status, [
+        \App\Models\CustomOrderRequest::STATUS_PAID,
+        \App\Models\CustomOrderRequest::STATUS_REJECTED,
+        \App\Models\CustomOrderRequest::STATUS_IN_PROGRESS,
+        \App\Models\CustomOrderRequest::STATUS_COMPLETED,
+    ]);
 @endphp
 
 <div class="grid gap-6 lg:grid-cols-[0.8fr_1.2fr]">
@@ -52,7 +59,7 @@
             </div>
 
             {{-- FLOW ACTIONS --}}
-            @if (in_array($status, ['pending', 'awaiting_confirmation']))
+            @if (!$isLocked && in_array($status, ['pending', 'awaiting_confirmation', 'quoted']))
 
                 <div class="mt-6 rounded-2xl border border-[#f0e4db] bg-[#fcfaf8] p-4">
 
@@ -73,7 +80,6 @@
                             <button class="rounded-full bg-green-600 px-5 py-2 text-white">
                                 Accept & Proceed
                             </button>
-                            
                         </form>
 
                         {{-- REJECT --}}
@@ -89,6 +95,12 @@
 
                 </div>
 
+            @else
+
+                <div class="mt-6 rounded-2xl border bg-gray-50 p-4 text-sm text-gray-600">
+                    Actions locked for this order status.
+                </div>
+
             @endif
 
         </div>
@@ -100,34 +112,44 @@
                 Send Quotation
             </h2>
 
-            <form method="POST"
-                  action="{{ route('admin.custom.quote', $request->id) }}"
-                  class="mt-6 space-y-4">
+            @if (!$isLocked)
 
-                @csrf
+                <form method="POST"
+                      action="{{ route('admin.custom.quote', $request->id) }}"
+                      class="mt-6 space-y-4">
 
-                <input
-                    type="number"
-                    step="0.01"
-                    name="final_price"
-                    value="{{ old('final_price', $request->final_price) }}"
-                    placeholder="Final quotation price"
-                    class="w-full rounded-2xl border border-[#eadfd7] px-4 py-3"
-                    required
-                >
+                    @csrf
 
-                <textarea
-                    name="admin_notes"
-                    rows="4"
-                    placeholder="Notes for customer"
-                    class="w-full rounded-2xl border border-[#eadfd7] px-4 py-3"
-                >{{ old('admin_notes', $request->admin_notes) }}</textarea>
+                    <input
+                        type="number"
+                        step="0.01"
+                        name="final_price"
+                        value="{{ old('final_price', $request->final_price) }}"
+                        placeholder="Final quotation price"
+                        class="w-full rounded-2xl border border-[#eadfd7] px-4 py-3"
+                        required
+                    >
 
-                <button class="w-full rounded-full bg-[#5d342b] py-3 text-white">
-                    Send Quotation
-                </button>
+                    <textarea
+                        name="admin_notes"
+                        rows="4"
+                        placeholder="Notes for customer"
+                        class="w-full rounded-2xl border border-[#eadfd7] px-4 py-3"
+                    >{{ old('admin_notes', $request->admin_notes) }}</textarea>
 
-            </form>
+                    <button class="w-full rounded-full bg-[#5d342b] py-3 text-white">
+                        Send Quotation
+                    </button>
+
+                </form>
+
+            @else
+
+                <p class="text-sm text-gray-500 mt-4">
+                    Quotation is locked for this order.
+                </p>
+
+            @endif
 
         </div>
 
@@ -165,34 +187,42 @@
                 </div>
 
             @empty
-
                 <p class="text-sm text-[#6f5a51]">
                     No messages yet.
                 </p>
-
             @endforelse
 
         </div>
 
         {{-- MESSAGE FORM --}}
-        <form method="POST"
-              action="{{ route('admin.custom.message', $request->id) }}"
-              class="mt-6">
+        @if (!$isLocked)
 
-            @csrf
+            <form method="POST"
+                  action="{{ route('admin.custom.message', $request->id) }}"
+                  class="mt-6">
 
-            <textarea
-                name="message"
-                rows="4"
-                placeholder="Reply to customer..."
-                class="w-full rounded-2xl border border-[#eadfd7] px-4 py-3"
-                required></textarea>
+                @csrf
 
-            <button class="mt-4 rounded-full bg-[#5d342b] px-6 py-3 text-white">
-                Send Reply
-            </button>
+                <textarea
+                    name="message"
+                    rows="4"
+                    placeholder="Reply to customer..."
+                    class="w-full rounded-2xl border border-[#eadfd7] px-4 py-3"
+                    required></textarea>
 
-        </form>
+                <button class="mt-4 rounded-full bg-[#5d342b] px-6 py-3 text-white">
+                    Send Reply
+                </button>
+
+            </form>
+
+        @else
+
+            <p class="mt-6 text-sm text-gray-500">
+                Chat locked for this order status.
+            </p>
+
+        @endif
 
     </div>
 

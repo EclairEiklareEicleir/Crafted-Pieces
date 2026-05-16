@@ -2,6 +2,10 @@
 
 @section('content')
 
+@php
+    $isLocked = $order->status === \App\Models\CustomOrderRequest::STATUS_PAID;
+@endphp
+
 <section class="mx-auto max-w-5xl px-4 py-14">
 
     {{-- HEADER --}}
@@ -29,7 +33,6 @@
     {{-- PAYMENT SECTION --}}
     @if ($order->status === \App\Models\CustomOrderRequest::STATUS_AWAITING_PAYMENT)
 
-        {{-- SAFETY CHECK (extra layer in case controller misses it) --}}
         @php
             $isExpired = $order->payment_due_at
                 ? \Carbon\Carbon::now()->greaterThan(\Carbon\Carbon::parse($order->payment_due_at))
@@ -49,12 +52,9 @@
                     Please complete payment before the deadline.
                 </p>
 
-                {{-- PRICE --}}
                 <div class="mt-5 rounded-xl bg-white p-4 border border-yellow-200">
 
-                    <p class="text-sm text-[#6f5a51]">
-                        Final Price
-                    </p>
+                    <p class="text-sm text-[#6f5a51]">Final Price</p>
 
                     <p class="mt-1 text-2xl font-semibold text-[#4d3028]">
                         PHP {{ number_format($order->final_price ?? $order->estimated_price, 2) }}
@@ -62,18 +62,13 @@
 
                 </div>
 
-                {{-- DEADLINE --}}
                 @if ($order->payment_due_at)
                     <div class="mt-4 text-sm text-yellow-900">
-
                         <strong>Payment Due:</strong>
-
                         {{ \Carbon\Carbon::parse($order->payment_due_at)->format('F d, Y h:i A') }}
-
                     </div>
                 @endif
 
-                {{-- PAYMENT BUTTON --}}
                 <a
                     href="{{ route('user.payment', ['type' => 'custom-order', 'id' => $order->id]) }}"
                     class="mt-6 inline-flex rounded-full bg-[#5d342b] px-6 py-3 text-sm font-medium text-white hover:bg-[#4a2922]"
@@ -85,7 +80,6 @@
 
         @else
 
-            {{-- EXPIRED --}}
             <div class="mt-6 rounded-2xl border border-red-300 bg-red-50 p-6">
 
                 <h2 class="text-xl font-semibold text-red-700">
@@ -146,32 +140,38 @@
                 </div>
 
             @empty
-
-                <p class="text-sm text-gray-500">
-                    No messages yet.
-                </p>
-
+                <p class="text-sm text-gray-500">No messages yet.</p>
             @endforelse
 
         </div>
 
         {{-- MESSAGE FORM --}}
-        <form method="POST"
-              action="{{ route('custom-order.message', $order->id) }}"
-              class="mt-4 flex gap-2">
+        @if (!$isLocked)
 
-            @csrf
+            <form method="POST"
+                  action="{{ route('custom-order.message', $order->id) }}"
+                  class="mt-4 flex gap-2">
 
-            <input type="text"
-                   name="message"
-                   class="flex-1 rounded-xl border px-4 py-2"
-                   placeholder="Type message...">
+                @csrf
 
-            <button class="rounded-xl bg-[#5d342b] px-5 py-2 text-white">
-                Send
-            </button>
+                <input type="text"
+                       name="message"
+                       class="flex-1 rounded-xl border px-4 py-2"
+                       placeholder="Type message...">
 
-        </form>
+                <button class="rounded-xl bg-[#5d342b] px-5 py-2 text-white">
+                    Send
+                </button>
+
+            </form>
+
+        @else
+
+            <div class="mt-4 rounded-xl border border-gray-200 bg-gray-50 p-3 text-sm text-gray-600">
+                Chat locked after payment completion.
+            </div>
+
+        @endif
 
     </div>
 

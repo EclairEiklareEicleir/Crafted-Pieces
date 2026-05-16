@@ -123,3 +123,16 @@
 - Improved cart/product rendering components and overall frontend maintainability
 - Refactored multiple Blade views, backend flows, and route handling for maintainability
 - Removed duplicate and unused files/components/routes
+
+## 16/05/26: Admin System Expansion, Seeder Refactor and Payment Schema Update
+- Refactored admin order management controller to improve manual order creation and streamline order workflow handling
+- Updated admin order UI (index, show, and create views) to improve usability 
+- Added CRUD (bulk and individual) order actions to admin side
+- Improved admin dashboard layout and analytics display with refined statistical breakdowns for orders, commissions, and revenue
+- Updated commission admin views to ensure consistent status handling and UI behavior across workflows
+- Enhanced user-side custom order view to match updated commission workflow structure
+- Refactored database seeders (UserSeeder, CategorySeeder, ProductSeeder, AnalyticSeeder) to align with current system structure and generate more realistic test data
+- Introduced admin manual order creation interface to support direct order insertion workflows
+- Improved route organization and updated admin routing structure to support expanded order, commission, and dashboard features
+- Added foundational backend support for improved payment tracking in custom commission transactions
+- Improved maintainability of admin modules through better alignment between controllers, views, and route structure
