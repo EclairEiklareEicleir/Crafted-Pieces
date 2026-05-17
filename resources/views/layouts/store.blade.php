@@ -19,6 +19,9 @@
     {{-- AUTH MODAL --}}
     <x-auth-modal />
 
+    {{-- Footer --}}
+    <x-footer />
+
     {{-- AUTO OPEN MODAL ON ERROR --}}
     @if ($errors->any())
         <script>
