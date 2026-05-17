@@ -12,6 +12,10 @@ class Order extends Model
         'email',
         'shipping_address',
         'payment_method',
+        'subtotal',
+        'platform_fee',
+        'delivery_fee',
+        'vat_amount',
         'total_amount',
         'status',
     ];
@@ -24,5 +28,11 @@ class Order extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function getComputedSubtotalAttribute()
+    {
+        return $this->subtotal
+            ?? $this->items->sum(fn ($i) => $i->quantity * $i->price);
     }
 }

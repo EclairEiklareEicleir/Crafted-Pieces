@@ -9,6 +9,27 @@ use Illuminate\Support\Facades\Auth;
 class OrderController extends Controller
 {
     // =========================
+    // RECEIPT
+    // =========================
+    public function downloadReceipt(Order $order)
+    {
+        if (Auth::id() !== $order->user_id) {
+            abort(403);
+        }
+
+        $order->load('items.product');
+
+        $pricing = (new \App\Services\PricingService())
+            ->calculateFromOrder($order);
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView(
+            'user.receipt.receipt-pdf',
+            compact('order', 'pricing')
+        );
+
+        return $pdf->download('receipt-order-' . $order->id . '.pdf');
+    }
+    // =========================
     // MY ORDERS (LOGGED IN)
     // =========================
     public function index()
@@ -65,6 +86,12 @@ class OrderController extends Controller
             ]);
         }
 
-        return view('user.orders.track-result', compact('order'));
+        $pricing = (new \App\Services\PricingService())
+            ->calculateFromOrder($order);
+
+        return view('user.orders.track-result', [
+            'order' => $order,
+            'pricing' => $pricing
+        ]);
     }
 }

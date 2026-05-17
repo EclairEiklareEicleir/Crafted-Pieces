@@ -6,6 +6,7 @@
     $status = strtolower($request->status);
 
     $isLocked = in_array($status, [
+        \App\Models\CustomOrderRequest::STATUS_AWAITING_PAYMENT,
         \App\Models\CustomOrderRequest::STATUS_PAID,
         \App\Models\CustomOrderRequest::STATUS_REJECTED,
         \App\Models\CustomOrderRequest::STATUS_IN_PROGRESS,
@@ -130,7 +131,7 @@
                         required
                     >
 
-                    <textarea
+                    <textarea hidden
                         name="admin_notes"
                         rows="4"
                         placeholder="Notes for customer"

@@ -28,18 +28,23 @@ class CustomOrderController extends Controller
     | SHOW SINGLE ORDER (TICKET VIEW)
     |--------------------------------------------------------------------------
     */
-    public function show(CustomOrderRequest $customOrder)
-    {
-        if ($customOrder->user_id !== Auth::id()) {
-            abort(403);
-        }
-
-        $customOrder->load(['messages.user']);
-
-        return view('user.custom-order.show', [
-            'order' => $customOrder
-        ]);
+public function show(CustomOrderRequest $customOrder)
+{
+    if ($customOrder->user_id !== Auth::id()) {
+        abort(403);
     }
+
+    $customOrder->load(['messages.user']);
+
+    $pricing = [
+        'base_price' => $customOrder->final_price ?? $customOrder->estimated_price,
+    ];
+
+    return view('user.custom-order.show', [
+        'order' => $customOrder,
+        'pricing' => $pricing,
+    ]);
+}
 
     /*
     |--------------------------------------------------------------------------

@@ -2,26 +2,19 @@
 
 @section('content')
 
-@php
-    $subtotal = $cartItems->sum(fn ($item) => $item->quantity * $item->price);
-@endphp
-
 <section class="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
 
-    {{-- SUCCESS STATE (FLASH SAFE) --}}
     @if (session('checkout_success'))
         <div class="mb-8 rounded-3xl border border-green-200 bg-green-50 p-6 text-green-800">
 
-            <h2 class="text-xl font-semibold">
-                🎉 Order Placed Successfully!
-            </h2>
+            <h2 class="text-xl font-semibold">🎉 Order Placed Successfully!</h2>
 
             <p class="mt-2 text-sm">
                 Your order #{{ session('checkout_success.order_id') }} has been received.
             </p>
 
             <p class="mt-1 text-sm">
-                Total Paid: PHP {{ number_format(session('checkout_success.total')) }}
+                Total Paid: PHP {{ number_format(session('checkout_success.total'), 2) }}
             </p>
 
             <a href="{{ route('shop') }}"
@@ -35,7 +28,7 @@
     <div class="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
 
         {{-- LEFT --}}
-        <div class="rounded-[2rem] border border-[#eadfd7] bg-white p-6 shadow-sm">
+        <div class="rounded-[2rem] border border-[#eadfd7] bg-[#fcfaf8] p-6 shadow-sm">
 
             <p class="text-xs font-semibold uppercase tracking-[0.2em] text-[#a86b57]">
                 Checkout
@@ -46,32 +39,99 @@
             </h1>
 
             @if ($cartItems->isEmpty())
+
                 <p class="mt-6 text-sm text-[#6f5a51]">
                     Your cart is empty.
                 </p>
+
             @else
 
-                <div class="mt-8 divide-y divide-[#efe3da]">
+                {{-- RECEIPT SUMMARY --}}
+                <div class="mt-8 rounded-2xl bg-white p-6 text-sm text-[#4d3028] shadow-sm">
 
-                    @foreach ($cartItems as $item)
-                        <div class="flex items-center justify-between py-4">
+                    {{-- ITEMS HEADER --}}
+                    <p class="text-xs font-semibold uppercase tracking-[0.15em] text-[#8f6a5d]">
+                        Items
+                    </p>
 
-                            <div>
-                                <p class="font-semibold text-[#4d3028]">
-                                    {{ $item->product->name }}
-                                </p>
+                    {{-- ITEMS LIST --}}
+                    <div class="mt-4 space-y-3">
 
-                                <p class="text-sm text-[#6f5a51]">
-                                    Qty: {{ $item->quantity }}
-                                </p>
+                        @foreach ($cartItems as $item)
+                            <div class="flex justify-between">
+                                <div>
+                                    <p class="font-semibold">
+                                        {{ $item->product->name }}
+                                    </p>
+                                    <p class="text-xs text-[#8f7a70]">
+                                        {{ $item->quantity }} × PHP {{ number_format($item->price, 2) }}
+                                    </p>
+                                </div>
+
+                                <div class="font-medium">
+                                    PHP {{ number_format($item->quantity * $item->price, 2) }}
+                                </div>
                             </div>
+                        @endforeach
 
-                            <p class="font-semibold text-[#8d5848]">
-                                PHP {{ number_format($item->quantity * $item->price) }}
-                            </p>
+                    </div>
 
+                    {{-- SEPARATOR --}}
+                    <div class="my-5 border-t border-dashed border-[#e7d6cd]"></div>
+
+                    {{-- SUBTOTAL --}}
+                    <div class="flex justify-between text-[#6f5a51]">
+                        <span>Subtotal</span>
+                        <span class="font-semibold text-[#4d3028]">
+                            PHP {{ number_format($pricing['subtotal'], 2) }}
+                        </span>
+                    </div>
+
+                    {{-- SEPARATOR --}}
+                    <div class="my-5 border-t border-dashed border-[#e7d6cd]"></div>
+
+                    {{-- FEES --}}
+                    <div class="space-y-2 text-[#6f5a51]">
+
+                        @isset($pricing['platform_fee'])
+                        <div class="flex justify-between">
+                            <span>Platform Fee</span>
+                            <span class="font-medium text-[#4d3028]">
+                                PHP {{ number_format($pricing['platform_fee'], 2) }}
+                            </span>
                         </div>
-                    @endforeach
+                        @endisset
+
+                        @isset($pricing['delivery_fee'])
+                        <div class="flex justify-between">
+                            <span>Delivery Fee</span>
+                            <span class="font-medium text-[#4d3028]">
+                                PHP {{ number_format($pricing['delivery_fee'], 2) }}
+                            </span>
+                        </div>
+                        @endisset
+
+                        @isset($pricing['vat'])
+                        <div class="flex justify-between">
+                            <span>VAT</span>
+                            <span class="font-medium text-[#4d3028]">
+                                PHP {{ number_format($pricing['vat'], 2) }}
+                            </span>
+                        </div>
+                        @endisset
+
+                    </div>
+
+                    {{-- SEPARATOR --}}
+                    <div class="my-5 border-t border-dashed border-[#e7d6cd]"></div>
+
+                    {{-- TOTAL --}}
+                    <div class="flex justify-between text-base">
+                        <span class="font-semibold text-[#4d3028]">Total</span>
+                        <span class="font-bold text-[#4d3028]">
+                            PHP {{ number_format($pricing['total'], 2) }}
+                        </span>
+                    </div>
 
                 </div>
 
@@ -83,19 +143,9 @@
         <div class="rounded-[2rem] border border-[#eadfd7] bg-[#fcfaf8] p-6 shadow-sm">
 
             <h2 class="font-display text-2xl font-semibold text-[#4d3028]">
-                Summary
+                Payment Detail
             </h2>
 
-            <div class="mt-6 rounded-3xl bg-white p-5">
-
-                <div class="flex justify-between text-sm">
-                    <span>Subtotal</span>
-                    <span>PHP {{ number_format($subtotal) }}</span>
-                </div>
-
-            </div>
-
-            {{-- FORM ONLY IF NO SUCCESS --}}
             @if (!session('checkout_success') && !$cartItems->isEmpty())
 
                 <form class="mt-6 space-y-4" method="POST" action="{{ route('checkout.submit') }}">
@@ -128,7 +178,7 @@
                     </select>
 
                     <button type="submit"
-                            class="w-full rounded-full bg-[#5d342b] py-3 text-white">
+                            class="w-full rounded-full bg-[#5d342b] py-3 text-white font-semibold">
                         Place Order
                     </button>
 

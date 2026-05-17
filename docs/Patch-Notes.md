@@ -146,3 +146,13 @@
 - Updated product and product-card views to handle new image logic
 
 - Remade Footer
+
+- Introduced centralized PricingService to unify all checkout, order, and receipt calculations
+- Refactored checkout and payment flows to remove duplicated pricing logic and rely on service layer
+- Unified order view and receipt output to ensure 1:1 consistent totals across UI and PDF
+- Added download receipt feature tied to OrderController using PricingService calculations
+- Created settings system foundation for dynamic platform fee, VAT, and delivery fee configuration
+- Updated custom order ticket flow to properly support base price, payment status, and final pricing logic
+- Cleaned up routes and views to align checkout, payment, and order display structure
+- Added SettingSeeder for default pricing configuration bootstrap
+- Updated composer.json / lock due to dependency alignment for PDF + service changes

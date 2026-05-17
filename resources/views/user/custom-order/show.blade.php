@@ -9,24 +9,37 @@
 <section class="mx-auto max-w-5xl px-4 py-14">
 
     {{-- HEADER --}}
-    <div class="rounded-2xl border bg-white p-6">
+    <div class="rounded-2xl border bg-white p-6 flex items-start justify-between">
 
-        <h1 class="text-2xl font-semibold text-[#4d3028]">
-            Commission Ticket #{{ $order->id }}
-        </h1>
+        <div>
+            <h1 class="text-2xl font-semibold text-[#4d3028]">
+                Commission Ticket #{{ $order->id }}
+            </h1>
 
-        <p class="mt-2 text-sm text-[#6f5a51]">
-            Status:
-            <span class="font-semibold text-[#a86b57]">
-                {{ $order->status_label }}
-            </span>
-        </p>
+            <p class="mt-2 text-sm text-[#6f5a51]">
+                Status:
+                <span class="font-semibold text-[#a86b57]">
+                    {{ $order->status_label }}
+                </span>
+            </p>
 
-        <p class="mt-2 text-sm text-[#6f5a51]">
-            Item: {{ $order->item_type }}
-            |
-            Size: {{ $order->preferred_size }}
-        </p>
+            <p class="mt-2 text-sm text-[#6f5a51]">
+                Item: {{ $order->item_type }}
+                |
+                Size: {{ $order->preferred_size }}
+            </p>
+        </div>
+
+        {{-- RECEIPT BUTTON --}}
+        @if ($order->status === \App\Models\CustomOrderRequest::STATUS_PAID)
+
+            <a href="{{ route('custom-order.receipt', $order->id) }}"
+            class="inline-flex items-center rounded-full border border-[#5d342b] px-5 py-2 text-sm font-medium text-[#5d342b] hover:bg-[#5d342b] hover:text-white">
+
+                Download Receipt
+            </a>
+
+        @endif
 
     </div>
 
@@ -57,10 +70,14 @@
                     <p class="text-sm text-[#6f5a51]">Final Price</p>
 
                     <p class="mt-1 text-2xl font-semibold text-[#4d3028]">
-                        PHP {{ number_format($order->final_price ?? $order->estimated_price, 2) }}
+                        PHP {{ number_format($pricing['base_price'], 2) }}
                     </p>
 
                 </div>
+
+                <p class="mt-2 text-sm text-red-700 font-medium">
+                    Note: This is the FINAL negotiated price. Fees are added during checkout.
+                </p>
 
                 @if ($order->payment_due_at)
                     <div class="mt-4 text-sm text-yellow-900">

@@ -1,12 +1,21 @@
 @props(['item'])
 
+@php
+    $image = $item->image;
+
+    $imageUrl = $image
+        ? (Str::startsWith($image, 'http')
+            ? $image
+            : asset('storage/' . $image))
+        : 'https://placehold.co/600x600/png';
+@endphp
+
 <div class="flex items-center justify-between gap-4 py-5">
 
     {{-- LEFT SIDE --}}
     <div class="flex items-center gap-4">
-
         <img
-            src="{{ $item->image }}"
+            src="{{ $imageUrl }}"
             class="h-20 w-20 rounded-2xl object-cover border border-[#eadfd7]"
         >
 
@@ -59,7 +68,7 @@
 
     </div>
 
-    {{-- RIGHT SIDE (TOTAL PER ITEM) --}}
+    {{-- RIGHT SIDE --}}
     <p class="font-semibold text-[#8d5848]">
         PHP {{ number_format($item->quantity * $item->price) }}
     </p>

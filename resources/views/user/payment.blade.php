@@ -39,31 +39,44 @@
         {{-- BREAKDOWN --}}
         <div class="space-y-2 text-sm">
 
+            @if ($type === 'custom-order')
+
+                {{-- CUSTOM ORDER = FIXED PRICE --}}
+                <p>
+                    Base Price:
+                    <strong>₱{{ number_format($pricing['base_price'], 2) }}</strong>
+                </p>
+
+            @else
+
+                {{-- CART ORDER = DETAILED BREAKDOWN --}}
+                <p>
+                    Subtotal:
+                    <strong>₱{{ number_format($pricing['subtotal'], 2) }}</strong>
+                </p>
+
+            @endif
+
             <p>
-                Base Amount:
-                <strong>₱{{ number_format($breakdown['base_amount'], 2) }}</strong>
+                Platform Fee:
+                <strong>₱{{ number_format($pricing['platform_fee'], 2) }}</strong>
             </p>
 
             <p>
-                Platform Fee (5%):
-                <strong>₱{{ number_format($breakdown['platform_fee'], 2) }}</strong>
+                Delivery Fee:
+                <strong>₱{{ number_format($pricing['delivery_fee'], 2) }}</strong>
             </p>
 
-            <p class="text-lg">
-                Total:
-                <strong>₱{{ number_format($breakdown['total_amount'], 2) }}</strong>
+            <p>
+                VAT:
+                <strong>₱{{ number_format($pricing['vat'], 2) }}</strong>
             </p>
 
             <hr>
 
-            <p class="text-green-700">
-                Deposit Required (50%):
-                <strong>₱{{ number_format($breakdown['deposit'], 2) }}</strong>
-            </p>
-
-            <p class="text-[#6f5a51]">
-                Remaining Balance:
-                <strong>₱{{ number_format($breakdown['balance'], 2) }}</strong>
+            <p class="text-lg">
+                Final Amount Payable:
+                <strong>₱{{ number_format($pricing['total'], 2) }}</strong>
             </p>
 
         </div>
@@ -75,7 +88,7 @@
             @csrf
 
             <button class="w-full rounded-full bg-[#5d342b] py-3 text-white">
-                Pay Deposit (Mock)
+                Pay Now
             </button>
 
         </form>

@@ -2,6 +2,23 @@
 
 @section('content')
 
+@php
+    /*
+    |--------------------------------------------------------------------------
+    | SOURCE OF TRUTH (ORDER SNAPSHOT)
+    |--------------------------------------------------------------------------
+    | No recalculation, no service calls.
+    | This ensures receipts NEVER change after checkout.
+    */
+    $pricing = [
+        'subtotal' => $order->subtotal,
+        'platform_fee' => $order->platform_fee,
+        'vat' => $order->vat_amount,
+        'delivery_fee' => $order->delivery_fee,
+        'total' => $order->total_amount,
+    ];
+@endphp
+
 <section class="mx-auto max-w-4xl px-4 py-14">
 
     <div class="rounded-[2rem] border border-[#eadfd7] bg-white p-6 shadow-sm">
@@ -40,20 +57,21 @@
 
             @foreach ($order->items as $item)
 
+                @php $product = $item->product; @endphp
+
                 <div class="flex items-center justify-between py-5">
 
                     <div class="flex items-center gap-4">
 
-                        {{-- optional product image --}}
-                        @if ($item->product?->image)
-                            <img src="{{ $item->product->image }}"
-                                 class="h-16 w-16 rounded-xl object-cover border border-[#eadfd7]">
-                        @endif
+                        <img
+                            src="{{ $product?->image ? Storage::url($product->image) : 'https://placehold.co/600x600/png' }}"
+                            class="h-16 w-16 rounded-xl object-cover border border-[#eadfd7]"
+                        >
 
                         <div>
 
                             <p class="font-semibold text-[#4d3028]">
-                                {{ $item->product->name ?? 'Deleted Product' }}
+                                {{ $product->name ?? 'Deleted Product' }}
                             </p>
 
                             <p class="text-sm text-[#6f5a51]">
@@ -61,7 +79,7 @@
                             </p>
 
                             <p class="text-xs text-[#8d5848]">
-                                PHP {{ number_format($item->price) }} each
+                                PHP {{ number_format($item->price, 2) }} each
                             </p>
 
                         </div>
@@ -69,7 +87,7 @@
                     </div>
 
                     <div class="font-semibold text-[#8d5848]">
-                        PHP {{ number_format($item->quantity * $item->price) }}
+                        PHP {{ number_format($item->quantity * $item->price, 2) }}
                     </div>
 
                 </div>
@@ -78,25 +96,59 @@
 
         </div>
 
-        {{-- TOTAL --}}
-        <div class="mt-6 flex items-center justify-between border-t border-[#efe3da] pt-5">
+        {{-- TOTAL BREAKDOWN --}}
+        <div class="mt-6 border-t border-[#efe3da] pt-5 space-y-2">
 
-            <span class="font-semibold text-[#4d3028]">
-                Total
-            </span>
+            <div class="flex justify-between text-sm text-[#6f5a51]">
+                <span>Subtotal</span>
+                <span class="font-semibold text-[#4d3028]">
+                    PHP {{ number_format($pricing['subtotal'], 2) }}
+                </span>
+            </div>
 
-            <span class="font-semibold text-[#4d3028]">
-                PHP {{ number_format($order->total_amount) }}
-            </span>
+            <div class="flex justify-between text-sm text-[#6f5a51]">
+                <span>Platform Fee</span>
+                <span class="font-semibold text-[#4d3028]">
+                    PHP {{ number_format($pricing['platform_fee'], 2) }}
+                </span>
+            </div>
+
+            <div class="flex justify-between text-sm text-[#6f5a51]">
+                <span>VAT</span>
+                <span class="font-semibold text-[#4d3028]">
+                    PHP {{ number_format($pricing['vat'], 2) }}
+                </span>
+            </div>
+
+            <div class="flex justify-between text-sm text-[#6f5a51]">
+                <span>Delivery Fee</span>
+                <span class="font-semibold text-[#4d3028]">
+                    PHP {{ number_format($pricing['delivery_fee'], 2) }}
+                </span>
+            </div>
+
+            <div class="flex justify-between font-semibold text-[#4d3028] pt-2 border-t border-[#efe3da]">
+                <span>Total</span>
+                <span>
+                    PHP {{ number_format($pricing['total'], 2) }}
+                </span>
+            </div>
 
         </div>
 
-        {{-- BACK BUTTON --}}
-        <div class="mt-8">
+        {{-- ACTIONS --}}
+        <div class="mt-8 flex items-center justify-between">
+
             <a href="{{ route('orders') }}"
-               class="inline-block rounded-full bg-[#5d342b] px-6 py-3 text-sm font-semibold text-white">
+               class="rounded-full border border-[#eadfd7] bg-white px-5 py-2 text-sm font-semibold text-[#5d342b]">
                 Back to Orders
             </a>
+
+            <a href="{{ route('orders.receipt.download', $order->id) }}"
+               class="rounded-full bg-[#5d342b] px-5 py-2 text-sm font-semibold text-white">
+                Download Receipt
+            </a>
+
         </div>
 
     </div>

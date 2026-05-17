@@ -17,7 +17,7 @@ use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\AdminOrderController;
 use App\Http\Controllers\AdminProductController;
 use App\Http\Controllers\AdminCategoryController;
-
+use App\Http\Controllers\AdminSettingController;
 /*
 |--------------------------------------------------------------------------
 | MAIN PAGES
@@ -84,6 +84,9 @@ Route::get('/order/success/{order}', [CheckoutController::class, 'success'])->na
 Route::get('/track-order', [OrderController::class, 'trackForm'])->name('orders.track.form');
 Route::post('/track-order', [OrderController::class, 'track'])->name('orders.track');
 Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+Route::get('/orders/{order}/receipt', [CheckoutController::class, 'downloadReceipt'])->name('orders.receipt.download');
+Route::get('/orders/{order}/receipt', [OrderController::class, 'downloadReceipt'])->name('orders.receipt');
+Route::get('/custom-order/{order}/receipt', [CheckoutController::class, 'downloadCustomReceipt'])->name('custom-order.receipt');
 
 /*
 |--------------------------------------------------------------------------
@@ -208,6 +211,17 @@ Route::middleware(['auth', 'role:owner'])->group(function () {
     Route::delete('/admin/categories/{category}', [AdminCategoryController::class, 'destroy'])
         ->name('admin.categories.destroy');
     });
+
+    /*
+    |--------------------------------------------------------------------------
+    | SETTINGS ADMIN
+    |--------------------------------------------------------------------------
+    */
+    Route::get('/admin/settings', [AdminSettingController::class, 'index'])
+    ->name('admin.settings.index');
+
+    Route::post('/admin/settings', [AdminSettingController::class, 'update'])
+        ->name('admin.settings.update');
 
 /*
 |--------------------------------------------------------------------------

@@ -35,6 +35,10 @@
             <a href="{{ route('admin.orders.index') }}" class="block">
                 Orders
             </a>
+            
+            <a href="{{ route('admin.settings.index') }}" class="block">
+                Settings
+            </a>
 
             <a href="{{ route('home') }}" class="block">
                 Back to Store

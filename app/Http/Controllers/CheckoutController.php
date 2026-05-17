@@ -5,29 +5,25 @@ namespace App\Http\Controllers;
 use App\Models\Cart;
 use App\Models\Order;
 use App\Models\CustomOrderRequest;
+use App\Services\PricingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class CheckoutController extends Controller
 {
-    /*
-    |--------------------------------------------------------------------------
-    | CART HANDLING
-    |--------------------------------------------------------------------------
-    */
-
     private function getCart()
     {
-        if (Auth::check()) {
-            return Cart::firstOrCreate([
-                'user_id' => Auth::id()
-            ]);
-        }
-
-        return Cart::firstOrCreate([
-            'session_id' => session()->getId()
-        ]);
+        return Auth::check()
+            ? Cart::firstOrCreate(['user_id' => Auth::id()])
+            : Cart::firstOrCreate(['session_id' => session()->getId()]);
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | CART CHECKOUT
+    |--------------------------------------------------------------------------
+    */
 
     public function index()
     {
@@ -37,17 +33,18 @@ class CheckoutController extends Controller
             ? $cart->items()->with('product')->get()
             : collect();
 
-        return view('user.checkout', compact('cartItems'));
+        $pricing = (new PricingService)->calculate($cartItems);
+
+        return view('user.checkout', compact('cartItems', 'pricing'));
     }
 
     public function submit(Request $request)
     {
         $cart = $this->getCart();
+        $cartItems = $cart->items()->with('product')->get();
 
-        if (! $cart || $cart->items()->count() === 0) {
-            return back()->withErrors([
-                'checkout' => 'Your cart is empty.'
-            ]);
+        if ($cartItems->isEmpty()) {
+            return back()->withErrors(['checkout' => 'Your cart is empty.']);
         }
 
         $validated = $request->validate([
@@ -57,19 +54,22 @@ class CheckoutController extends Controller
             'payment_method' => 'required|string',
         ]);
 
-        $cartItems = $cart->items()->with('product')->get();
-
-        $total = $cartItems->sum(function ($item) {
-            return $item->quantity * $item->price;
-        });
+        $pricing = (new PricingService)->calculate($cartItems);
 
         $order = Order::create([
             'user_id' => Auth::id(),
+
             'full_name' => $validated['full_name'],
             'email' => $validated['email'],
             'shipping_address' => $validated['shipping_address'],
             'payment_method' => $validated['payment_method'],
-            'total_amount' => $total,
+
+            'subtotal' => $pricing['subtotal'],
+            'platform_fee' => $pricing['platform_fee'],
+            'delivery_fee' => $pricing['delivery_fee'],
+            'vat_amount' => $pricing['vat'],
+            'total_amount' => $pricing['total'],
+
             'status' => 'pending',
         ]);
 
@@ -93,7 +93,7 @@ class CheckoutController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | UNIVERSAL PAYMENT SYSTEM (CUSTOM + ORDERS)
+    | PAYMENT
     |--------------------------------------------------------------------------
     */
 
@@ -101,130 +101,48 @@ class CheckoutController extends Controller
     {
         $item = $this->resolvePaymentItem($type, $id);
 
-        /*
-        |--------------------------------------------------------------------------
-        | AUTO EXPIRE UNPAID CUSTOM ORDERS
-        |--------------------------------------------------------------------------
-        */
-        if (
-            $type === 'custom-order' &&
-            $item->paymentIsExpired()
-        ) {
-
-            $item->update([
-                'status' => CustomOrderRequest::STATUS_REJECTED
-            ]);
-
-            return redirect()
-                ->route('custom-order.show', $item)
-                ->withErrors([
-                    'payment' => 'Payment deadline has expired.'
-                ]);
+        if (Auth::check() && $item->user_id !== Auth::id()) {
+            abort(403);
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | SECURITY CHECK
-        |--------------------------------------------------------------------------
-        */
-        if (Auth::check()) {
+        if ($type === 'custom-order') {
 
-            if (
-                $type === 'custom-order' &&
-                $item->user_id !== Auth::id()
-            ) {
-                abort(403, 'Unauthorized payment access.');
-            }
+            $basePrice = $item->final_price ?? $item->estimated_price;
+            $pricing = (new PricingService)->calculateCustomOrder($basePrice);
 
-            if (
-                $type === 'order' &&
-                $item->user_id !== Auth::id()
-            ) {
-                abort(403, 'Unauthorized payment access.');
-            }
+        } else {
+            $pricing = (new PricingService)->calculateFromOrder($item);
         }
 
-        $amount = $this->resolveAmount($item, $type);
-
-        $breakdown = $this->buildPaymentBreakdown($amount);
-
-        return view('user.payment', [
-            'type' => $type,
-            'item' => $item,
-            'breakdown' => $breakdown
-        ]);
+        return view('user.payment', compact('type', 'item', 'pricing'));
     }
 
     public function processPayment(Request $request, $type, $id)
     {
         $item = $this->resolvePaymentItem($type, $id);
 
-        /*
-        |--------------------------------------------------------------------------
-        | AUTO EXPIRE BEFORE PAYMENT PROCESS
-        |--------------------------------------------------------------------------
-        */
-        if (
-            $type === 'custom-order' &&
-            $item->paymentIsExpired()
-        ) {
-
-            $item->update([
-                'status' => CustomOrderRequest::STATUS_REJECTED
-            ]);
-
-            return redirect()
-                ->route('custom-order.show', $item)
-                ->withErrors([
-                    'payment' => 'Payment deadline expired.'
-                ]);
+        if ($type === 'custom-order' && $item->paymentIsExpired()) {
+            $item->update(['status' => CustomOrderRequest::STATUS_REJECTED]);
+            return back()->withErrors(['payment' => 'Payment expired']);
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | SECURITY CHECK
-        |--------------------------------------------------------------------------
-        */
-        if (
-            $type === 'custom-order' &&
-            $item->user_id !== Auth::id()
-        ) {
+        if ($item->user_id !== Auth::id()) {
             abort(403);
         }
 
-        if (
-            $type === 'order' &&
-            $item->user_id !== Auth::id()
-        ) {
-            abort(403);
-        }
+        $item->update([
+            'status' => $type === 'custom-order'
+                ? CustomOrderRequest::STATUS_PAID
+                : 'paid',
+            'paid_at' => now(),
+        ]);
 
-        switch ($type) {
-
-            case 'custom-order':
-
-                $item->update([
-                    'status' => CustomOrderRequest::STATUS_PAID,
-                    'paid_at' => now(),
-                ]);
-
-                return redirect()
-                    ->route('custom-order.show', $item)
-                    ->with('success', 'Custom order payment successful.');
-
-            case 'order':
-
-                $item->update([
-                    'status' => 'paid'
-                ]);
-
-                return redirect()
-                    ->route('checkout.success', $item)
-                    ->with('success', 'Order payment successful.');
-
-            default:
-                abort(404);
-        }
+        return redirect()->route(
+            $type === 'custom-order'
+                ? 'custom-order.show'
+                : 'checkout.success',
+            $item
+        )->with('success', 'Payment successful.');
     }
 
     /*
@@ -236,56 +154,45 @@ class CheckoutController extends Controller
     private function resolvePaymentItem($type, $id)
     {
         return match ($type) {
-
             'custom-order' => CustomOrderRequest::findOrFail($id),
-
             'order' => Order::findOrFail($id),
-
             default => abort(404),
         };
     }
 
     /*
     |--------------------------------------------------------------------------
-    | AMOUNT RESOLVER
+    | RECEIPT
     |--------------------------------------------------------------------------
     */
 
-    private function resolveAmount($item, $type)
+    public function downloadReceipt(Order $order)
     {
-        return match ($type) {
+        $order->load('items.product');
 
-            'custom-order' => $item->final_price ?? $item->estimated_price,
+        $pricing = (new PricingService)->calculateFromOrder($order);
 
-            'order' => $item->total_amount,
-
-            default => 0,
-        };
+        return Pdf::loadView('user.receipt.receipt-pdf', compact('order', 'pricing'))
+            ->download('receipt-order-' . $order->id . '.pdf');
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | PAYMENT BREAKDOWN ENGINE
-    |--------------------------------------------------------------------------
-    */
-
-    private function buildPaymentBreakdown($amount)
+    public function downloadCustomReceipt(CustomOrderRequest $order)
     {
-        $platformFeeRate = 0.05; // 5%
-        $depositRate = 0.50;     // 50%
+        if ($order->user_id !== Auth::id()) {
+            abort(403);
+        }
 
-        $platformFee = $amount * $platformFeeRate;
-        $total = $amount + $platformFee;
+        $pricingService = new PricingService();
 
-        $deposit = $total * $depositRate;
-        $balance = $total - $deposit;
+        $basePrice = $order->final_price ?? $order->estimated_price;
 
-        return [
-            'base_amount' => round($amount, 2),
-            'platform_fee' => round($platformFee, 2),
-            'total_amount' => round($total, 2),
-            'deposit' => round($deposit, 2),
-            'balance' => round($balance, 2),
-        ];
+        $pricing = $pricingService->calculateCustomOrder($basePrice);
+
+        $pdf = Pdf::loadView('user.receipt.customreceipt-pdf', [
+            'order' => $order,
+            'pricing' => $pricing,
+        ]);
+
+        return $pdf->download('custom-receipt-' . $order->id . '.pdf');
     }
 }
