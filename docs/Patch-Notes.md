@@ -136,3 +136,11 @@
 - Improved route organization and updated admin routing structure to support expanded order, commission, and dashboard features
 - Added foundational backend support for improved payment tracking in custom commission transactions
 - Improved maintainability of admin modules through better alignment between controllers, views, and route structure
+
+## 17/05/26:
+- Combined admin product tab and category tab under one tab: Products
+- Introduced new admin product management views under resources/views/admin/products/ for create and edit workflows
+- Added 2 controllers for admin product management: AdminCategoryController and AdminProductController
+- Updated routing system to support product and category management
+- Remade image logic: now connects to the storage folder and utilizes it for the product images
+- Updated product and product-card views to handle new image logic

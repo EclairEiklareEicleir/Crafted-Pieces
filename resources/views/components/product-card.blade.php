@@ -1,10 +1,20 @@
 @props(['product'])
 
+@php
+    $image = $product->image;
+
+    $imageUrl = $image
+        ? (Str::startsWith($image, 'http')
+            ? $image
+            : asset('storage/' . $image))
+        : 'https://placehold.co/600x600/png';
+@endphp
+
 <div class="group overflow-hidden rounded-[1.75rem] border bg-white shadow-sm transition hover:-translate-y-1">
 
     <a href="{{ route('product.show', $product->slug) }}">
 
-        <img src="{{ $product->image }}"
+        <img src="{{ $imageUrl }}"
              class="h-48 w-full object-cover"
              alt="{{ $product->name }}">
 
@@ -26,7 +36,7 @@
 
     </a>
 
-    {{-- FIX #2: UX SAFE ADD TO CART --}}
+    {{-- ADD TO CART --}}
     <div class="p-4 pt-0">
 
         @if ($product->stock > 0)

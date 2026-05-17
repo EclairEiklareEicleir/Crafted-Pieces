@@ -15,6 +15,8 @@ use App\Http\Controllers\CustomOrderController;
 use App\Http\Controllers\AdminCustomOrderController;
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\AdminOrderController;
+use App\Http\Controllers\AdminProductController;
+use App\Http\Controllers\AdminCategoryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -142,15 +144,14 @@ Route::middleware(['auth', 'role:owner'])->group(function () {
     Route::post('/custom-order/{customOrder}/reject', [AdminCustomOrderController::class, 'reject'])
         ->name('admin.custom.reject');
 
-    
-    Route::get('/admin/orders/create', [AdminOrderController::class, 'create'])
-        ->name('admin.orders.create');
-
     /*
     |--------------------------------------------------------------------------
     | ORDERS ADMIN
     |--------------------------------------------------------------------------
     */
+
+    Route::get('/admin/orders/create', [AdminOrderController::class, 'create'])
+        ->name('admin.orders.create');
 
     Route::get('/admin/orders', [AdminOrderController::class, 'index'])
         ->name('admin.orders.index');
@@ -164,23 +165,49 @@ Route::middleware(['auth', 'role:owner'])->group(function () {
     Route::delete('/admin/orders/{order}', [AdminOrderController::class, 'destroy'])
         ->name('admin.orders.destroy');
 
-    /*
-    |--------------------------------------------
-    | ✅ BULK ACTION (FIXED)
-    |--------------------------------------------
-    */
     Route::post('/admin/orders/bulk', [AdminOrderController::class, 'bulkAction'])
         ->name('admin.orders.bulk');
 
-    /*
-    |--------------------------------------------
-    | ✅ MANUAL ORDER CREATION (PROF REQUIREMENT)
-    |--------------------------------------------
-    */
     Route::post('/admin/orders/manual', [AdminOrderController::class, 'store'])
         ->name('admin.orders.store');
 
-});
+    /*
+    |--------------------------------------------------------------------------
+    | 🧵 PRODUCTS ADMIN (NEW)
+    |--------------------------------------------------------------------------
+    */
+    Route::get('/admin/products', [AdminProductController::class, 'index'])
+        ->name('admin.products.index');
+
+    Route::get('/admin/products/create', [AdminProductController::class, 'create'])
+        ->name('admin.products.create');
+
+    Route::post('/admin/products', [AdminProductController::class, 'store'])
+        ->name('admin.products.store');
+
+    Route::get('/admin/products/{product}/edit', [AdminProductController::class, 'edit'])
+        ->name('admin.products.edit');
+
+    Route::put('/admin/products/{product}', [AdminProductController::class, 'update'])
+        ->name('admin.products.update');
+
+    Route::delete('/admin/products/{product}', [AdminProductController::class, 'destroy'])
+        ->name('admin.products.destroy');
+
+    /*
+    |--------------------------------------------------------------------------
+    | 🧷 CATEGORY ADMIN (NEW - SAME CONTROLLER LOGIC)
+    |--------------------------------------------------------------------------
+    */
+    Route::post('/admin/categories', [AdminCategoryController::class, 'store'])
+        ->name('admin.categories.store');
+
+    Route::put('/admin/categories/{category}', [AdminCategoryController::class, 'update'])
+        ->name('admin.categories.update');
+
+    Route::delete('/admin/categories/{category}', [AdminCategoryController::class, 'destroy'])
+        ->name('admin.categories.destroy');
+    });
 
 /*
 |--------------------------------------------------------------------------

@@ -24,6 +24,10 @@
                 Dashboard
             </a>
 
+            <a href="{{ route('admin.products.index') }}" class="block">
+                Products
+            </a>
+
             <a href="{{ route('admin.custom.index') }}" class="block">
                 Custom Requests
             </a>
