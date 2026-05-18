@@ -2,18 +2,18 @@
 
 @section('content')
 
-<div class="rounded-[2rem] border border-[#eadfd7] bg-white p-6 shadow-sm">
+<div class="rounded-[2rem] border border-brand-border bg-white p-6 shadow-sm">
 
     {{-- HEADER --}}
     <div class="flex items-center justify-between">
 
-        <h2 class="font-display text-2xl font-semibold text-[#4d3028]">
+        <h2 class="font-display text-2xl font-semibold text-brand-primary">
             Orders
         </h2>
 
         {{-- MANUAL ORDER CREATION --}}
         <a href="{{ route('admin.orders.create') }}"
-           class="rounded-full bg-[#5d342b] px-5 py-2 text-sm text-white whitespace-nowrap">
+           class="brand-btn-primary px-5 py-2 text-sm whitespace-nowrap">
             + Create Order
         </a>
 
@@ -33,7 +33,7 @@
                 name="search"
                 value="{{ request('search') }}"
                 placeholder="Search by name, email, or order ID"
-                class="flex-1 min-w-0 rounded-2xl border px-4 py-2"
+                class="brand-input flex-1 min-w-0 py-2"
                 oninput="submitFilter()"
             >
 
@@ -41,7 +41,7 @@
             <select
                 name="status"
                 onchange="submitFilter()"
-                class="rounded-2xl border px-4 py-2 whitespace-nowrap">
+                class="brand-input rounded-2xl px-4 py-2 whitespace-nowrap">
 
                 <option value="">All Status</option>
 
@@ -78,7 +78,7 @@
         </form>
 
         {{-- SEPARATOR --}}
-        <span class="text-[#b59a8c] font-semibold">|</span>
+        <span class="font-semibold text-brand-ink/40">|</span>
 
         {{-- BULK ACTIONS --}}
         <form method="POST"
@@ -89,7 +89,7 @@
 
             <select
                 name="action"
-                class="rounded-2xl border px-4 py-2 whitespace-nowrap">
+                class="brand-input rounded-2xl px-4 py-2 whitespace-nowrap">
 
                 <option value="">Bulk Action</option>
 
@@ -111,7 +111,7 @@
 
             </select>
 
-            <button class="rounded-2xl bg-[#5d342b] px-5 py-2 text-sm text-white whitespace-nowrap">
+            <button class="brand-btn-primary px-5 py-2 text-sm whitespace-nowrap">
                 Apply
             </button>
 
@@ -124,7 +124,7 @@
 
         <table class="w-full text-left text-sm">
 
-            <thead class="text-xs uppercase tracking-[0.16em] text-[#8f7a70]">
+            <thead class="text-xs uppercase tracking-[0.16em] text-brand-ink/55">
 
                 <tr>
 
@@ -156,7 +156,7 @@
 
             </thead>
 
-            <tbody class="divide-y divide-[#efe3da]">
+            <tbody class="divide-y divide-brand-border">
 
                 @forelse ($orders as $order)
 
@@ -170,25 +170,25 @@
 
                         </td>
 
-                        <td class="py-4 pr-4 font-medium text-[#4d3028]">
+                        <td class="py-4 pr-4 font-medium text-brand-primary">
 
                             #{{ $order->id }}
 
                         </td>
 
-                        <td class="py-4 pr-4 text-[#6f5a51]">
+                        <td class="py-4 pr-4 text-brand-ink/70">
 
                             {{ $order->full_name }}
 
                         </td>
 
-                        <td class="py-4 pr-4 text-[#6f5a51]">
+                        <td class="py-4 pr-4 text-brand-ink/70">
 
                             PHP {{ number_format($order->total_amount) }}
 
                         </td>
 
-                        <td class="py-4 pr-4 text-[#6f5a51]">
+                        <td class="py-4 pr-4 text-brand-ink/70">
 
                             {{ ucfirst(str_replace('_', ' ', $order->status)) }}
 
@@ -201,7 +201,7 @@
 
                                 {{-- VIEW --}}
                                 <a href="{{ route('admin.orders.show', $order->id) }}"
-                                   class="font-semibold text-[#a86b57]">
+                                   class="font-semibold text-brand-secondary">
                                     View
                                 </a>
 
@@ -215,7 +215,7 @@
                                            name="status"
                                            value="shipped">
 
-                                    <button class="text-blue-600 text-sm">
+                                    <button class="text-sm text-brand-secondary">
                                         Mark Shipped
                                     </button>
 
@@ -231,7 +231,7 @@
                                            name="status"
                                            value="delivered">
 
-                                    <button class="text-green-600 text-sm">
+                                    <button class="text-sm text-brand-primary">
                                         Mark Delivered
                                     </button>
 

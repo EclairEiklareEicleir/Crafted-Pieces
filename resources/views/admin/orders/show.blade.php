@@ -5,27 +5,27 @@
 <div class="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
 
     {{-- ORDER DETAILS --}}
-    <div class="rounded-[2rem] border border-[#eadfd7] bg-white p-6 shadow-sm">
+    <div class="rounded-4xl border border-brand-border bg-white p-6 shadow-sm">
 
-        <h2 class="font-display text-2xl font-semibold text-[#4d3028]">
+        <h2 class="font-display text-2xl font-semibold text-brand-primary">
             Order #{{ $order->id }}
         </h2>
 
-        <p class="mt-2 text-sm text-[#6f5a51]">
+        <p class="mt-2 text-sm text-brand-ink/70">
             Customer: {{ $order->full_name }} ({{ $order->email }})
         </p>
 
-        <p class="text-sm text-[#6f5a51]">
+        <p class="text-sm text-brand-ink/70">
             Address: {{ $order->shipping_address }}
         </p>
 
-        <p class="text-sm text-[#6f5a51]">
+        <p class="text-sm text-brand-ink/70">
             Payment: {{ $order->payment_method }}
         </p>
 
-        <hr class="my-6 border-[#efe3da]">
+        <hr class="my-6 border-brand-border">
 
-        <h3 class="font-semibold text-[#4d3028]">Items</h3>
+        <h3 class="font-semibold text-brand-primary">Items</h3>
 
         <div class="mt-4 space-y-3">
 
@@ -34,16 +34,16 @@
                 <div class="flex justify-between text-sm">
 
                     <div>
-                        <p class="font-medium text-[#4d3028]">
+                        <p class="font-medium text-brand-primary">
                             {{ $item->product->name ?? 'Deleted Product' }}
                         </p>
 
-                        <p class="text-[#6f5a51]">
+                        <p class="text-brand-ink/70">
                             Qty: {{ $item->quantity }}
                         </p>
                     </div>
 
-                    <p class="font-semibold text-[#8d5848]">
+                    <p class="font-semibold text-brand-secondary">
                         PHP {{ number_format($item->price * $item->quantity) }}
                     </p>
 
@@ -56,13 +56,13 @@
     </div>
 
     {{-- STATUS PANEL --}}
-    <div class="rounded-[2rem] border border-[#eadfd7] bg-white p-6 shadow-sm">
+    <div class="rounded-4xl border border-brand-border bg-white p-6 shadow-sm">
 
-        <h3 class="font-display text-xl font-semibold text-[#4d3028]">
+        <h3 class="font-display text-xl font-semibold text-brand-primary">
             Order Status
         </h3>
 
-        <p class="mt-2 text-sm text-[#6f5a51]">
+        <p class="mt-2 text-sm text-brand-ink/70">
             Current: <strong>{{ ucfirst($order->status) }}</strong>
         </p>
 
@@ -73,7 +73,7 @@
             @csrf
 
             <select name="status"
-                    class="w-full rounded-2xl border px-4 py-3">
+                    class="brand-input">
 
                 <option value="pending" {{ $order->status === 'pending' ? 'selected' : '' }}>
                     Pending
@@ -106,7 +106,7 @@
             </select>
 
             <button type="submit"
-                    class="w-full rounded-full bg-[#5d342b] py-3 text-white">
+                    class="brand-btn-primary w-full py-3">
                 Update Status
             </button>
 
@@ -118,7 +118,7 @@
             <form method="POST" action="{{ route('admin.orders.status', $order->id) }}">
                 @csrf
                 <input type="hidden" name="status" value="shipped">
-                <button class="w-full rounded-xl bg-blue-600 py-2 text-white">
+                <button class="w-full rounded-xl bg-brand-secondary py-2 text-white hover:bg-brand-primary">
                     Mark as Shipped
                 </button>
             </form>
@@ -126,7 +126,7 @@
             <form method="POST" action="{{ route('admin.orders.status', $order->id) }}">
                 @csrf
                 <input type="hidden" name="status" value="delivered">
-                <button class="w-full rounded-xl bg-green-600 py-2 text-white">
+                <button class="w-full rounded-xl bg-brand-primary py-2 text-white hover:bg-brand-secondary">
                     Mark as Delivered
                 </button>
             </form>

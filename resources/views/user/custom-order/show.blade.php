@@ -9,21 +9,21 @@
 <section class="mx-auto max-w-5xl px-4 py-14">
 
     {{-- HEADER --}}
-    <div class="rounded-2xl border bg-white p-6 flex items-start justify-between">
+    <div class="rounded-2xl border border-brand-border bg-white p-6 flex items-start justify-between">
 
         <div>
-            <h1 class="text-2xl font-semibold text-[#4d3028]">
+            <h1 class="text-2xl font-semibold text-brand-primary">
                 Commission Ticket #{{ $order->id }}
             </h1>
 
-            <p class="mt-2 text-sm text-[#6f5a51]">
+            <p class="mt-2 text-sm text-brand-ink/70">
                 Status:
-                <span class="font-semibold text-[#a86b57]">
+                <span class="font-semibold text-brand-secondary">
                     {{ $order->status_label }}
                 </span>
             </p>
 
-            <p class="mt-2 text-sm text-[#6f5a51]">
+            <p class="mt-2 text-sm text-brand-ink/70">
                 Item: {{ $order->item_type }}
                 |
                 Size: {{ $order->preferred_size }}
@@ -34,7 +34,7 @@
         @if ($order->status === \App\Models\CustomOrderRequest::STATUS_PAID)
 
             <a href="{{ route('custom-order.receipt', $order->id) }}"
-            class="inline-flex items-center rounded-full border border-[#5d342b] px-5 py-2 text-sm font-medium text-[#5d342b] hover:bg-[#5d342b] hover:text-white">
+            class="brand-btn-secondary inline-flex items-center px-5 py-2 text-sm font-medium">
 
                 Download Receipt
             </a>
@@ -54,28 +54,28 @@
 
         @if (!$isExpired && $order->paymentIsValid())
 
-            <div class="mt-6 rounded-2xl border border-yellow-300 bg-yellow-50 p-6">
+            <div class="mt-6 rounded-2xl border border-brand-secondary bg-brand-light/40 p-6">
 
-                <h2 class="text-xl font-semibold text-yellow-800">
+                <h2 class="text-xl font-semibold text-brand-primary">
                     Payment Required
                 </h2>
 
-                <p class="mt-2 text-sm text-yellow-700">
+                <p class="mt-2 text-sm text-brand-ink/70">
                     Your custom request has been approved by the owner.
                     Please complete payment before the deadline.
                 </p>
 
-                <div class="mt-5 rounded-xl bg-white p-4 border border-yellow-200">
+                <div class="mt-5 rounded-xl border border-brand-border bg-white p-4">
 
-                    <p class="text-sm text-[#6f5a51]">Final Price</p>
+                    <p class="text-sm text-brand-ink/70">Final Price</p>
 
-                    <p class="mt-1 text-2xl font-semibold text-[#4d3028]">
+                    <p class="mt-1 text-2xl font-semibold text-brand-primary">
                         PHP {{ number_format($pricing['base_price'], 2) }}
                     </p>
 
                 </div>
 
-                <p class="mt-2 text-sm text-red-700 font-medium">
+                <p class="mt-2 text-sm font-medium text-brand-secondary">
                     Note: This is the FINAL negotiated price. Fees are added during checkout.
                 </p>
 
@@ -88,7 +88,7 @@
 
                 <a
                     href="{{ route('user.payment', ['type' => 'custom-order', 'id' => $order->id]) }}"
-                    class="mt-6 inline-flex rounded-full bg-[#5d342b] px-6 py-3 text-sm font-medium text-white hover:bg-[#4a2922]"
+                    class="brand-btn-primary mt-6 inline-flex px-6 py-3 text-sm font-medium"
                 >
                     Pay Now
                 </a>
@@ -97,13 +97,13 @@
 
         @else
 
-            <div class="mt-6 rounded-2xl border border-red-300 bg-red-50 p-6">
+            <div class="mt-6 rounded-2xl border border-brand-secondary bg-brand-light/40 p-6">
 
-                <h2 class="text-xl font-semibold text-red-700">
+                <h2 class="text-xl font-semibold text-brand-primary">
                     Payment Expired
                 </h2>
 
-                <p class="mt-2 text-sm text-red-600">
+                <p class="mt-2 text-sm text-brand-ink/70">
                     This custom order was automatically cancelled because
                     payment was not completed before the deadline.
                 </p>
@@ -117,13 +117,13 @@
     {{-- PAID STATUS --}}
     @if ($order->status === \App\Models\CustomOrderRequest::STATUS_PAID)
 
-        <div class="mt-6 rounded-2xl border border-green-300 bg-green-50 p-6">
+        <div class="mt-6 rounded-2xl border border-brand-border bg-brand-light/35 p-6">
 
-            <h2 class="text-xl font-semibold text-green-700">
+            <h2 class="text-xl font-semibold text-brand-primary">
                 Payment Completed
             </h2>
 
-            <p class="mt-2 text-sm text-green-700">
+            <p class="mt-2 text-sm text-brand-ink/70">
                 Your payment has been received successfully.
                 Production may begin soon.
             </p>
@@ -133,9 +133,9 @@
     @endif
 
     {{-- CHAT --}}
-    <div class="mt-6 rounded-2xl border bg-white p-6">
+    <div class="mt-6 rounded-2xl border border-brand-border bg-white p-6">
 
-        <h2 class="font-semibold text-[#4d3028]">
+        <h2 class="font-semibold text-brand-primary">
             Conversation
         </h2>
 
@@ -143,21 +143,21 @@
 
             @forelse ($order->messages as $msg)
 
-                <div class="rounded-xl bg-[#fcfaf8] p-3">
+                <div class="rounded-xl bg-brand-light/35 p-3">
 
-                    <div class="text-xs text-gray-500">
+                    <div class="text-xs text-brand-ink/55">
                         {{ $msg->user->name ?? 'Unknown' }}
                         • {{ $msg->created_at->diffForHumans() }}
                     </div>
 
-                    <div class="mt-1 text-sm text-[#4d3028]">
+                    <div class="mt-1 text-sm text-brand-primary">
                         {{ $msg->message }}
                     </div>
 
                 </div>
 
             @empty
-                <p class="text-sm text-gray-500">No messages yet.</p>
+                <p class="text-sm text-brand-ink/60">No messages yet.</p>
             @endforelse
 
         </div>
@@ -173,10 +173,10 @@
 
                 <input type="text"
                        name="message"
-                       class="flex-1 rounded-xl border px-4 py-2"
+                      class="brand-input flex-1 py-2"
                        placeholder="Type message...">
 
-                <button class="rounded-xl bg-[#5d342b] px-5 py-2 text-white">
+                  <button class="brand-btn-primary px-5 py-2">
                     Send
                 </button>
 
@@ -184,7 +184,7 @@
 
         @else
 
-            <div class="mt-4 rounded-xl border border-gray-200 bg-gray-50 p-3 text-sm text-gray-600">
+            <div class="mt-4 rounded-xl border border-brand-border bg-brand-light/25 p-3 text-sm text-brand-ink/60">
                 Chat locked after payment completion.
             </div>
 

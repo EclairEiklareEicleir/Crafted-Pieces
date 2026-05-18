@@ -9,27 +9,27 @@
         {{-- LEFT INFO --}}
         <div>
 
-            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-[#a86b57]">
+            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-brand-secondary">
                 Custom Commission
             </p>
 
-            <h1 class="mt-2 font-display text-4xl font-semibold text-[#4d3028]">
+            <h1 class="mt-2 font-display text-4xl font-semibold text-brand-primary">
                 Request a Quote
             </h1>
 
-            <p class="mt-4 text-[#6f5a51]">
+            <p class="mt-4 text-brand-ink/70">
                 Submit your idea and we will reply with a
                 <strong>price estimate, materials breakdown, and timeline</strong>.
                 This is not an order yet — it becomes a commission only after confirmation.
             </p>
 
-            <div class="mt-8 rounded-[2rem] border border-[#eadfd7] bg-white p-6 shadow-sm">
+            <div class="mt-8 rounded-[2rem] border border-brand-border bg-white p-6 shadow-sm">
 
-                <h2 class="font-display text-2xl font-semibold text-[#4d3028]">
+                <h2 class="font-display text-2xl font-semibold text-brand-primary">
                     How it works
                 </h2>
 
-                <ul class="mt-4 space-y-3 text-sm leading-6 text-[#6f5a51]">
+                <ul class="mt-4 space-y-3 text-sm leading-6 text-brand-ink/70">
                     <li>1. Submit your commission request</li>
                     <li>2. Owner reviews your request</li>
                     <li>3. Discuss details through the commission chatroom</li>
@@ -39,9 +39,9 @@
 
             </div>
 
-            <div class="mt-6 rounded-[2rem] border border-[#f0e4db] bg-[#fcfaf8] p-6 text-sm text-[#6f5a51]">
+            <div class="mt-6 rounded-[2rem] border border-brand-border bg-brand-light/35 p-6 text-sm text-brand-ink/70">
 
-                <p class="font-semibold text-[#4d3028]">
+                <p class="font-semibold text-brand-primary">
                     Estimated pricing includes:
                 </p>
 
@@ -58,7 +58,7 @@
         </div>
 
         {{-- FORM --}}
-        <div class="rounded-[2rem] border border-[#eadfd7] bg-white p-6 shadow-sm">
+        <div class="rounded-[2rem] border border-brand-border bg-white p-6 shadow-sm">
 
             @php
                 $currentUser = auth()->user();
@@ -67,7 +67,7 @@
 
             @if (! $canSubmit)
 
-                <p class="mb-4 text-sm text-[#6f5a51]">
+                <p class="mb-4 text-sm text-brand-ink/70">
                     Login as a customer to submit a commission request.
                 </p>
 
@@ -88,11 +88,11 @@
                         name="name"
                         value="{{ old('name', $currentUser?->name) }}"
                         placeholder="Full name"
-                        class="w-full rounded-2xl border border-[#eadfd7] px-4 py-3"
+                        class="brand-input"
                     >
 
                     @error('name')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        <p class="mt-1 text-sm text-brand-secondary">{{ $message }}</p>
                     @enderror
                 </div>
 
@@ -103,11 +103,11 @@
                         name="email"
                         value="{{ old('email', $currentUser?->email) }}"
                         placeholder="Email address"
-                        class="w-full rounded-2xl border border-[#eadfd7] px-4 py-3"
+                        class="brand-input"
                     >
 
                     @error('email')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        <p class="mt-1 text-sm text-brand-secondary">{{ $message }}</p>
                     @enderror
                 </div>
 
@@ -118,11 +118,11 @@
                         name="item_type"
                         value="{{ old('item_type') }}"
                         placeholder="What do you want? (e.g. plushie, bouquet, keychain)"
-                        class="w-full rounded-2xl border border-[#eadfd7] px-4 py-3"
+                        class="brand-input"
                     >
 
                     @error('item_type')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        <p class="mt-1 text-sm text-brand-secondary">{{ $message }}</p>
                     @enderror
                 </div>
 
@@ -133,11 +133,11 @@
                         name="design_theme"
                         value="{{ old('design_theme') }}"
                         placeholder="Theme / aesthetic"
-                        class="w-full rounded-2xl border border-[#eadfd7] px-4 py-3"
+                        class="brand-input"
                     >
 
                     @error('design_theme')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        <p class="mt-1 text-sm text-brand-secondary">{{ $message }}</p>
                     @enderror
                 </div>
 
@@ -145,7 +145,7 @@
                 <div>
                     <select
                         name="preferred_size"
-                        class="w-full rounded-2xl border border-[#eadfd7] px-4 py-3"
+                        class="brand-input"
                     >
                         <option value="">Preferred size</option>
                         <option value="10cm">10 cm</option>
@@ -155,7 +155,7 @@
                     </select>
 
                     @error('preferred_size')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        <p class="mt-1 text-sm text-brand-secondary">{{ $message }}</p>
                     @enderror
                 </div>
 
@@ -176,7 +176,7 @@
                 </div>
 
                 {{-- NOTICE --}}
-                <p class="sm:col-span-2 text-xs text-[#8f6a5d]">
+                <p class="sm:col-span-2 text-xs text-brand-secondary">
                     This creates a quotation request and opens a commission discussion ticket.
                 </p>
 
@@ -185,7 +185,7 @@
 
                     <button
                         type="submit"
-                        class="rounded-full bg-[#5d342b] px-5 py-3 text-sm font-semibold text-white shadow-md transition hover:-translate-y-0.5 sm:col-span-2"
+                        class="brand-btn-primary sm:col-span-2"
                     >
                         Submit Commission Request
                     </button>
@@ -195,7 +195,7 @@
                     <button
                         type="button"
                         data-auth-modal-open
-                        class="rounded-full bg-[#5d342b] px-5 py-3 text-sm font-semibold text-white shadow-md transition hover:-translate-y-0.5 sm:col-span-2"
+                        class="brand-btn-primary sm:col-span-2"
                     >
                         Submit Commission Request
                     </button>

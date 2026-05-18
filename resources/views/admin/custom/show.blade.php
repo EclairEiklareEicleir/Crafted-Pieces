@@ -19,17 +19,17 @@
     {{-- LEFT INFO --}}
     <div class="space-y-6">
 
-        <div class="rounded-[2rem] border border-[#eadfd7] bg-white p-6 shadow-sm">
+        <div class="rounded-4xl border border-brand-border bg-white p-6 shadow-sm">
 
-            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-[#a86b57]">
+            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-brand-secondary">
                 Request Details
             </p>
 
-            <h1 class="mt-2 font-display text-3xl font-semibold text-[#4d3028]">
+            <h1 class="mt-2 font-display text-3xl font-semibold text-brand-primary">
                 {{ $request->item_type }}
             </h1>
 
-            <div class="mt-6 space-y-4 text-sm text-[#6f5a51]">
+            <div class="mt-6 space-y-4 text-sm text-brand-ink/70">
 
                 <p><strong>Customer:</strong> {{ $request->name }}</p>
                 <p><strong>Email:</strong> {{ $request->email }}</p>
@@ -55,20 +55,20 @@
 
             </div>
 
-            <div class="mt-6 rounded-3xl bg-[#fcfaf8] p-4 text-sm text-[#6f5a51]">
+            <div class="mt-6 rounded-3xl bg-brand-light/35 p-4 text-sm text-brand-ink/70">
                 {{ $request->description }}
             </div>
 
             {{-- FLOW ACTIONS --}}
             @if (!$isLocked && in_array($status, ['pending', 'awaiting_confirmation', 'quoted']))
 
-                <div class="mt-6 rounded-2xl border border-[#f0e4db] bg-[#fcfaf8] p-4">
+                <div class="mt-6 rounded-2xl border border-brand-border bg-brand-light/35 p-4">
 
-                    <p class="text-sm font-semibold text-[#4d3028]">
+                    <p class="text-sm font-semibold text-brand-primary">
                         Seller Decision Required
                     </p>
 
-                    <p class="mt-1 text-xs text-[#6f5a51]">
+                    <p class="mt-1 text-xs text-brand-ink/70">
                         After discussion and quotation, choose whether to proceed.
                     </p>
 
@@ -78,7 +78,7 @@
                         <form method="POST"
                               action="{{ route('admin.custom.accept', $request->id) }}">
                             @csrf
-                            <button class="rounded-full bg-green-600 px-5 py-2 text-white">
+                            <button class="brand-btn-primary px-5 py-2">
                                 Accept & Proceed
                             </button>
                         </form>
@@ -87,7 +87,7 @@
                         <form method="POST"
                               action="{{ route('admin.custom.reject', $request->id) }}">
                             @csrf
-                            <button class="rounded-full bg-red-600 px-5 py-2 text-white">
+                            <button class="rounded-full bg-brand-secondary px-5 py-2 text-white hover:bg-brand-primary">
                                 Decline
                             </button>
                         </form>
@@ -98,7 +98,7 @@
 
             @else
 
-                <div class="mt-6 rounded-2xl border bg-gray-50 p-4 text-sm text-gray-600">
+                <div class="mt-6 rounded-2xl border border-brand-border bg-brand-light/25 p-4 text-sm text-brand-ink/60">
                     Actions locked for this order status.
                 </div>
 
@@ -107,9 +107,9 @@
         </div>
 
         {{-- QUOTE FORM --}}
-        <div class="rounded-[2rem] border border-[#eadfd7] bg-white p-6 shadow-sm">
+        <div class="rounded-4xl border border-brand-border bg-white p-6 shadow-sm">
 
-            <h2 class="font-display text-2xl font-semibold text-[#4d3028]">
+            <h2 class="font-display text-2xl font-semibold text-brand-primary">
                 Send Quotation
             </h2>
 
@@ -127,7 +127,7 @@
                         name="final_price"
                         value="{{ old('final_price', $request->final_price) }}"
                         placeholder="Final quotation price"
-                        class="w-full rounded-2xl border border-[#eadfd7] px-4 py-3"
+                        class="brand-input"
                         required
                     >
 
@@ -135,10 +135,10 @@
                         name="admin_notes"
                         rows="4"
                         placeholder="Notes for customer"
-                        class="w-full rounded-2xl border border-[#eadfd7] px-4 py-3"
+                        class="brand-input"
                     >{{ old('admin_notes', $request->admin_notes) }}</textarea>
 
-                    <button class="w-full rounded-full bg-[#5d342b] py-3 text-white">
+                    <button class="brand-btn-primary w-full py-3">
                         Send Quotation
                     </button>
 
@@ -146,7 +146,7 @@
 
             @else
 
-                <p class="text-sm text-gray-500 mt-4">
+                <p class="mt-4 text-sm text-brand-ink/60">
                     Quotation is locked for this order.
                 </p>
 
@@ -157,9 +157,9 @@
     </div>
 
     {{-- RIGHT CHAT --}}
-    <div class="rounded-[2rem] border border-[#eadfd7] bg-white p-6 shadow-sm">
+    <div class="rounded-4xl border border-brand-border bg-white p-6 shadow-sm">
 
-        <h2 class="font-display text-2xl font-semibold text-[#4d3028]">
+        <h2 class="font-display text-2xl font-semibold text-brand-primary">
             Conversation
         </h2>
 
@@ -167,28 +167,28 @@
 
             @forelse ($request->messages as $message)
 
-                <div class="rounded-3xl bg-[#fcfaf8] p-4">
+                <div class="rounded-3xl bg-brand-light/35 p-4">
 
                     <div class="flex items-center justify-between">
 
-                        <p class="font-semibold text-[#4d3028]">
+                        <p class="font-semibold text-brand-primary">
                             {{ $message->user->name }}
                         </p>
 
-                        <p class="text-xs text-[#8f6a5d]">
+                        <p class="text-xs text-brand-secondary">
                             {{ $message->created_at->diffForHumans() }}
                         </p>
 
                     </div>
 
-                    <p class="mt-3 text-sm leading-6 text-[#6f5a51]">
+                    <p class="mt-3 text-sm leading-6 text-brand-ink/70">
                         {{ $message->message }}
                     </p>
 
                 </div>
 
             @empty
-                <p class="text-sm text-[#6f5a51]">
+                <p class="text-sm text-brand-ink/70">
                     No messages yet.
                 </p>
             @endforelse
@@ -208,10 +208,10 @@
                     name="message"
                     rows="4"
                     placeholder="Reply to customer..."
-                    class="w-full rounded-2xl border border-[#eadfd7] px-4 py-3"
+                    class="brand-input"
                     required></textarea>
 
-                <button class="mt-4 rounded-full bg-[#5d342b] px-6 py-3 text-white">
+                <button class="mt-4 brand-btn-primary px-6 py-3">
                     Send Reply
                 </button>
 
@@ -219,7 +219,7 @@
 
         @else
 
-            <p class="mt-6 text-sm text-gray-500">
+            <p class="mt-6 text-sm text-brand-ink/60">
                 Chat locked for this order status.
             </p>
 

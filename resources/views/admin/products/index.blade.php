@@ -9,11 +9,11 @@
 
         <div>
 
-            <h1 class="font-display text-4xl font-semibold text-[#4d3028]">
+            <h1 class="font-display text-4xl font-semibold text-brand-primary">
                 Product Management
             </h1>
 
-            <p class="mt-2 text-sm text-[#8f7a70]">
+            <p class="mt-2 text-sm text-brand-ink/55">
                 Manage categories and crochet products.
             </p>
 
@@ -24,17 +24,17 @@
     {{-- ========================= --}}
     {{-- CATEGORY MANAGEMENT --}}
     {{-- ========================= --}}
-    <div class="rounded-[2rem] border border-[#eadfd7] bg-white p-6 shadow-sm">
+    <div class="rounded-[2rem] border border-brand-border bg-white p-6 shadow-sm">
 
         <div class="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
 
             <div>
 
-                <h2 class="font-display text-2xl font-semibold text-[#4d3028]">
+                <h2 class="font-display text-2xl font-semibold text-brand-primary">
                     Categories
                 </h2>
 
-                <p class="mt-1 text-sm text-[#8f7a70]">
+                <p class="mt-1 text-sm text-brand-ink/55">
                     Organize products into categories.
                 </p>
 
@@ -51,11 +51,11 @@
                     type="text"
                     name="name"
                     placeholder="New category..."
-                    class="rounded-2xl border border-[#eadfd7] px-4 py-2 text-sm focus:outline-none"
+                    class="brand-input"
                 >
 
                 <button
-                    class="rounded-2xl bg-[#5d342b] px-5 py-2 text-sm font-semibold text-white">
+                    class="brand-btn-primary px-5 py-2 text-sm">
 
                     Add Category
 
@@ -70,7 +70,7 @@
 
             <table class="w-full text-left text-sm">
 
-                <thead class="text-xs uppercase tracking-[0.16em] text-[#8f7a70]">
+                <thead class="text-xs uppercase tracking-[0.16em] text-brand-ink/55">
 
                     <tr>
 
@@ -94,21 +94,21 @@
 
                 </thead>
 
-                <tbody class="divide-y divide-[#efe3da]">
+                <tbody class="divide-y divide-brand-border">
 
                     @forelse ($categories as $category)
 
                         <tr>
 
-                            <td class="py-4 pr-4 text-[#6f5a51]">
+                            <td class="py-4 pr-4 text-brand-ink/70">
                                 {{ $category->id }}
                             </td>
 
-                            <td class="py-4 pr-4 font-medium text-[#4d3028]">
+                            <td class="py-4 pr-4 font-medium text-brand-primary">
                                 {{ $category->name }}
                             </td>
 
-                            <td class="py-4 pr-4 text-[#8f7a70]">
+                            <td class="py-4 pr-4 text-brand-ink/55">
                                 {{ $category->slug }}
                             </td>
 
@@ -121,7 +121,7 @@
                                     @method('DELETE')
 
                                     <button
-                                        class="text-sm font-semibold text-red-600">
+                                        class="text-sm font-semibold text-brand-secondary">
 
                                         Delete
 
@@ -138,7 +138,7 @@
                         <tr>
 
                             <td colspan="4"
-                                class="py-6 text-center text-[#8f7a70]">
+                                class="py-6 text-center text-brand-ink/55">
 
                                 No categories found.
 
@@ -159,24 +159,24 @@
     {{-- ========================= --}}
     {{-- PRODUCT MANAGEMENT --}}
     {{-- ========================= --}}
-    <div class="rounded-[2rem] border border-[#eadfd7] bg-white p-6 shadow-sm">
+    <div class="rounded-[2rem] border border-brand-border bg-white p-6 shadow-sm">
 
         <div class="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
 
             <div>
 
-                <h2 class="font-display text-2xl font-semibold text-[#4d3028]">
+                <h2 class="font-display text-2xl font-semibold text-brand-primary">
                     Products
                 </h2>
 
-                <p class="mt-1 text-sm text-[#8f7a70]">
+                <p class="mt-1 text-sm text-brand-ink/55">
                     Manage active crochet products and custom items.
                 </p>
 
             </div>
 
-            <a href="{{ route('admin.products.create') }}"
-               class="rounded-2xl bg-[#5d342b] px-5 py-3 text-sm font-semibold text-white">
+                <a href="{{ route('admin.products.create') }}"
+                    class="brand-btn-primary px-5 py-3 text-sm">
 
                 + Add Product
 
@@ -189,7 +189,7 @@
 
             <table class="w-full text-left text-sm">
 
-                <thead class="text-xs uppercase tracking-[0.16em] text-[#8f7a70]">
+                <thead class="text-xs uppercase tracking-[0.16em] text-brand-ink/55">
 
                     <tr>
 
@@ -225,7 +225,7 @@
 
                 </thead>
 
-                <tbody class="divide-y divide-[#efe3da]">
+                <tbody class="divide-y divide-brand-border">
 
                     @forelse ($products as $product)
 

@@ -10,7 +10,7 @@
         : 'https://placehold.co/600x600/png';
 @endphp
 
-<div class="group overflow-hidden rounded-[1.75rem] border bg-white shadow-sm transition hover:-translate-y-1">
+<div class="group overflow-hidden rounded-[1.75rem] border border-brand-border bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
 
     <a href="{{ route('product.show', $product->slug) }}">
 
@@ -20,15 +20,15 @@
 
         <div class="p-4">
 
-            <h3 class="font-semibold text-[#4d3028]">
+            <h3 class="font-semibold text-brand-primary">
                 {{ $product->name }}
             </h3>
 
-            <p class="text-sm text-[#6f5a51]">
+            <p class="text-sm text-brand-ink/70">
                 PHP {{ number_format($product->price) }}
             </p>
 
-            <p class="mt-1 text-xs text-[#8d5848]">
+            <p class="mt-1 text-xs text-brand-secondary">
                 {{ $product->stock > 0 ? 'In stock' : 'Out of stock' }}
             </p>
 
@@ -44,13 +44,13 @@
                 @csrf
 
                 <button type="submit"
-                        class="w-full rounded-full bg-[#5d342b] py-2 text-white transition hover:bg-[#704338]">
+                        class="brand-btn-primary w-full py-2">
                     Add to Cart
                 </button>
             </form>
         @else
             <button disabled
-                    class="w-full rounded-full bg-gray-300 py-2 text-white cursor-not-allowed">
+                    class="w-full rounded-full bg-brand-ink/20 py-2 text-white cursor-not-allowed">
                 Out of Stock
             </button>
         @endif

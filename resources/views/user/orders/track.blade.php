@@ -4,7 +4,7 @@
 
 <section class="mx-auto max-w-md px-4 py-20">
 
-    <h1 class="text-3xl font-semibold text-[#4d3028]">
+    <h1 class="text-3xl font-semibold text-brand-primary">
         Track Your Order
     </h1>
 
@@ -15,7 +15,7 @@
             name="order_id"
             type="number"
             placeholder="Order ID"
-            class="w-full rounded-2xl border px-4 py-3"
+            class="brand-input"
             required
         >
 
@@ -23,15 +23,15 @@
             name="email"
             type="email"
             placeholder="Email used in order"
-            class="w-full rounded-2xl border px-4 py-3"
+            class="brand-input"
             required
         >
 
         @error('track')
-            <p class="text-sm text-red-600">{{ $message }}</p>
+            <p class="text-sm text-brand-secondary">{{ $message }}</p>
         @enderror
 
-        <button class="w-full rounded-full bg-[#5d342b] py-3 text-white">
+        <button class="brand-btn-primary w-full py-3">
             Track Order
         </button>
 

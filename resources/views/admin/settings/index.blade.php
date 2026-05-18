@@ -8,11 +8,11 @@
     <div class="flex items-center justify-between">
 
         <div>
-            <h1 class="font-display text-4xl font-semibold text-[#4d3028]">
+            <h1 class="font-display text-4xl font-semibold text-brand-primary">
                 Additional Charges
             </h1>
 
-            <p class="mt-2 text-sm text-[#8f7a70]">
+            <p class="mt-2 text-sm text-brand-ink/55">
                 Configure platform fees and optional order charges.
             </p>
         </div>
@@ -25,10 +25,10 @@
 
         @csrf
 
-        <div class="overflow-hidden rounded-[2rem] border border-[#eadfd7] bg-white shadow-sm">
+        <div class="overflow-hidden rounded-[2rem] border border-brand-border bg-white shadow-sm">
 
             {{-- TABLE HEADER --}}
-            <div class="grid grid-cols-[1.2fr_0.8fr_1fr] border-b border-[#efe3da] bg-[#fcfaf8] px-6 py-4 text-xs font-semibold uppercase tracking-[0.15em] text-[#8f7a70]">
+            <div class="grid grid-cols-[1.2fr_0.8fr_1fr] border-b border-brand-border bg-brand-light/35 px-6 py-4 text-xs font-semibold uppercase tracking-[0.15em] text-brand-ink/55">
 
                 <div>Setting</div>
                 <div>Value</div>
@@ -37,7 +37,7 @@
             </div>
 
             {{-- SETTINGS --}}
-            <div class="divide-y divide-[#efe3da]">
+            <div class="divide-y divide-brand-border">
 
                 @foreach($settings as $key => $group)
 
@@ -50,12 +50,12 @@
                         {{-- LABEL --}}
                         <div>
 
-                            <p class="font-semibold text-[#4d3028]">
+                            <p class="font-semibold text-brand-primary">
                                 {{ $setting->label }}
                             </p>
 
                             @if($setting->description)
-                                <p class="mt-1 text-xs text-[#8f7a70]">
+                                <p class="mt-1 text-xs text-brand-ink/55">
                                     {{ $setting->description }}
                                 </p>
                             @endif
@@ -69,7 +69,7 @@
 
                                 <select
                                     name="settings[{{ $key }}]"
-                                    class="w-full rounded-2xl border border-[#eadfd7] px-4 py-2 text-sm">
+                                    class="brand-input py-2">
 
                                     <option value="1" {{ $setting->value ? 'selected' : '' }}>
                                         Enabled
@@ -88,7 +88,7 @@
                                     step="0.01"
                                     name="settings[{{ $key }}]"
                                     value="{{ $setting->value }}"
-                                    class="w-full rounded-2xl border border-[#eadfd7] px-4 py-2 text-sm">
+                                    class="brand-input py-2">
 
                             @endif
 
@@ -99,19 +99,19 @@
 
                             @if($setting->type === 'boolean')
 
-                                <span class="rounded-full bg-[#f4ebe6] px-3 py-1 text-xs font-semibold text-[#8d5848]">
+                                <span class="rounded-full bg-brand-light px-3 py-1 text-xs font-semibold text-brand-primary">
                                     Toggle Setting
                                 </span>
 
                             @elseif($setting->type === 'percent')
 
-                                <span class="rounded-full bg-[#f4ebe6] px-3 py-1 text-xs font-semibold text-[#8d5848]">
+                                <span class="rounded-full bg-brand-light px-3 py-1 text-xs font-semibold text-brand-primary">
                                     Percentage Fee
                                 </span>
 
                             @else
 
-                                <span class="rounded-full bg-[#f4ebe6] px-3 py-1 text-xs font-semibold text-[#8d5848]">
+                                <span class="rounded-full bg-brand-light px-3 py-1 text-xs font-semibold text-brand-primary">
                                     Fixed Amount
                                 </span>
 
@@ -131,7 +131,7 @@
         <div class="flex justify-end">
 
             <button
-                class="rounded-2xl bg-[#5d342b] px-6 py-3 text-sm font-semibold text-white">
+                class="brand-btn-primary px-6 py-3 text-sm">
                 Save Settings
             </button>
 

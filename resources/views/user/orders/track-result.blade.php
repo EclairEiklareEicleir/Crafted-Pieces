@@ -4,21 +4,21 @@
 
 <section class="mx-auto max-w-3xl py-14 px-4">
 
-    <div class="rounded-2xl border bg-white p-6">
+    <div class="rounded-2xl border border-brand-border bg-white p-6">
 
         {{-- HEADER (same as receipt) --}}
-        <div class="text-center border-b pb-4 mb-4">
-            <h1 class="text-2xl font-semibold text-[#4d3028]">
+        <div class="mb-4 border-b pb-4 text-center">
+            <h1 class="text-2xl font-semibold text-brand-primary">
                 Order Receipt #{{ $order->id }}
             </h1>
 
-            <p class="text-sm text-[#6f5a51]">
+            <p class="text-sm text-brand-ink/70">
                 {{ $order->created_at->format('F d, Y h:i A') }}
             </p>
         </div>
 
         {{-- CUSTOMER --}}
-        <div class="text-sm text-[#6f5a51] space-y-1 mb-4">
+        <div class="mb-4 space-y-1 text-sm text-brand-ink/70">
 
             <p><strong>Name:</strong> {{ $order->full_name }}</p>
             <p><strong>Email:</strong> {{ $order->email }}</p>
@@ -33,7 +33,7 @@
         <div class="space-y-2">
 
             @foreach ($order->items as $item)
-                <div class="flex justify-between text-sm text-[#6f5a51]">
+                <div class="flex justify-between text-sm text-brand-ink/70">
                     <span>
                         {{ $item->product->name }} × {{ $item->quantity }}
                     </span>
@@ -49,7 +49,7 @@
         <hr class="my-4">
 
         {{-- PRICING (SAME SOURCE AS RECEIPT) --}}
-        <div class="space-y-2 text-sm text-[#6f5a51]">
+        <div class="space-y-2 text-sm text-brand-ink/70">
 
             <div class="flex justify-between">
                 <span>Subtotal</span>
@@ -73,7 +73,7 @@
 
             <hr>
 
-            <div class="flex justify-between font-semibold text-[#4d3028] text-base">
+            <div class="flex justify-between text-base font-semibold text-brand-primary">
                 <span>Total Paid</span>
                 <span>PHP {{ number_format($pricing['total'], 2) }}</span>
             </div>
@@ -86,7 +86,7 @@
     <div class="mt-6 flex justify-end">
 
         <a href="{{ route('orders.receipt', $order->id) }}"
-        class="inline-flex items-center rounded-full bg-[#5d342b] px-6 py-2 text-sm text-white hover:bg-[#4a2922]">
+        class="brand-btn-primary inline-flex items-center px-6 py-2 text-sm">
 
             Download Receipt
 

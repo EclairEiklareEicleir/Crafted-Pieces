@@ -4,24 +4,24 @@
 
 <section class="mx-auto max-w-3xl px-4 py-16">
 
-    <h1 class="text-3xl font-semibold text-[#4d3028]">
+    <h1 class="text-3xl font-semibold text-brand-primary">
         Payment Summary
     </h1>
 
-    <div class="mt-6 rounded-2xl border border-[#eadfd7] bg-white p-6">
+    <div class="mt-6 rounded-2xl border border-brand-border bg-white p-6">
 
-        <p class="text-sm text-[#6f5a51]">
+        <p class="text-sm text-brand-ink/70">
             You are paying for:
         </p>
 
-        <p class="mt-2 text-xl font-semibold text-[#4d3028]">
+        <p class="mt-2 text-xl font-semibold text-brand-primary">
             {{ ucfirst(str_replace('-', ' ', $type)) }}
         </p>
 
         <hr class="my-4">
 
         {{-- ITEM INFO --}}
-        <div class="text-sm text-[#6f5a51] space-y-1">
+        <div class="space-y-1 text-sm text-brand-ink/70">
 
             @if ($type === 'custom-order')
                 <p><strong>Item:</strong> {{ $item->item_type }}</p>
@@ -37,7 +37,7 @@
         <hr class="my-4">
 
         {{-- BREAKDOWN --}}
-        <div class="space-y-2 text-sm">
+        <div class="space-y-2 text-sm text-brand-ink/70">
 
             @if ($type === 'custom-order')
 
@@ -74,7 +74,7 @@
 
             <hr>
 
-            <p class="text-lg">
+            <p class="text-lg text-brand-primary">
                 Final Amount Payable:
                 <strong>₱{{ number_format($pricing['total'], 2) }}</strong>
             </p>
@@ -87,7 +87,7 @@
 
             @csrf
 
-            <button class="w-full rounded-full bg-[#5d342b] py-3 text-white">
+            <button class="brand-btn-primary w-full py-3">
                 Pay Now
             </button>
 

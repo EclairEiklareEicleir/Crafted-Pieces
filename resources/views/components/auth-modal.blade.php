@@ -3,11 +3,19 @@
 
     <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
 
-    <div class="relative w-full max-w-md bg-white p-8 rounded-[2rem] border border-[#eadfd7] shadow-sm">
+    <div class="relative w-full max-w-md rounded-[2rem] border border-brand-border bg-white p-8 shadow-2xl shadow-brand-primary/10">
+
+        <div class="mb-6 flex items-center gap-3 pr-10">
+            <img src="{{ asset('images/crafted_pieces_logo.png') }}" alt="Crafted Pieces" class="h-12 w-auto rounded-xl object-contain">
+            <div>
+                <p class="text-xs font-semibold uppercase tracking-[0.22em] text-brand-secondary">Crafted Pieces</p>
+                <p class="text-sm text-brand-ink/70">Access your account</p>
+            </div>
+        </div>
 
         <button type="button"
                 onclick="closeAuthModal()"
-                class="absolute top-4 right-4 text-2xl font-bold text-[#6f5a51] hover:text-[#a86b57] transition">
+                class="absolute right-4 top-4 text-2xl font-bold text-brand-ink/60 transition hover:text-brand-primary">
             ×
         </button>
 
@@ -17,43 +25,43 @@
             method="POST"
             action="{{ route('login') }}">
 
-            <h2 class="text-2xl font-semibold text-[#4d3028] text-center">Login</h2>
+            <h2 class="text-center text-2xl font-semibold text-brand-primary">Login</h2>
 
             @csrf
 
             <div>
-                <label class="mb-2 block text-sm font-semibold text-[#5d342b]">Email</label>
+                <label class="mb-2 block text-sm font-semibold text-brand-primary">Email</label>
                 <input type="email" name="email" required
-                       class="w-full rounded-2xl border border-[#e7d6cb] px-4 py-3 text-sm focus:border-[#b8745f] focus:outline-none">
+                       class="brand-input">
                 @error('email')
-                    <p class="mt-2 text-sm text-red-700">{{ $message }}</p>
+                    <p class="mt-2 text-sm text-brand-secondary">{{ $message }}</p>
                 @enderror
             </div>
 
             <div>
-                <label class="mb-2 block text-sm font-semibold text-[#5d342b]">Password</label>
+                <label class="mb-2 block text-sm font-semibold text-brand-primary">Password</label>
                 <input type="password" name="password" required
-                       class="w-full rounded-2xl border border-[#e7d6cb] px-4 py-3 text-sm focus:border-[#b8745f] focus:outline-none">
+                       class="brand-input">
                 @error('password')
-                    <p class="mt-2 text-sm text-red-700">{{ $message }}</p>
+                    <p class="mt-2 text-sm text-brand-secondary">{{ $message }}</p>
                 @enderror
             </div>
 
-            <label class="flex items-center gap-2 text-sm text-[#6f5a51]">
+            <label class="flex items-center gap-2 text-sm text-brand-ink/70">
                 <input type="checkbox" name="remember" class="h-4 w-4">
                 Remember me
             </label>
 
             <button type="submit"
-                    class="w-full rounded-full bg-[#b8745f] px-5 py-3 text-sm font-semibold text-white hover:bg-[#a96550]">
+                    class="brand-btn-primary w-full">
                 Log In
             </button>
 
-            <p class="text-center text-sm text-[#6f5a51]">
+            <p class="text-center text-sm text-brand-ink/70">
                 Don’t have an account?
                 <button type="button"
                         onclick="showRegister()"
-                        class="text-[#a86b57] font-semibold hover:underline">
+                        class="font-semibold text-brand-secondary hover:text-brand-primary hover:underline">
                     Sign Up Now!
                 </button>
             </p>
@@ -65,65 +73,65 @@
             method="POST"
             action="{{ route('register') }}">
 
-            <h2 class="text-2xl font-semibold text-[#4d3028] text-center">Create Account</h2>
+            <h2 class="text-center text-2xl font-semibold text-brand-primary">Create Account</h2>
 
             @csrf
 
             <div>
-                <label class="mb-2 block text-sm font-semibold text-[#5d342b]">Full name</label>
+                <label class="mb-2 block text-sm font-semibold text-brand-primary">Full name</label>
                 <input type="text" name="name" required
-                       class="w-full rounded-2xl border border-[#e7d6cb] px-4 py-3 text-sm">
+                       class="brand-input">
                 @error('name')
-                    <p class="mt-2 text-sm text-red-700">{{ $message }}</p>
+                    <p class="mt-2 text-sm text-brand-secondary">{{ $message }}</p>
                 @enderror
             </div>
 
             <div>
-                <label class="mb-2 block text-sm font-semibold text-[#5d342b]">Email</label>
+                <label class="mb-2 block text-sm font-semibold text-brand-primary">Email</label>
                 <input type="email" name="email" required
-                       class="w-full rounded-2xl border border-[#e7d6cb] px-4 py-3 text-sm">
+                       class="brand-input">
                 @error('email')
-                    <p class="mt-2 text-sm text-red-700">{{ $message }}</p>
+                    <p class="mt-2 text-sm text-brand-secondary">{{ $message }}</p>
                 @enderror
             </div>
 
             <div>
-                <label class="mb-2 block text-sm font-semibold text-[#5d342b]">Password</label>
+                <label class="mb-2 block text-sm font-semibold text-brand-primary">Password</label>
                 <input type="password" name="password" required
-                       class="w-full rounded-2xl border border-[#e7d6cb] px-4 py-3 text-sm">
+                       class="brand-input">
                 @error('password')
-                    <p class="mt-2 text-sm text-red-700">{{ $message }}</p>
+                    <p class="mt-2 text-sm text-brand-secondary">{{ $message }}</p>
                 @enderror
             </div>
 
             <div>
-                <label class="mb-2 block text-sm font-semibold text-[#5d342b]">Confirm password</label>
+                <label class="mb-2 block text-sm font-semibold text-brand-primary">Confirm password</label>
                 <input type="password" name="password_confirmation" required
-                       class="w-full rounded-2xl border border-[#e7d6cb] px-4 py-3 text-sm">
+                       class="brand-input">
             </div>
 
-            <label class="flex items-start gap-2 text-sm text-[#6f5a51]">
+            <label class="flex items-start gap-2 text-sm text-brand-ink/70">
                 <input type="checkbox" id="privacy-check" class="mt-1 h-4 w-4">
                 <span>
                     I agree to the
-                    <a href="#" class="text-[#a86b57] font-semibold hover:underline">Privacy Policy</a>
+                    <a href="#" class="font-semibold text-brand-secondary hover:text-brand-primary hover:underline">Privacy Policy</a>
                     and
-                    <a href="#" class="text-[#a86b57] font-semibold hover:underline">Terms of Service</a>.
+                    <a href="#" class="font-semibold text-brand-secondary hover:text-brand-primary hover:underline">Terms of Service</a>.
                 </span>
             </label>
 
             <button type="submit"
                     id="register-btn"
                     disabled
-                    class="w-full rounded-full bg-[#b8745f] px-5 py-3 text-sm font-semibold text-white opacity-50 cursor-not-allowed transition">
+                    class="brand-btn-primary w-full opacity-50 cursor-not-allowed">
                 Register
             </button>
 
-            <p class="text-center text-sm text-[#6f5a51]">
+            <p class="text-center text-sm text-brand-ink/70">
                 Already have an account?
                 <button type="button"
                         onclick="showLogin()"
-                        class="text-[#a86b57] font-semibold hover:underline">
+                        class="font-semibold text-brand-secondary hover:text-brand-primary hover:underline">
                     Login here
                 </button>
             </p>
