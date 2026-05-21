@@ -27,6 +27,6 @@ class AccountController extends Controller
         $user->update($validated);
         Auth::setUser($user->fresh());
         
-        return back()->with('status', 'Account updated successfully.');
+        return back()->with('success', 'Account updated successfully.');
     }
 }

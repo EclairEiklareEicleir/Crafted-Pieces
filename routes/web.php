@@ -232,3 +232,19 @@ Route::middleware(['auth', 'role:owner'])->group(function () {
 Route::post('/login', [AuthController::class, 'login'])->name('login');
 Route::post('/register', [AuthController::class, 'register'])->name('register');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+
+/*
+|--------------------------------------------------------------------------
+| TEST
+|--------------------------------------------------------------------------
+*/
+Route::get('/test-error-ui', function () {
+    return redirect()->route('home')
+        ->withErrors(['test' => 'This is a TEST error for global alert UI']);
+});
+
+Route::get('/test-success-ui', function () {
+    return redirect()->route('home')
+        ->with('success', 'This is a TEST success message for global alert UI');
+});

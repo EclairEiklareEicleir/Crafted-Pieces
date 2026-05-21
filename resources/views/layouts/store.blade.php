@@ -10,31 +10,102 @@
 
 <body class="bg-brand-light text-brand-ink antialiased">
 
-    {{-- NAVBAR --}}
     <x-navbar />
 
-    {{-- PAGE CONTENT --}}
-    @yield('content')
+    @if (session('success') || $errors->any())
 
-    {{-- AUTH MODAL --}}
-    <x-auth-modal />
+        <div id="global-alert" class="fixed right-4 top-4 z-[9999] w-full max-w-lg px-4">
 
-    {{-- Footer --}}
-    <x-footer />
+            <div id="global-alert-box"
+                 class="translate-x-[120%] rounded-2xl border border-[#eadfd7] bg-white shadow-2xl transition-all duration-500 ease-out">
 
-    {{-- AUTO OPEN MODAL ON ERROR --}}
-    @if ($errors->any())
+                <div class="flex items-start justify-between gap-4 p-5">
+
+                    <div class="text-base font-medium text-[#4d3028] leading-relaxed">
+
+                        @if (session('success'))
+                            <p>{{ session('success') }}</p>
+                        @endif
+
+                        @if ($errors->any())
+                            <div class="space-y-2">
+                                @foreach ($errors->all() as $error)
+                                    <div class="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+                                        {{ $error }}
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
+
+                    </div>
+
+                    <button onclick="closeGlobalAlert()"
+                            class="text-2xl leading-none text-[#6f5a51] hover:text-black transition">
+                        ×
+                    </button>
+
+                </div>
+
+            </div>
+        </div>
+
         <script>
             window.addEventListener('DOMContentLoaded', () => {
+
+                const alertBox = document.getElementById('global-alert-box');
+
+                requestAnimationFrame(() => {
+                    alertBox.classList.remove('translate-x-[120%]');
+                    alertBox.classList.add('translate-x-0');
+                });
+
+            });
+
+            function closeGlobalAlert() {
+
+                const alertBox = document.getElementById('global-alert-box');
+
+                alertBox.classList.remove('translate-x-0');
+                alertBox.classList.add('translate-x-[120%]');
+
+                setTimeout(() => {
+                    document.getElementById('global-alert')?.remove();
+                }, 500);
+            }
+        </script>
+
+    @endif
+
+    @yield('content')
+
+    <x-auth-modal />
+
+    <x-footer />
+
+    @php
+        $authForm = session('auth_form');
+    @endphp
+
+    @if ($authForm)
+        <script>
+            window.addEventListener('DOMContentLoaded', () => {
+
                 openAuthModal();
-                showLogin();
+
+                const form = @json($authForm);
+
+                if (form === 'register') {
+                    showRegister();
+                } else {
+                    showLogin();
+                }
+
             });
         </script>
     @endif
 
-    {{-- GLOBAL SCRIPTS --}}
     <script>
-        let authState = 'login'; // "login" | "register"
+        let authState = 'login';
 
         function openAuthModal() {
             const modal = document.getElementById('auth-modal');
@@ -92,14 +163,12 @@
 
         function showLogin() {
             authState = 'login';
-
             resetForm('register-form');
             renderAuth();
         }
 
         function showRegister() {
             authState = 'register';
-
             resetForm('login-form');
             renderAuth();
             initRegisterGuard();

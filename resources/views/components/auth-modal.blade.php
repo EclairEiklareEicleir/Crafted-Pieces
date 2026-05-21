@@ -21,9 +21,9 @@
 
         {{-- ================= LOGIN ================= --}}
         <form id="login-form"
-            class="auth-form space-y-5 opacity-100 translate-x-0 transition-all duration-300 ease-in-out"
-            method="POST"
-            action="{{ route('login') }}">
+              class="auth-form space-y-5 opacity-100 translate-x-0 transition-all duration-300 ease-in-out"
+              method="POST"
+              action="{{ route('login') }}">
 
             <h2 class="text-center text-2xl font-semibold text-brand-primary">Login</h2>
 
@@ -31,20 +31,12 @@
 
             <div>
                 <label class="mb-2 block text-sm font-semibold text-brand-primary">Email</label>
-                <input type="email" name="email" required
-                       class="brand-input">
-                @error('email')
-                    <p class="mt-2 text-sm text-brand-secondary">{{ $message }}</p>
-                @enderror
+                <input type="email" name="email" required class="brand-input">
             </div>
 
             <div>
                 <label class="mb-2 block text-sm font-semibold text-brand-primary">Password</label>
-                <input type="password" name="password" required
-                       class="brand-input">
-                @error('password')
-                    <p class="mt-2 text-sm text-brand-secondary">{{ $message }}</p>
-                @enderror
+                <input type="password" name="password" required class="brand-input">
             </div>
 
             <label class="flex items-center gap-2 text-sm text-brand-ink/70">
@@ -52,8 +44,7 @@
                 Remember me
             </label>
 
-            <button type="submit"
-                    class="brand-btn-primary w-full">
+            <button type="submit" class="brand-btn-primary w-full">
                 Log In
             </button>
 
@@ -69,9 +60,9 @@
 
         {{-- ================= REGISTER ================= --}}
         <form id="register-form"
-            class="auth-form hidden space-y-5 opacity-0 translate-x-6 transition-all duration-300 ease-in-out"
-            method="POST"
-            action="{{ route('register') }}">
+              class="auth-form hidden space-y-5 opacity-0 translate-x-6 transition-all duration-300 ease-in-out"
+              method="POST"
+              action="{{ route('register') }}">
 
             <h2 class="text-center text-2xl font-semibold text-brand-primary">Create Account</h2>
 
@@ -79,35 +70,22 @@
 
             <div>
                 <label class="mb-2 block text-sm font-semibold text-brand-primary">Full name</label>
-                <input type="text" name="name" required
-                       class="brand-input">
-                @error('name')
-                    <p class="mt-2 text-sm text-brand-secondary">{{ $message }}</p>
-                @enderror
+                <input type="text" name="name" required class="brand-input">
             </div>
 
             <div>
                 <label class="mb-2 block text-sm font-semibold text-brand-primary">Email</label>
-                <input type="email" name="email" required
-                       class="brand-input">
-                @error('email')
-                    <p class="mt-2 text-sm text-brand-secondary">{{ $message }}</p>
-                @enderror
+                <input type="email" name="email" required class="brand-input">
             </div>
 
             <div>
                 <label class="mb-2 block text-sm font-semibold text-brand-primary">Password</label>
-                <input type="password" name="password" required
-                       class="brand-input">
-                @error('password')
-                    <p class="mt-2 text-sm text-brand-secondary">{{ $message }}</p>
-                @enderror
+                <input type="password" name="password" required class="brand-input">
             </div>
 
             <div>
                 <label class="mb-2 block text-sm font-semibold text-brand-primary">Confirm password</label>
-                <input type="password" name="password_confirmation" required
-                       class="brand-input">
+                <input type="password" name="password_confirmation" required class="brand-input">
             </div>
 
             <label class="flex items-start gap-2 text-sm text-brand-ink/70">

@@ -9,34 +9,80 @@ use App\Models\User;
 
 class AuthController extends Controller
 {
+    /*
+    |----------------------------------------
+    | LOGIN
+    |----------------------------------------
+    */
     public function login(Request $request)
     {
-        $credentials = $request->only('email', 'password');
+        $validated = $request->validate([
+            'email' => ['required', 'email', 'max:255'],
+            'password' => ['required', 'string'],
+        ]);
+
+        $credentials = [
+            'email' => trim($validated['email']),
+            'password' => $validated['password'],
+        ];
 
         if (Auth::attempt($credentials)) {
-            return redirect()->route('home');
+
+            $request->session()->regenerate();
+
+            return redirect()->route('home')
+                ->with('success', 'Logged in successfully!');
         }
 
-        return back()->withErrors(['login' => 'Invalid credentials']);
+        return back()
+            ->withErrors([
+                'email' => 'Invalid credentials.'
+            ])
+            ->withInput()
+            ->with('auth_form', 'login');
     }
 
+    /*
+    |----------------------------------------
+    | REGISTER
+    |----------------------------------------
+    */
     public function register(Request $request)
     {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:100'],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
+            'password' => ['required', 'string', 'confirmed'],
+        ]);
+
         $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => 'user', 
+            'name' => trim($validated['name']),
+            'email' => trim($validated['email']),
+            'password' => Hash::make($validated['password']),
+            'role' => 'user',
         ]);
 
         Auth::login($user);
 
-        return redirect()->route('home');
+        $request->session()->regenerate();
+
+        return redirect()->route('home')
+            ->with('success', 'Account created successfully!');
     }
 
-    public function logout()
+    /*
+    |----------------------------------------
+    | LOGOUT
+    |----------------------------------------
+    */
+    public function logout(Request $request)
     {
         Auth::logout();
-        return redirect()->route('home');
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()->route('home')
+            ->with('success', 'Logged out successfully.');
     }
 }

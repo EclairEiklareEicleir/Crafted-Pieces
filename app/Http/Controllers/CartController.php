@@ -64,7 +64,7 @@ class CartController extends Controller
             ]);
         }
 
-        return back()->with('status', 'Added to cart');
+        return back()->with('success', 'Added to cart');
     }
 
     public function update(Request $request, $id)
@@ -79,13 +79,13 @@ class CartController extends Controller
             'quantity' => $request->quantity
         ]);
 
-        return back()->with('status', 'Cart updated');
+        return back()->with('success', 'Cart updated');
     }
 
     public function remove($id)
     {
         CartItem::findOrFail($id)->delete();
 
-        return back()->with('status', 'Item removed');
+        return back()->with('success', 'Item removed');
     }
 }
