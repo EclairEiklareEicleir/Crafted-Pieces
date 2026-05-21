@@ -18,6 +18,8 @@ use App\Http\Controllers\AdminOrderController;
 use App\Http\Controllers\AdminProductController;
 use App\Http\Controllers\AdminCategoryController;
 use App\Http\Controllers\AdminSettingController;
+use App\Http\Controllers\AdminAboutSectionController;
+use App\Http\Controllers\AdminFaqController;
 /*
 |--------------------------------------------------------------------------
 | MAIN PAGES
@@ -28,6 +30,8 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/shop', [ShopController::class, 'index'])->name('shop');
 Route::get('/product/{slug}', [ProductController::class, 'show'])->name('product.show');
 Route::get('/about', [StaticController::class, 'about'])->name('about');
+Route::get('/privacy-policy', [StaticController::class, 'privacy'])->name('privacy.policy');
+Route::get('/terms-of-service', [StaticController::class, 'terms'])->name('terms.service');
 
 /*
 |--------------------------------------------------------------------------
@@ -146,6 +150,30 @@ Route::middleware(['auth', 'role:owner'])->group(function () {
 
     Route::post('/custom-order/{customOrder}/reject', [AdminCustomOrderController::class, 'reject'])
         ->name('admin.custom.reject');
+
+    Route::get('/admin/about/edit', [AdminAboutSectionController::class, 'edit'])
+        ->name('admin.about.edit');
+
+    Route::put('/admin/about', [AdminAboutSectionController::class, 'update'])
+        ->name('admin.about.update');
+
+    Route::get('/admin/faq', [AdminFaqController::class, 'index'])
+        ->name('admin.faq.index');
+
+    Route::get('/admin/faq/create', [AdminFaqController::class, 'create'])
+        ->name('admin.faq.create');
+
+    Route::post('/admin/faq', [AdminFaqController::class, 'store'])
+        ->name('admin.faq.store');
+
+    Route::get('/admin/faq/{faq}/edit', [AdminFaqController::class, 'edit'])
+        ->name('admin.faq.edit');
+
+    Route::put('/admin/faq/{faq}', [AdminFaqController::class, 'update'])
+        ->name('admin.faq.update');
+
+    Route::delete('/admin/faq/{faq}', [AdminFaqController::class, 'destroy'])
+        ->name('admin.faq.destroy');
 
     /*
     |--------------------------------------------------------------------------

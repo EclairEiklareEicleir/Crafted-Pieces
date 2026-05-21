@@ -50,9 +50,14 @@
                 <a class="flex items-center gap-2 transition hover:text-brand-primary" href="{{ route('about') }}#faq">
                     FAQs
                 </a>
+                </a>
 
-                <a class="flex items-center gap-2 transition hover:text-brand-primary" href="{{ route('about') }}#contact">
-                    Contact Us
+                <a class="flex items-center gap-2 transition hover:text-brand-primary" href="{{ route('privacy.policy') }}">
+                    Privacy Policy
+                </a>
+
+                <a class="flex items-center gap-2 transition hover:text-brand-primary" href="{{ route('terms.service') }}">
+                    Terms of Service
                 </a>
 
             </div>

@@ -125,6 +125,30 @@
             updateButtonState();
         }
 
+        function togglePasswordVisibility(button) {
+            const targetId = button.dataset.passwordTarget;
+            const passwordInput = document.getElementById(targetId);
+            if (!passwordInput) return;
+
+            const visible = passwordInput.type === 'text';
+            passwordInput.type = visible ? 'password' : 'text';
+
+            button.innerHTML = visible
+                ? `
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-5 w-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8a4 4 0 0 1 0 8 4 4 0 0 1 0-8Z" />
+                    </svg>
+                  `
+                : `
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-5 w-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.5 8.5 15.5 15.5" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.5 8.5 8.5 15.5" />
+                    </svg>
+                  `;
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             initRegisterGuard();
         });

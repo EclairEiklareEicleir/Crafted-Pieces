@@ -2,25 +2,32 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AboutSection;
+use App\Models\Faq;
+
 class StaticController extends Controller
 {
     public function about()
     {
-        $faq = [
-            [
-                'q' => 'Do you accept custom orders?',
-                'a' => 'Yes, we accept custom crochet requests depending on complexity and schedule.',
-            ],
-            [
-                'q' => 'How long does production take?',
-                'a' => 'Usually 3–10 days depending on the item.',
-            ],
-            [
-                'q' => 'Do you require full payment upfront?',
-                'a' => 'Yes for custom orders unless stated otherwise.',
-            ],
-        ];
+        // Get active FAQs ordered by order field, fallback to empty array
+        $faq = Faq::where('active', true)
+            ->orderBy('order', 'asc')
+            ->get()
+            ->map(fn($item) => ['q' => $item->question, 'a' => $item->answer])
+            ->toArray();
 
-        return view('user.about', compact('faq'));
+        $aboutSection = AboutSection::latest()->first();
+
+        return view('user.about', compact('faq', 'aboutSection'));
+    }
+
+    public function privacy()
+    {
+        return view('user.privacy-policy');
+    }
+
+    public function terms()
+    {
+        return view('user.terms-of-service');
     }
 }

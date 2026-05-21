@@ -60,6 +60,21 @@
                 <span>Custom Orders</span>
             </a>
 
+            <a href="{{ route('admin.about.edit') }}" class="brand-admin-nav-link {{ request()->routeIs('admin.about.*') ? 'bg-brand-light text-brand-primary' : '' }}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-5 w-5 shrink-0">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5a7.5 7.5 0 1 1 0 15 7.5 7.5 0 0 1 0-15Z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8.5v3h3" />
+                </svg>
+                <span>About</span>
+            </a>
+
+            <a href="{{ route('admin.faq.index') }}" class="brand-admin-nav-link {{ request()->routeIs('admin.faq.*') ? 'bg-brand-light text-brand-primary' : '' }}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-5 w-5 shrink-0">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z" />
+                </svg>
+                <span>FAQ</span>
+            </a>
+
             <a href="{{ route('admin.settings.index') }}" class="brand-admin-nav-link {{ request()->routeIs('admin.settings.*') ? 'bg-brand-light text-brand-primary' : '' }}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-5 w-5 shrink-0">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" />
@@ -102,6 +117,8 @@
                                 <a href="{{ route('admin.products.index') }}" class="brand-dropdown-link {{ request()->routeIs('admin.products.*') ? 'bg-brand-light text-brand-primary' : '' }}">Products</a>
                                 <a href="{{ route('admin.orders.index') }}" class="brand-dropdown-link {{ request()->routeIs('admin.orders.*') ? 'bg-brand-light text-brand-primary' : '' }}">Orders</a>
                                 <a href="{{ route('admin.custom.index') }}" class="brand-dropdown-link {{ request()->routeIs('admin.custom.*') ? 'bg-brand-light text-brand-primary' : '' }}">Custom Orders</a>
+                                <a href="{{ route('admin.about.edit') }}" class="brand-dropdown-link {{ request()->routeIs('admin.about.*') ? 'bg-brand-light text-brand-primary' : '' }}">About</a>
+                                <a href="{{ route('admin.faq.index') }}" class="brand-dropdown-link {{ request()->routeIs('admin.faq.*') ? 'bg-brand-light text-brand-primary' : '' }}">FAQ</a>
                                 <a href="{{ route('admin.settings.index') }}" class="brand-dropdown-link {{ request()->routeIs('admin.settings.*') ? 'bg-brand-light text-brand-primary' : '' }}">Settings</a>
                                 <a href="{{ route('home') }}" class="brand-dropdown-link">Back to Store</a>
                             </nav>

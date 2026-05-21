@@ -217,6 +217,12 @@
                             </div>
 
                             <div class="mt-3 grid gap-1">
+                                @if ($isOwner)
+                                    <a href="{{ route('admin.dashboard') }}" class="brand-dropdown-link">
+                                        Admin Dashboard
+                                    </a>
+                                @endif
+
                                 <a href="{{ route('orders') }}"
                                    class="brand-dropdown-link {{ request()->routeIs('orders') ? 'bg-brand-light text-brand-primary' : '' }}">
                                     Orders
@@ -231,12 +237,6 @@
                                     <a href="{{ route('account') }}"
                                        class="brand-dropdown-link {{ request()->routeIs('account') ? 'bg-brand-light text-brand-primary' : '' }}">
                                         Account
-                                    </a>
-                                @endif
-
-                                @if ($isOwner)
-                                    <a href="{{ route('admin.dashboard') }}" class="brand-dropdown-link">
-                                        Admin Dashboard
                                     </a>
                                 @endif
 
