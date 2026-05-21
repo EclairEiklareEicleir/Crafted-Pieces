@@ -163,52 +163,34 @@
             Conversation
         </h2>
 
-        <div class="mt-6 space-y-4">
-
-            @forelse ($request->messages as $message)
-
-                <div class="rounded-3xl bg-brand-light/35 p-4">
-
-                    <div class="flex items-center justify-between">
-
-                        <p class="font-semibold text-brand-primary">
-                            {{ $message->user->name }}
-                        </p>
-
-                        <p class="text-xs text-brand-secondary">
-                            {{ $message->created_at->diffForHumans() }}
-                        </p>
-
-                    </div>
-
-                    <p class="mt-3 text-sm leading-6 text-brand-ink/70">
-                        {{ $message->message }}
-                    </p>
-
-                </div>
-
-            @empty
-                <p class="text-sm text-brand-ink/70">
-                    No messages yet.
-                </p>
-            @endforelse
-
-        </div>
+        <x-custom-order-thread
+            :messages="$request->messages"
+            thread-id="admin-message-thread"
+            :viewer-id="auth()->id()"
+            :customer-id="$request->user_id"
+            viewer-label="You"
+            customer-label="Customer"
+            owner-label="Admin Owner"
+        />
 
         {{-- MESSAGE FORM --}}
         @if (!$isLocked)
 
             <form method="POST"
                   action="{{ route('admin.custom.message', $request->id) }}"
-                  class="mt-6">
+                  class="sticky bottom-0 mt-6 rounded-[1.75rem] border border-brand-border bg-brand-light/30 p-4 shadow-sm backdrop-blur sm:p-5">
 
                 @csrf
+
+                <label class="mb-3 block text-sm font-semibold text-brand-primary">
+                    Write a reply
+                </label>
 
                 <textarea
                     name="message"
                     rows="4"
                     placeholder="Reply to customer..."
-                    class="brand-input"
+                    class="brand-input min-h-28 resize-none rounded-3xl border border-[#e7bfce] bg-white/95"
                     required></textarea>
 
                 <button class="mt-4 brand-btn-primary px-6 py-3">

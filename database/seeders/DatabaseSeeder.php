@@ -30,6 +30,8 @@ class DatabaseSeeder extends Seeder
             AnalyticSeeder::class,
             SettingSeeder::class,
             ReviewSeeder::class,
+            AboutSectionSeeder::class,
+            FaqSeeder::class,
         ]);
     }
 }

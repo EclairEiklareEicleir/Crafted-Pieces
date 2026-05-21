@@ -10,7 +10,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="min-h-screen bg-brand-light text-brand-ink antialiased">
+<body class="min-h-screen text-brand-ink antialiased">
 
 @php
     $adminUser = auth()->user();
@@ -18,7 +18,7 @@
 
 <div class="min-h-screen xl:grid xl:grid-cols-[18rem_minmax(0,1fr)]">
 
-    <aside class="hidden border-r border-brand-border bg-white/95 shadow-sm xl:flex xl:flex-col xl:sticky xl:top-0 xl:h-screen">
+    <aside class="hidden border-r border-brand-border/80 bg-white/82 shadow-sm backdrop-blur-xl xl:flex xl:flex-col xl:sticky xl:top-0 xl:h-screen">
         <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 border-b border-brand-border px-5 py-5">
             <img src="{{ asset('images/crafted_pieces_logo.png') }}" alt="Crafted Pieces" class="h-14 w-auto rounded-xl object-contain">
             <div>
@@ -60,6 +60,21 @@
                 <span>Custom Orders</span>
             </a>
 
+            <a href="{{ route('admin.about.edit') }}" class="brand-admin-nav-link {{ request()->routeIs('admin.about.*') ? 'bg-brand-light text-brand-primary' : '' }}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-5 w-5 shrink-0">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5a7.5 7.5 0 1 1 0 15 7.5 7.5 0 0 1 0-15Z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8.5v3h3" />
+                </svg>
+                <span>About</span>
+            </a>
+
+            <a href="{{ route('admin.faq.index') }}" class="brand-admin-nav-link {{ request()->routeIs('admin.faq.*') ? 'bg-brand-light text-brand-primary' : '' }}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-5 w-5 shrink-0">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z" />
+                </svg>
+                <span>FAQ</span>
+            </a>
+
             <a href="{{ route('admin.settings.index') }}" class="brand-admin-nav-link {{ request()->routeIs('admin.settings.*') ? 'bg-brand-light text-brand-primary' : '' }}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-5 w-5 shrink-0">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" />
@@ -77,7 +92,7 @@
     </aside>
 
     <div class="flex min-w-0 flex-col">
-        <header class="sticky top-0 z-30 border-b border-brand-border bg-brand-light/95 backdrop-blur">
+        <header class="sticky top-0 z-30 border-b border-brand-border/80 bg-brand-surface/78 backdrop-blur-xl">
             <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
                 <div class="flex items-center gap-3">
                     <details class="relative xl:hidden">
@@ -102,6 +117,8 @@
                                 <a href="{{ route('admin.products.index') }}" class="brand-dropdown-link {{ request()->routeIs('admin.products.*') ? 'bg-brand-light text-brand-primary' : '' }}">Products</a>
                                 <a href="{{ route('admin.orders.index') }}" class="brand-dropdown-link {{ request()->routeIs('admin.orders.*') ? 'bg-brand-light text-brand-primary' : '' }}">Orders</a>
                                 <a href="{{ route('admin.custom.index') }}" class="brand-dropdown-link {{ request()->routeIs('admin.custom.*') ? 'bg-brand-light text-brand-primary' : '' }}">Custom Orders</a>
+                                <a href="{{ route('admin.about.edit') }}" class="brand-dropdown-link {{ request()->routeIs('admin.about.*') ? 'bg-brand-light text-brand-primary' : '' }}">About</a>
+                                <a href="{{ route('admin.faq.index') }}" class="brand-dropdown-link {{ request()->routeIs('admin.faq.*') ? 'bg-brand-light text-brand-primary' : '' }}">FAQ</a>
                                 <a href="{{ route('admin.settings.index') }}" class="brand-dropdown-link {{ request()->routeIs('admin.settings.*') ? 'bg-brand-light text-brand-primary' : '' }}">Settings</a>
                                 <a href="{{ route('home') }}" class="brand-dropdown-link">Back to Store</a>
                             </nav>
@@ -158,6 +175,8 @@
     </div>
 
 </div>
+
+<x-brand-loader />
 
 </body>
 </html>

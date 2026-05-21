@@ -173,7 +173,6 @@
 
                         <option value="GCash">GCash</option>
                         <option value="Maya">Maya</option>
-                        <option value="Bank Transfer">Bank Transfer</option>
 
                     </select>
 

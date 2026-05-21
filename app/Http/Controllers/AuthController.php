@@ -27,11 +27,11 @@ class AuthController extends Controller
         ];
 
         if (Auth::attempt($credentials)) {
-
             $request->session()->regenerate();
 
-            return redirect()->route('home')
-                ->with('success', 'Logged in successfully!');
+            return redirect()->route(
+                Auth::user()?->role === 'owner' ? 'admin.dashboard' : 'home'
+            )->with('success', 'Logged in successfully!');
         }
 
         return back()

@@ -19,6 +19,8 @@ use App\Http\Controllers\AdminProductController;
 use App\Http\Controllers\AdminCategoryController;
 use App\Http\Controllers\AdminSettingController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\AdminAboutSectionController;
+use App\Http\Controllers\AdminFaqController;
 /*
 |--------------------------------------------------------------------------
 | MAIN PAGES
@@ -29,6 +31,8 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/shop', [ShopController::class, 'index'])->name('shop');
 Route::get('/product/{slug}', [ProductController::class, 'show'])->name('product.show');
 Route::get('/about', [StaticController::class, 'about'])->name('about');
+Route::get('/privacy-policy', [StaticController::class, 'privacy'])->name('privacy.policy');
+Route::get('/terms-of-service', [StaticController::class, 'terms'])->name('terms.service');
 
 /*
 |--------------------------------------------------------------------------
@@ -52,13 +56,6 @@ Route::get('/custom-order/{customOrder}', [CustomOrderController::class, 'show']
 // MESSAGE
 Route::post('/custom-order/{customOrder}/message', [CustomOrderController::class, 'message'])
     ->name('custom-order.message');
-
-// USER LIST (MY REQUESTS)
-Route::middleware(['auth', 'role:user'])->group(function () {
-
-    Route::get('/my-custom-orders', [CustomOrderController::class, 'index'])
-        ->name('custom-order.index');
-});
 
 /*
 |--------------------------------------------------------------------------
@@ -85,15 +82,8 @@ Route::get('/order/success/{order}', [CheckoutController::class, 'success'])->na
 Route::get('/track-order', [OrderController::class, 'trackForm'])->name('orders.track.form');
 Route::post('/track-order', [OrderController::class, 'track'])->name('orders.track');
 Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
-// Route::get('/orders/{order}/receipt', [CheckoutController::class, 'downloadReceipt'])->name('orders.receipt.download');
 Route::get('/orders/{order}/receipt', [OrderController::class, 'downloadReceipt'])->name('orders.receipt.download');
 Route::get('/custom-order/{order}/receipt', [CheckoutController::class, 'downloadCustomReceipt'])->name('custom-order.receipt');
-
-/*
-|--------------------------------------------------------------------------
-| USER AUTH
-|--------------------------------------------------------------------------
-*/
 
 Route::middleware(['auth', 'role:user'])->group(function () {
 
@@ -111,14 +101,11 @@ Route::middleware(['auth', 'role:user'])->group(function () {
     |--------------------------------------------------------------------------
     */
 
-    Route::middleware(['auth'])->group(function () {
+    Route::get('/user/payment/{type}/{id}', [CheckoutController::class, 'payment'])
+        ->name('user.payment');
 
-        Route::get('/user/payment/{type}/{id}', [CheckoutController::class, 'payment'])
-            ->name('user.payment');
-
-        Route::post('/user/payment/{type}/{id}', [CheckoutController::class, 'processPayment'])
-            ->name('user.payment.process');
-    });
+    Route::post('/user/payment/{type}/{id}', [CheckoutController::class, 'processPayment'])
+        ->name('user.payment.process');
 
     Route::post('/reviews', [ReviewController::class, 'store'])
         ->name('reviews.store');
@@ -152,6 +139,30 @@ Route::middleware(['auth', 'role:owner'])->group(function () {
 
     Route::post('/custom-order/{customOrder}/reject', [AdminCustomOrderController::class, 'reject'])
         ->name('admin.custom.reject');
+
+    Route::get('/admin/about/edit', [AdminAboutSectionController::class, 'edit'])
+        ->name('admin.about.edit');
+
+    Route::put('/admin/about', [AdminAboutSectionController::class, 'update'])
+        ->name('admin.about.update');
+
+    Route::get('/admin/faq', [AdminFaqController::class, 'index'])
+        ->name('admin.faq.index');
+
+    Route::get('/admin/faq/create', [AdminFaqController::class, 'create'])
+        ->name('admin.faq.create');
+
+    Route::post('/admin/faq', [AdminFaqController::class, 'store'])
+        ->name('admin.faq.store');
+
+    Route::get('/admin/faq/{faq}/edit', [AdminFaqController::class, 'edit'])
+        ->name('admin.faq.edit');
+
+    Route::put('/admin/faq/{faq}', [AdminFaqController::class, 'update'])
+        ->name('admin.faq.update');
+
+    Route::delete('/admin/faq/{faq}', [AdminFaqController::class, 'destroy'])
+        ->name('admin.faq.destroy');
 
     /*
     |--------------------------------------------------------------------------
@@ -216,7 +227,6 @@ Route::middleware(['auth', 'role:owner'])->group(function () {
 
     Route::delete('/admin/categories/{category}', [AdminCategoryController::class, 'destroy'])
         ->name('admin.categories.destroy');
-    });
 
     /*
     |--------------------------------------------------------------------------
@@ -224,10 +234,11 @@ Route::middleware(['auth', 'role:owner'])->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::get('/admin/settings', [AdminSettingController::class, 'index'])
-    ->name('admin.settings.index');
+        ->name('admin.settings.index');
 
     Route::post('/admin/settings', [AdminSettingController::class, 'update'])
         ->name('admin.settings.update');
+});
 
 /*
 |--------------------------------------------------------------------------

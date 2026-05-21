@@ -32,11 +32,31 @@
             <div>
                 <label class="mb-2 block text-sm font-semibold text-brand-primary">Email</label>
                 <input type="email" name="email" required class="brand-input">
+
+                @error('email')
+                    <p class="mt-2 text-sm text-brand-secondary">{{ $message }}</p>
+                @enderror
             </div>
 
             <div>
                 <label class="mb-2 block text-sm font-semibold text-brand-primary">Password</label>
-                <input type="password" name="password" required class="brand-input">
+                <div class="relative">
+                    <input id="login-password" type="password" name="password" required
+                           class="brand-input pr-12">
+                    <button type="button"
+                            data-password-target="login-password"
+                            class="absolute inset-y-0 right-3 flex items-center text-brand-ink/70 transition hover:text-brand-primary"
+                            onclick="togglePasswordVisibility(this)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-5 w-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8a4 4 0 0 1 0 8 4 4 0 0 1 0-8Z" />
+                        </svg>
+                    </button>
+                </div>
+
+                @error('password')
+                    <p class="mt-2 text-sm text-brand-secondary">{{ $message }}</p>
+                @enderror
             </div>
 
             <label class="flex items-center gap-2 text-sm text-brand-ink/70">
@@ -71,30 +91,66 @@
             <div>
                 <label class="mb-2 block text-sm font-semibold text-brand-primary">Full name</label>
                 <input type="text" name="name" required class="brand-input">
+
+                @error('name')
+                    <p class="mt-2 text-sm text-brand-secondary">{{ $message }}</p>
+                @enderror
             </div>
 
             <div>
                 <label class="mb-2 block text-sm font-semibold text-brand-primary">Email</label>
                 <input type="email" name="email" required class="brand-input">
+
+                @error('email')
+                    <p class="mt-2 text-sm text-brand-secondary">{{ $message }}</p>
+                @enderror
             </div>
 
             <div>
                 <label class="mb-2 block text-sm font-semibold text-brand-primary">Password</label>
-                <input type="password" name="password" required class="brand-input">
+                <div class="relative">
+                    <input id="register-password" type="password" name="password" required
+                           class="brand-input pr-12">
+                    <button type="button"
+                            data-password-target="register-password"
+                            class="absolute inset-y-0 right-3 flex items-center text-brand-ink/70 transition hover:text-brand-primary"
+                            onclick="togglePasswordVisibility(this)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-5 w-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8a4 4 0 0 1 0 8 4 4 0 0 1 0-8Z" />
+                        </svg>
+                    </button>
+                </div>
+
+                @error('password')
+                    <p class="mt-2 text-sm text-brand-secondary">{{ $message }}</p>
+                @enderror
             </div>
 
             <div>
                 <label class="mb-2 block text-sm font-semibold text-brand-primary">Confirm password</label>
-                <input type="password" name="password_confirmation" required class="brand-input">
+                <div class="relative">
+                    <input id="register-password-confirmation" type="password" name="password_confirmation" required
+                           class="brand-input pr-12">
+                    <button type="button"
+                            data-password-target="register-password-confirmation"
+                            class="absolute inset-y-0 right-3 flex items-center text-brand-ink/70 transition hover:text-brand-primary"
+                            onclick="togglePasswordVisibility(this)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-5 w-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8a4 4 0 0 1 0 8 4 4 0 0 1 0-8Z" />
+                        </svg>
+                    </button>
+                </div>
             </div>
 
             <label class="flex items-start gap-2 text-sm text-brand-ink/70">
                 <input type="checkbox" id="privacy-check" class="mt-1 h-4 w-4">
                 <span>
                     I agree to the
-                    <a href="#" class="font-semibold text-brand-secondary hover:text-brand-primary hover:underline">Privacy Policy</a>
+                    <a href="{{ route('privacy.policy') }}" class="font-semibold text-brand-secondary hover:text-brand-primary hover:underline">Privacy Policy</a>
                     and
-                    <a href="#" class="font-semibold text-brand-secondary hover:text-brand-primary hover:underline">Terms of Service</a>.
+                    <a href="{{ route('terms.service') }}" class="font-semibold text-brand-secondary hover:text-brand-primary hover:underline">Terms of Service</a>.
                 </span>
             </label>
 

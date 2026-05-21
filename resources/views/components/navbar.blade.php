@@ -1,4 +1,4 @@
-<header class="sticky top-0 z-40 border-b border-brand-border bg-brand-light/95 backdrop-blur">
+<header class="sticky top-0 z-40 border-b border-brand-border/80 bg-brand-surface/78 backdrop-blur-xl">
     <div class="mx-auto max-w-7xl px-4 py-3 sm:px-6 lg:px-8">
 
         @php
@@ -217,6 +217,12 @@
                             </div>
 
                             <div class="mt-3 grid gap-1">
+                                @if ($isOwner)
+                                    <a href="{{ route('admin.dashboard') }}" class="brand-dropdown-link">
+                                        Admin Dashboard
+                                    </a>
+                                @endif
+
                                 <a href="{{ route('orders') }}"
                                    class="brand-dropdown-link {{ request()->routeIs('orders') ? 'bg-brand-light text-brand-primary' : '' }}">
                                     Orders
@@ -231,12 +237,6 @@
                                     <a href="{{ route('account') }}"
                                        class="brand-dropdown-link {{ request()->routeIs('account') ? 'bg-brand-light text-brand-primary' : '' }}">
                                         Account
-                                    </a>
-                                @endif
-
-                                @if ($isOwner)
-                                    <a href="{{ route('admin.dashboard') }}" class="brand-dropdown-link">
-                                        Admin Dashboard
                                     </a>
                                 @endif
 

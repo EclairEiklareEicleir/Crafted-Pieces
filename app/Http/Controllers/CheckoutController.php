@@ -51,7 +51,9 @@ class CheckoutController extends Controller
             'full_name' => 'required|string|max:255',
             'email' => 'required|email|max:255',
             'shipping_address' => 'required|string',
-            'payment_method' => 'required|string',
+            'payment_method' => ['required', 'string', 'not_in:Bank Transfer'],
+        ], [
+            'payment_method.not_in' => 'Bank Transfer is no longer accepted. Please select another payment method.',
         ]);
 
         $pricing = (new PricingService)->calculate($cartItems);
