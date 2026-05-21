@@ -49,13 +49,11 @@ class OrderController extends Controller
     // =========================
     public function show(Order $order)
     {
-        // security check (important)
         if (Auth::id() !== $order->user_id) {
             abort(403);
         }
 
         $order->load('items.product');
-
         return view('user.orders.show', compact('order'));
     }
 
@@ -84,7 +82,7 @@ class OrderController extends Controller
 
         if (! $order) {
             return back()->withErrors([
-                'track' => 'Order not found. Please check your details.'
+                'error' => 'Order not found. Please check your details.'
             ]);
         }
 

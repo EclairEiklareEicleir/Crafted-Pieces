@@ -164,3 +164,4 @@
 - Modified Navbar: Switched account and cart button, converted My Orders to a group dropdown(Custom Orders and Orders)
 
 - Added Global Alert UI
+- Added Password Update in Accounts

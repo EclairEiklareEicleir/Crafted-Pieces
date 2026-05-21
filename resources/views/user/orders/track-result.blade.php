@@ -85,7 +85,7 @@
     {{-- DOWNLOAD RECEIPT --}}
     <div class="mt-6 flex justify-end">
 
-        <a href="{{ route('orders.receipt', $order->id) }}"
+        <a href="{{ route('orders.receipt.download', $order->id) }}"
         class="brand-btn-primary inline-flex items-center px-6 py-2 text-sm">
 
             Download Receipt

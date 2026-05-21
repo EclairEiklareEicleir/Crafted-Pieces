@@ -84,8 +84,8 @@ Route::get('/order/success/{order}', [CheckoutController::class, 'success'])->na
 Route::get('/track-order', [OrderController::class, 'trackForm'])->name('orders.track.form');
 Route::post('/track-order', [OrderController::class, 'track'])->name('orders.track');
 Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
-Route::get('/orders/{order}/receipt', [CheckoutController::class, 'downloadReceipt'])->name('orders.receipt.download');
-Route::get('/orders/{order}/receipt', [OrderController::class, 'downloadReceipt'])->name('orders.receipt');
+// Route::get('/orders/{order}/receipt', [CheckoutController::class, 'downloadReceipt'])->name('orders.receipt.download');
+Route::get('/orders/{order}/receipt', [OrderController::class, 'downloadReceipt'])->name('orders.receipt.download');
 Route::get('/custom-order/{order}/receipt', [CheckoutController::class, 'downloadCustomReceipt'])->name('custom-order.receipt');
 
 /*
@@ -98,6 +98,7 @@ Route::middleware(['auth', 'role:user'])->group(function () {
 
     Route::get('/account', [AccountController::class, 'index'])->name('account');
     Route::patch('/account', [AccountController::class, 'update'])->name('account.update');
+    Route::patch('/account/password', [AccountController::class, 'updatePassword'])->name('account.password.update');
     Route::get('/orders', [OrderController::class, 'index'])->name('orders');
 
     Route::get('/my-custom-orders', [CustomOrderController::class, 'index'])

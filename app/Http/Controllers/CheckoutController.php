@@ -166,16 +166,6 @@ class CheckoutController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    public function downloadReceipt(Order $order)
-    {
-        $order->load('items.product');
-
-        $pricing = (new PricingService)->calculateFromOrder($order);
-
-        return Pdf::loadView('user.receipt.receipt-pdf', compact('order', 'pricing'))
-            ->download('receipt-order-' . $order->id . '.pdf');
-    }
-
     public function downloadCustomReceipt(CustomOrderRequest $order)
     {
         if ($order->user_id !== Auth::id()) {
