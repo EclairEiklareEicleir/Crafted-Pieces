@@ -150,11 +150,9 @@
 
     </section>
 
-    {{-- TRUST SECTION (COMBINED: STEPS + TESTIMONIALS) --}}
+    {{-- TRUST SECTION (COMBINED: STEPS + REVIEWS) --}}
     <section class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-
         <div class="rounded-[2rem] border border-brand-border bg-white p-6 shadow-sm sm:p-8">
-
             <p class="text-xs font-semibold uppercase tracking-[0.2em] text-brand-secondary">
                 How it works
             </p>
@@ -165,54 +163,186 @@
 
             {{-- STEPS --}}
             <div class="mt-8 grid gap-5 md:grid-cols-4">
-
                 @foreach ($steps as $step)
-
                     <div class="rounded-3xl bg-brand-light/60 p-5">
-
                         <h3 class="font-semibold text-brand-primary">
-                            {{ $step['title'] }}
+                            {{ $step['title'] ?? '' }}
                         </h3>
 
                         <p class="mt-2 text-sm leading-6 text-brand-ink/70">
-                            {{ $step['desc'] }}
+                            {{ $step['desc'] ?? '' }}
                         </p>
-
                     </div>
-
                 @endforeach
-
             </div>
 
-            {{-- TESTIMONIALS --}}
-            <div class="mt-10 grid gap-5 md:grid-cols-3">
+            {{-- REVIEW FORM --}}
+            @auth
+                <div class="mt-10 rounded-3xl border border-brand-border bg-brand-light/30 p-6">
+                    <h3 class="text-xl font-semibold text-brand-primary">
+                        Leave a Review
+                    </h3>
 
-                @foreach ($testimonials as $testimonial)
+                    <p class="mt-2 text-sm text-brand-ink/70">
+                        Share your experience with Crafted Pieces.
+                    </p>
 
-                    <div class="rounded-3xl border border-brand-border bg-white p-5">
+                    <form
+                        method="POST"
+                        action="{{ route('reviews.store') }}"
+                        class="mt-6 space-y-5"
+                    >
+                        @csrf
 
-                        <div class="flex gap-1 text-brand-secondary">
-                            @for ($i = 0; $i < $testimonial['rating']; $i++)
-                                <span>*</span>
-                            @endfor
+                        <div>
+                            <label class="mb-2 block text-sm font-semibold text-brand-primary">
+                                Rating
+                            </label>
+
+                            <select name="rating" required class="brand-input">
+                                <option value="">Select rating</option>
+                                <option value="5">5 Stars</option>
+                                <option value="4">4 Stars</option>
+                                <option value="3">3 Stars</option>
+                                <option value="2">2 Stars</option>
+                                <option value="1">1 Star</option>
+                            </select>
                         </div>
 
-                        <p class="mt-4 text-sm leading-6 text-brand-ink/70">
-                            {{ $testimonial['text'] }}
-                        </p>
+                        <div>
+                            <label class="mb-2 block text-sm font-semibold text-brand-primary">
+                                Review
+                            </label>
 
-                        <p class="mt-4 text-xs font-semibold uppercase tracking-[0.16em] text-brand-secondary">
-                            {{ $testimonial['name'] }}
-                        </p>
+                            <textarea
+                                name="comment"
+                                rows="4"
+                                required
+                                maxlength="1000"
+                                class="brand-input resize-none"
+                            ></textarea>
+                        </div>
 
+                        <label class="flex items-center gap-2 text-sm text-brand-ink/70">
+                            <input
+                                type="checkbox"
+                                name="is_anonymous"
+                                class="h-4 w-4"
+                            >
+
+                            Submit anonymously
+                        </label>
+
+                        <button type="submit" class="brand-btn-primary">
+                            Submit Review
+                        </button>
+                    </form>
+                </div>
+            @else
+                <div class="mt-10 rounded-3xl border border-brand-border bg-brand-light/30 p-6 text-center">
+                    <p class="text-sm text-brand-ink/70">
+                        Login to leave a review.
+                    </p>
+
+                    <button
+                        type="button"
+                        onclick="openAuthModal()"
+                        class="mt-4 brand-btn-primary"
+                    >
+                        Login / Register
+                    </button>
+                </div>
+            @endauth
+
+            {{-- REVIEWS --}}
+            <div class="mt-10">
+
+                <div class="flex items-center justify-between mb-4">
+                    <p class="text-xs font-semibold uppercase tracking-[0.2em] text-brand-secondary">
+                        Customer Reviews
+                    </p>
+
+                    <div class="flex gap-2">
+                        <button type="button" onclick="prevReviews()" class="text-brand-primary px-3 py-1 border rounded-lg">
+                            ‹
+                        </button>
+
+                        <button type="button" onclick="nextReviews()" class="text-brand-primary px-3 py-1 border rounded-lg">
+                            ›
+                        </button>
                     </div>
+                </div>
 
-                @endforeach
+                <div id="reviews-container" class="grid gap-5 md:grid-cols-3">
 
+                    @forelse ($testimonials as $testimonial)
+
+                        <div class="review-card hidden rounded-3xl border border-brand-border bg-white p-5">
+
+                            <div class="flex gap-1 text-brand-secondary">
+                                @for ($i = 0; $i < $testimonial->rating; $i++)
+                                    <span>★</span>
+                                @endfor
+                            </div>
+
+                            <p class="mt-4 text-sm leading-6 text-brand-ink/70">
+                                {{ $testimonial->comment }}
+                            </p>
+
+                            <p class="mt-4 text-xs font-semibold uppercase tracking-[0.16em] text-brand-secondary">
+                                {{ $testimonial->is_anonymous ? 'Anonymous Customer' : $testimonial->user->name }}
+                            </p>
+
+                        </div>
+
+                    @empty
+
+                        <div class="md:col-span-3 rounded-3xl border border-dashed border-brand-border bg-brand-light/20 p-8 text-center">
+                            <p class="text-sm text-brand-ink/70">
+                                No reviews yet.
+                            </p>
+                        </div>
+
+                    @endforelse
+
+                </div>
             </div>
 
         </div>
-
     </section>
-
 @endsection
+
+<script>
+let reviewIndex = 0;
+
+function updateReviews() {
+    const cards = document.querySelectorAll('.review-card');
+
+    cards.forEach((card, i) => {
+        card.classList.add('hidden');
+    });
+
+    for (let i = 0; i < 3; i++) {
+        const idx = (reviewIndex + i) % cards.length;
+        if (cards[idx]) {
+            cards[idx].classList.remove('hidden');
+        }
+    }
+}
+
+function nextReviews() {
+    const cards = document.querySelectorAll('.review-card');
+    reviewIndex = (reviewIndex + 3) % cards.length;
+    updateReviews();
+}
+
+function prevReviews() {
+    const cards = document.querySelectorAll('.review-card');
+    reviewIndex = (reviewIndex - 3 + cards.length) % cards.length;
+    updateReviews();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    updateReviews();
+});
+</script>

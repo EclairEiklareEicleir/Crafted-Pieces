@@ -165,3 +165,5 @@
 
 - Added Global Alert UI
 - Added Password Update in Accounts
+- Modified Reviews: Account holders can now leave reviews and Guest can view reviews
+- Added ReviewSeeder to fill in reviews

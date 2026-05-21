@@ -29,6 +29,7 @@ class DatabaseSeeder extends Seeder
             ProductSeeder::class,
             AnalyticSeeder::class,
             SettingSeeder::class,
+            ReviewSeeder::class,
         ]);
     }
 }

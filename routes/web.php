@@ -18,6 +18,7 @@ use App\Http\Controllers\AdminOrderController;
 use App\Http\Controllers\AdminProductController;
 use App\Http\Controllers\AdminCategoryController;
 use App\Http\Controllers\AdminSettingController;
+use App\Http\Controllers\ReviewController;
 /*
 |--------------------------------------------------------------------------
 | MAIN PAGES
@@ -118,7 +119,11 @@ Route::middleware(['auth', 'role:user'])->group(function () {
         Route::post('/user/payment/{type}/{id}', [CheckoutController::class, 'processPayment'])
             ->name('user.payment.process');
     });
+
+    Route::post('/reviews', [ReviewController::class, 'store'])
+        ->name('reviews.store');
 });
+
 
 /*
 |--------------------------------------------------------------------------
