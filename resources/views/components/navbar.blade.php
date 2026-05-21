@@ -37,17 +37,48 @@
 
                         <nav class="mt-4 grid gap-2">
                             <a href="{{ route('home') }}" class="brand-dropdown-link {{ request()->routeIs('home') ? 'bg-brand-light text-brand-primary' : '' }}">Home</a>
-                            <a href="{{ route('shop') }}" class="brand-dropdown-link {{ request()->routeIs('shop') ? 'bg-brand-light text-brand-primary' : '' }}">Shop</a>
-                            <a href="{{ route('about') }}" class="brand-dropdown-link {{ request()->routeIs('about') ? 'bg-brand-light text-brand-primary' : '' }}">About</a>
-                            <a href="{{ route('custom-order') }}" class="brand-dropdown-link {{ request()->routeIs('custom-order') ? 'bg-brand-light text-brand-primary' : '' }}">Custom Order</a>
+
+                            <a href="{{ route('shop') }}" class="brand-dropdown-link {{ request()->routeIs('shop') ? 'bg-brand-light text-brand-primary' : '' }}">
+                                Shop
+                            </a>
+
+                            <a href="{{ route('about') }}" class="brand-dropdown-link {{ request()->routeIs('about') ? 'bg-brand-light text-brand-primary' : '' }}">
+                                About
+                            </a>
+
+                            <a href="{{ route('custom-order') }}" class="brand-dropdown-link whitespace-nowrap {{ request()->routeIs('custom-order') ? 'bg-brand-light text-brand-primary' : '' }}">
+                                Custom Order
+                            </a>
+
                             @auth
-                                <a href="{{ route('orders') }}" class="brand-dropdown-link {{ request()->routeIs('orders') ? 'bg-brand-light text-brand-primary' : '' }}">My Orders</a>
+                                <div class="grid gap-1 rounded-2xl border border-brand-border p-2">
+                                    <p class="px-3 pt-1 text-xs font-semibold uppercase tracking-[0.16em] text-brand-secondary">
+                                        My Orders
+                                    </p>
+
+                                    <a href="{{ route('orders') }}"
+                                       class="brand-dropdown-link {{ request()->routeIs('orders') ? 'bg-brand-light text-brand-primary' : '' }}">
+                                        Orders
+                                    </a>
+
+                                    <a href="{{ route('custom-order.index') }}"
+                                       class="brand-dropdown-link whitespace-nowrap {{ request()->routeIs('custom-order.index') ? 'bg-brand-light text-brand-primary' : '' }}">
+                                        Custom Orders
+                                    </a>
+                                </div>
+
                                 @if (Route::has('account'))
-                                    <a href="{{ route('account') }}" class="brand-dropdown-link {{ request()->routeIs('account') ? 'bg-brand-light text-brand-primary' : '' }}">Account</a>
+                                    <a href="{{ route('account') }}" class="brand-dropdown-link {{ request()->routeIs('account') ? 'bg-brand-light text-brand-primary' : '' }}">
+                                        Account
+                                    </a>
                                 @endif
                             @endauth
+
                             @guest
-                                <a href="{{ route('orders.track.form') }}" class="brand-dropdown-link {{ request()->routeIs('orders.track.*') ? 'bg-brand-light text-brand-primary' : '' }}">Track Order</a>
+                                <a href="{{ route('orders.track.form') }}"
+                                   class="brand-dropdown-link {{ request()->routeIs('orders.track.*') ? 'bg-brand-light text-brand-primary' : '' }}">
+                                    Track Order
+                                </a>
                             @endguest
                         </nav>
 
@@ -76,26 +107,91 @@
                     <img src="{{ asset('images/crafted_pieces_logo.png') }}"
                          alt="Crafted Pieces"
                          class="h-12 w-auto rounded-xl object-contain sm:h-14 lg:h-16">
+
                     <span class="hidden text-sm font-semibold uppercase tracking-[0.22em] text-brand-primary sm:inline-flex">
                         Crafted Pieces
                     </span>
                 </a>
 
                 <nav class="hidden items-center justify-center gap-8 text-sm font-medium lg:flex">
-                    <a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'text-brand-primary' : 'text-brand-ink/75 hover:text-brand-primary' }}">Home</a>
-                    <a href="{{ route('shop') }}" class="{{ request()->routeIs('shop') ? 'text-brand-primary' : 'text-brand-ink/75 hover:text-brand-primary' }}">Shop</a>
-                    <a href="{{ route('about') }}" class="{{ request()->routeIs('about') ? 'text-brand-primary' : 'text-brand-ink/75 hover:text-brand-primary' }}">About</a>
-                    <a href="{{ route('custom-order') }}" class="{{ request()->routeIs('custom-order') ? 'text-brand-primary' : 'text-brand-ink/75 hover:text-brand-primary' }}">Custom Order</a>
+                    <a href="{{ route('home') }}"
+                       class="{{ request()->routeIs('home') ? 'text-brand-primary' : 'text-brand-ink/75 hover:text-brand-primary' }}">
+                        Home
+                    </a>
+
+                    <a href="{{ route('shop') }}"
+                       class="{{ request()->routeIs('shop') ? 'text-brand-primary' : 'text-brand-ink/75 hover:text-brand-primary' }}">
+                        Shop
+                    </a>
+
+                    <a href="{{ route('about') }}"
+                       class="{{ request()->routeIs('about') ? 'text-brand-primary' : 'text-brand-ink/75 hover:text-brand-primary' }}">
+                        About
+                    </a>
+
+                    <a href="{{ route('custom-order') }}"
+                       class="whitespace-nowrap {{ request()->routeIs('custom-order') ? 'text-brand-primary' : 'text-brand-ink/75 hover:text-brand-primary' }}">
+                        Custom Order
+                    </a>
+
                     @auth
-                        <a href="{{ route('orders') }}" class="{{ request()->routeIs('orders') ? 'text-brand-primary' : 'text-brand-ink/75 hover:text-brand-primary' }}">My Orders</a>
+                        <div class="relative group">
+                            <button type="button"
+                                    class="{{ request()->routeIs('orders') || request()->routeIs('custom-order.index')
+                                        ? 'text-brand-primary'
+                                        : 'text-brand-ink/75 hover:text-brand-primary' }} flex items-center gap-1">
+
+                                My Orders
+
+                                <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd"
+                                          d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.94a.75.75 0 111.08 1.04l-4.24 4.5a.75.75 0 01-1.08 0l-4.24-4.5a.75.75 0 01.02-1.06z"
+                                          clip-rule="evenodd" />
+                                </svg>
+                            </button>
+
+                            <div class="absolute left-1/2 top-full z-50 hidden w-36 -translate-x-1/2 pt-2 group-hover:block group-focus-within:block">
+                                <div class="overflow-hidden rounded-xl border border-brand-border bg-white shadow-xl">
+
+                                    <a href="{{ route('orders') }}"
+                                       class="block px-3 py-2 text-left text-sm transition hover:bg-brand-light whitespace-nowrap
+                                       {{ request()->routeIs('orders') ? 'text-brand-primary font-medium' : 'text-brand-ink/80' }}">
+                                        Orders
+                                    </a>
+
+                                    <a href="{{ route('custom-order.index') }}"
+                                       class="block px-3 py-2 text-left text-sm transition hover:bg-brand-light whitespace-nowrap
+                                       {{ request()->routeIs('custom-order.index') ? 'text-brand-primary font-medium' : 'text-brand-ink/80' }}">
+                                        Custom Orders
+                                    </a>
+
+                                </div>
+                            </div>
+                        </div>
                     @endauth
+
                     @guest
-                        <a href="{{ route('orders.track.form') }}" class="{{ request()->routeIs('orders.track.*') ? 'text-brand-primary' : 'text-brand-ink/75 hover:text-brand-primary' }}">Track Order</a>
+                        <a href="{{ route('orders.track.form') }}"
+                           class="{{ request()->routeIs('orders.track.*') ? 'text-brand-primary' : 'text-brand-ink/75 hover:text-brand-primary' }}">
+                            Track Order
+                        </a>
                     @endguest
                 </nav>
             </div>
 
             <div class="flex items-center justify-end gap-2 justify-self-end">
+
+                <a href="{{ route('cart') }}" class="brand-icon-button relative" aria-label="Cart" title="Cart">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-5 w-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 4h2l2.4 10.2a2 2 0 0 0 2 1.6h7.8a2 2 0 0 0 2-1.5L21 8H7.2" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.5 20.5a1 1 0 1 0 0-2 1 1 0 0 0 0 2ZM17.5 20.5a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" />
+                    </svg>
+
+                    @if ($cartCount > 0)
+                        <span class="brand-badge absolute -right-1 -top-1">{{ $cartCount }}</span>
+                    @endif
+                </a>
+
                 @auth
                     <details class="relative">
                         <summary class="brand-icon-button list-none cursor-pointer" aria-label="Open profile menu" title="Profile menu">
@@ -107,19 +203,43 @@
 
                         <div class="brand-dropdown-panel right-0 w-64 p-3">
                             <div class="rounded-3xl bg-brand-light p-4">
-                                <p class="text-xs font-semibold uppercase tracking-[0.2em] text-brand-secondary">Signed in</p>
-                                <p class="mt-2 text-sm font-semibold text-brand-primary">{{ $user?->name }}</p>
-                                <p class="text-xs text-brand-ink/70">{{ $user?->email }}</p>
+                                <p class="text-xs font-semibold uppercase tracking-[0.2em] text-brand-secondary">
+                                    Signed in
+                                </p>
+
+                                <p class="mt-2 text-sm font-semibold text-brand-primary">
+                                    {{ $user?->name }}
+                                </p>
+
+                                <p class="text-xs text-brand-ink/70">
+                                    {{ $user?->email }}
+                                </p>
                             </div>
 
                             <div class="mt-3 grid gap-1">
-                                <a href="{{ route('orders') }}" class="brand-dropdown-link {{ request()->routeIs('orders') ? 'bg-brand-light text-brand-primary' : '' }}">My Orders</a>
+                                <a href="{{ route('orders') }}"
+                                   class="brand-dropdown-link {{ request()->routeIs('orders') ? 'bg-brand-light text-brand-primary' : '' }}">
+                                    Orders
+                                </a>
+
+                                <a href="{{ route('custom-order.index') }}"
+                                   class="brand-dropdown-link whitespace-nowrap {{ request()->routeIs('custom-order.index') ? 'bg-brand-light text-brand-primary' : '' }}">
+                                    Custom Orders
+                                </a>
+
                                 @if (Route::has('account'))
-                                    <a href="{{ route('account') }}" class="brand-dropdown-link {{ request()->routeIs('account') ? 'bg-brand-light text-brand-primary' : '' }}">Account</a>
+                                    <a href="{{ route('account') }}"
+                                       class="brand-dropdown-link {{ request()->routeIs('account') ? 'bg-brand-light text-brand-primary' : '' }}">
+                                        Account
+                                    </a>
                                 @endif
+
                                 @if ($isOwner)
-                                    <a href="{{ route('admin.dashboard') }}" class="brand-dropdown-link">Admin Dashboard</a>
+                                    <a href="{{ route('admin.dashboard') }}" class="brand-dropdown-link">
+                                        Admin Dashboard
+                                    </a>
                                 @endif
+
                                 <form method="POST" action="{{ route('logout') }}">
                                     @csrf
                                     <button type="submit" class="brand-dropdown-link w-full text-left">
@@ -144,16 +264,6 @@
                     </button>
                 @endguest
 
-                <a href="{{ route('cart') }}" class="brand-icon-button relative" aria-label="Cart" title="Cart">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-5 w-5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 4h2l2.4 10.2a2 2 0 0 0 2 1.6h7.8a2 2 0 0 0 2-1.5L21 8H7.2" />
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.5 20.5a1 1 0 1 0 0-2 1 1 0 0 0 0 2ZM17.5 20.5a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" />
-                    </svg>
-
-                    @if ($cartCount > 0)
-                        <span class="brand-badge absolute -right-1 -top-1">{{ $cartCount }}</span>
-                    @endif
-                </a>
             </div>
         </div>
     </div>

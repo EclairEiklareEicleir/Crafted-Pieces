@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Barryvdh\DomPDF\Facade\Pdf;
+use App\Services\PricingService;
 
 class OrderController extends Controller
 {
@@ -19,10 +21,10 @@ class OrderController extends Controller
 
         $order->load('items.product');
 
-        $pricing = (new \App\Services\PricingService())
+        $pricing = (new PricingService())
             ->calculateFromOrder($order);
 
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView(
+        $pdf = Pdf::loadView(
             'user.receipt.receipt-pdf',
             compact('order', 'pricing')
         );
@@ -86,7 +88,7 @@ class OrderController extends Controller
             ]);
         }
 
-        $pricing = (new \App\Services\PricingService())
+        $pricing = (new PricingService())
             ->calculateFromOrder($order);
 
         return view('user.orders.track-result', [

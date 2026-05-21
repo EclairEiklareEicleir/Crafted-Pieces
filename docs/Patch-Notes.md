@@ -156,3 +156,9 @@
 - Cleaned up routes and views to align checkout, payment, and order display structure
 - Added SettingSeeder for default pricing configuration bootstrap
 - Updated composer.json / lock due to dependency alignment for PDF + service changes
+
+
+- Ui Update
+
+## 21/05/26: Minor Navbar Modification
+- Modified Navbar: Switched account and cart button, converted My Orders to a group dropdown(Custom Orders and Orders)
