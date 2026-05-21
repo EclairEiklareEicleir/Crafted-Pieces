@@ -162,3 +162,5 @@
 
 ## 21/05/26: Minor Navbar Modification
 - Modified Navbar: Switched account and cart button, converted My Orders to a group dropdown(Custom Orders and Orders)
+
+- Added Global Alert UI
