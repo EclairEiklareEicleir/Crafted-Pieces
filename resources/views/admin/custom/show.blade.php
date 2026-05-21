@@ -2,6 +2,33 @@
 
 @section('content')
 
+<style>
+    .custom-thread-scroll {
+        scroll-behavior: smooth;
+        scrollbar-width: thin;
+        scrollbar-color: #b83a68 #fbe8ef;
+    }
+
+    .custom-thread-scroll::-webkit-scrollbar {
+        width: 9px;
+    }
+
+    .custom-thread-scroll::-webkit-scrollbar-track {
+        background: #fbe8ef;
+        border-radius: 999px;
+    }
+
+    .custom-thread-scroll::-webkit-scrollbar-thumb {
+        background: linear-gradient(180deg, #c94a79 0%, #650c2a 100%);
+        border-radius: 999px;
+        border: 2px solid #fbe8ef;
+    }
+
+    .custom-thread-scroll::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(180deg, #b33966 0%, #4f0921 100%);
+    }
+</style>
+
 @php
     $status = strtolower($request->status);
 
@@ -163,35 +190,61 @@
             Conversation
         </h2>
 
-        <div class="mt-6 space-y-4">
+        <div
+            id="admin-message-thread"
+            class="custom-thread-scroll mt-6 rounded-[1.75rem] border border-brand-border/80 bg-brand-light/15 p-4 sm:p-5 {{ $request->messages->isEmpty() ? 'max-h-56' : 'max-h-130' }} overflow-y-auto"
+        >
 
-            @forelse ($request->messages as $message)
+            <div class="space-y-4">
 
-                <div class="rounded-3xl bg-brand-light/35 p-4">
+                @forelse ($request->messages as $message)
+                    @php
+                        $isMine = $message->user_id === auth()->id();
+                        $isCustomer = $message->user_id === $request->user_id;
+                        $senderLabel = $isMine
+                            ? 'You'
+                            : ($isCustomer ? 'Customer' : (($message->user->role ?? null) === 'owner' ? 'Admin Owner' : ($message->user->name ?? 'User')));
+                    @endphp
 
-                    <div class="flex items-center justify-between">
+                    <div class="flex {{ $isMine ? 'justify-end' : 'justify-start' }}">
+                        <article class="max-w-[92%] rounded-[1.75rem] px-4 py-3.5 shadow-[0_12px_30px_-20px_rgba(101,12,42,0.55)] sm:max-w-[80%] md:max-w-[72%] {{ $isMine ? 'rounded-br-md bg-brand-primary text-white' : 'rounded-bl-md border border-[#f0d2de] bg-white text-brand-ink' }}">
 
-                        <p class="font-semibold text-brand-primary">
-                            {{ $message->user->name }}
-                        </p>
+                            <div class="flex items-center justify-between gap-4 text-[11px] {{ $isMine ? 'text-white/75' : 'text-brand-ink/50' }}">
 
-                        <p class="text-xs text-brand-secondary">
-                            {{ $message->created_at->diffForHumans() }}
-                        </p>
+                                <p class="font-semibold uppercase tracking-[0.12em] {{ $isMine ? 'text-white/90' : 'text-brand-primary' }}">
+                                    {{ $senderLabel }}
+                                </p>
 
+                                <p>
+                                    {{ $message->created_at->format('M d, Y h:i A') }}
+                                </p>
+
+                            </div>
+
+                            <p class="mt-2.5 whitespace-pre-wrap wrap-break-word text-sm leading-6 {{ $isMine ? 'text-white/95' : 'text-brand-ink/80' }}">
+                                {{ $message->message }}
+                            </p>
+
+                        </article>
                     </div>
 
-                    <p class="mt-3 text-sm leading-6 text-brand-ink/70">
-                        {{ $message->message }}
-                    </p>
+                @empty
+                    <div class="rounded-4xl border border-dashed border-brand-border bg-brand-light/25 p-8 text-center">
+                        <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-white text-brand-primary ring-1 ring-brand-border">
+                            <span class="text-xl">✦</span>
+                        </div>
 
-                </div>
+                        <p class="mt-4 font-semibold text-brand-primary">
+                            No messages yet
+                        </p>
 
-            @empty
-                <p class="text-sm text-brand-ink/70">
-                    No messages yet.
-                </p>
-            @endforelse
+                        <p class="mt-2 text-sm leading-6 text-brand-ink/65">
+                            No messages yet. Start the conversation by sending a message.
+                        </p>
+                    </div>
+                @endforelse
+
+            </div>
 
         </div>
 
@@ -200,15 +253,19 @@
 
             <form method="POST"
                   action="{{ route('admin.custom.message', $request->id) }}"
-                  class="mt-6">
+                  class="sticky bottom-0 mt-6 rounded-[1.75rem] border border-brand-border bg-brand-light/30 p-4 shadow-sm backdrop-blur sm:p-5">
 
                 @csrf
+
+                <label class="mb-3 block text-sm font-semibold text-brand-primary">
+                    Write a reply
+                </label>
 
                 <textarea
                     name="message"
                     rows="4"
                     placeholder="Reply to customer..."
-                    class="brand-input"
+                    class="brand-input min-h-28 resize-none rounded-3xl border border-[#e7bfce] bg-white/95"
                     required></textarea>
 
                 <button class="mt-4 brand-btn-primary px-6 py-3">
@@ -228,5 +285,17 @@
     </div>
 
 </div>
+
+<script>
+    window.addEventListener('DOMContentLoaded', () => {
+        const thread = document.getElementById('admin-message-thread');
+
+        if (!thread) {
+            return;
+        }
+
+        thread.scrollTop = thread.scrollHeight;
+    });
+</script>
 
 @endsection
