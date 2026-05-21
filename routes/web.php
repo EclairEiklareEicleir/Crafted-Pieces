@@ -233,6 +233,23 @@ Route::post('/login', [AuthController::class, 'login'])->name('login');
 Route::post('/register', [AuthController::class, 'register'])->name('register');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+/*
+|--------------------------------------------------------------------------
+| ERROR PAGES
+|--------------------------------------------------------------------------
+*/
+Route::get('/test-404', function () {
+    abort(404);
+});
+
+Route::get('/test-403', function () {
+    abort(403);
+});
+
+Route::get('/test-500', function () {
+    abort(500);
+});
+
 
 /*
 |--------------------------------------------------------------------------
