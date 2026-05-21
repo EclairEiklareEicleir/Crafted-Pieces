@@ -9,11 +9,24 @@ class HomeController extends Controller
 {
     public function index()
     {
-        $categories = Category::withCount('products')->get()->map(function ($category) {
+        $preferredOrder = [
+            'bouquets' => 0,
+            'accessories' => 1,
+            'plushies' => 2,
+        ];
+
+        $categories = Category::withCount('products')
+            ->get()
+            ->sortBy(function ($category) use ($preferredOrder) {
+                return $preferredOrder[$category->slug] ?? 99;
+            })
+            ->values()
+            ->map(function ($category) {
             return [
                 'name' => $category->name,
                 'slug' => $category->slug,
                 'count' => $category->products_count,
+                'image_url' => $category->image_url,
             ];
         });
 

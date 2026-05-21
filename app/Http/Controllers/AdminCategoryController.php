@@ -5,14 +5,18 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 
 class AdminCategoryController extends Controller
 {
+    private const CATEGORY_IMAGE_MAX_KB = 10240;
+
     public function store(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-        ]);
+        $request->validate(
+            $this->categoryValidationRules(),
+            $this->categoryValidationMessages()
+        );
 
         $slug = Str::slug($request->name);
 
@@ -26,6 +30,9 @@ class AdminCategoryController extends Controller
         Category::create([
             'name' => $request->name,
             'slug' => $slug,
+            'image_path' => $request->hasFile('image')
+                ? $request->file('image')->store('categories', 'public')
+                : null,
         ]);
 
         return redirect()
@@ -35,9 +42,10 @@ class AdminCategoryController extends Controller
 
     public function update(Request $request, Category $category)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-        ]);
+        $request->validate(
+            $this->categoryValidationRules(),
+            $this->categoryValidationMessages()
+        );
 
         $slug = Str::slug($request->name);
 
@@ -52,9 +60,20 @@ class AdminCategoryController extends Controller
             $slug = $originalSlug . '-' . $counter++;
         }
 
+        $imagePath = $category->image_path;
+
+        if ($request->hasFile('image')) {
+            if ($category->image_path) {
+                Storage::disk('public')->delete($category->image_path);
+            }
+
+            $imagePath = $request->file('image')->store('categories', 'public');
+        }
+
         $category->update([
             'name' => $request->name,
             'slug' => $slug,
+            'image_path' => $imagePath,
         ]);
 
         return redirect()
@@ -73,10 +92,32 @@ class AdminCategoryController extends Controller
                 ->with('error', 'Cannot delete category with existing products.');
         }
 
+        if ($category->image_path) {
+            Storage::disk('public')->delete($category->image_path);
+        }
+
         $category->delete();
 
         return redirect()
             ->route('admin.products.index')
             ->with('success', 'Category deleted successfully.');
+    }
+
+    private function categoryValidationRules(): array
+    {
+        return [
+            'name' => 'required|string|max:255',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:' . self::CATEGORY_IMAGE_MAX_KB,
+        ];
+    }
+
+    private function categoryValidationMessages(): array
+    {
+        $maxMb = (int) (self::CATEGORY_IMAGE_MAX_KB / 1024);
+
+        return [
+            'image.mimes' => 'The image must be a file of type: jpg, jpeg, png, webp.',
+            'image.max' => 'The image field must not be greater than ' . $maxMb . ' MB.',
+        ];
     }
 }

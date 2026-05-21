@@ -84,20 +84,32 @@
 
         </div>
 
-        <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        <div class="mt-6 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
 
             @foreach ($categories as $category)
 
                 <a href="{{ route('shop', ['category' => $category['slug']]) }}"
-                   class="rounded-3xl border border-brand-border bg-white p-6 text-center shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
+                   class="group relative overflow-visible rounded-[2rem] border border-[#f3c5d6] bg-gradient-to-br from-[#fff7fb] via-[#fde4ee] to-[#f9d4e0] p-6 pt-16 text-left shadow-[0_18px_50px_rgba(101,12,42,0.10)] transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_28px_70px_rgba(101,12,42,0.18)]">
 
-                    <p class="font-semibold text-brand-primary">
-                        {{ $category['name'] }}
-                    </p>
+                    <div class="relative z-10 max-w-[12rem] pr-20 sm:pr-24">
 
-                    <p class="mt-1 text-xs text-brand-ink/60">
-                        {{ $category['count'] }} items
-                    </p>
+                        <p class="text-lg font-semibold leading-tight text-brand-primary">
+                            {{ $category['name'] }}
+                        </p>
+
+                        <p class="mt-2 text-sm text-brand-ink/60">
+                            {{ $category['count'] }} items
+                        </p>
+
+                    </div>
+
+                    <div class="pointer-events-none absolute right-[-0.5rem] top-[-2rem] z-20 w-28 transition-transform duration-300 group-hover:-rotate-6 group-hover:scale-105 sm:right-[-0.75rem] sm:top-[-2.25rem] sm:w-32">
+
+                        <img src="{{ $category['image_url'] }}"
+                             alt="{{ $category['name'] }}"
+                             class="h-full w-full object-contain drop-shadow-[0_20px_25px_rgba(101,12,42,0.18)]">
+
+                    </div>
 
                 </a>
 
