@@ -1,4 +1,4 @@
-<header class="sticky top-0 z-40 border-b border-brand-border bg-brand-light/95 backdrop-blur">
+<header class="sticky top-0 z-40 border-b border-brand-border/80 bg-brand-surface/78 backdrop-blur-xl">
     <div class="mx-auto max-w-7xl px-4 py-3 sm:px-6 lg:px-8">
 
         @php

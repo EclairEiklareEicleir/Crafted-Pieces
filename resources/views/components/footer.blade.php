@@ -1,4 +1,4 @@
-<footer class="mt-16 border-t border-brand-border bg-white/80">
+<footer class="mt-16 border-t border-brand-border/80 bg-brand-surface/76 backdrop-blur-xl">
 
     <div class="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-4 lg:px-8">
 

@@ -10,7 +10,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="min-h-screen bg-brand-light text-brand-ink antialiased">
+<body class="min-h-screen text-brand-ink antialiased">
 
 @php
     $adminUser = auth()->user();
@@ -18,7 +18,7 @@
 
 <div class="min-h-screen xl:grid xl:grid-cols-[18rem_minmax(0,1fr)]">
 
-    <aside class="hidden border-r border-brand-border bg-white/95 shadow-sm xl:flex xl:flex-col xl:sticky xl:top-0 xl:h-screen">
+    <aside class="hidden border-r border-brand-border/80 bg-white/82 shadow-sm backdrop-blur-xl xl:flex xl:flex-col xl:sticky xl:top-0 xl:h-screen">
         <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 border-b border-brand-border px-5 py-5">
             <img src="{{ asset('images/crafted_pieces_logo.png') }}" alt="Crafted Pieces" class="h-14 w-auto rounded-xl object-contain">
             <div>
@@ -92,7 +92,7 @@
     </aside>
 
     <div class="flex min-w-0 flex-col">
-        <header class="sticky top-0 z-30 border-b border-brand-border bg-brand-light/95 backdrop-blur">
+        <header class="sticky top-0 z-30 border-b border-brand-border/80 bg-brand-surface/78 backdrop-blur-xl">
             <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
                 <div class="flex items-center gap-3">
                     <details class="relative xl:hidden">
@@ -175,6 +175,8 @@
     </div>
 
 </div>
+
+<x-brand-loader />
 
 </body>
 </html>

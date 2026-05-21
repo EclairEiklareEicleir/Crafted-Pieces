@@ -8,7 +8,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="bg-brand-light text-brand-ink antialiased">
+<body class="min-h-screen text-brand-ink antialiased">
 
     {{-- NAVBAR --}}
     <x-navbar />
@@ -21,6 +21,8 @@
 
     {{-- Footer --}}
     <x-footer />
+
+    <x-brand-loader />
 
     {{-- AUTO OPEN MODAL ON ERROR --}}
     @if ($errors->any())
