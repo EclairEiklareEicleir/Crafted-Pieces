@@ -40,11 +40,12 @@
     ];
 
     $isLocked = $order->status === \App\Models\CustomOrderRequest::STATUS_PAID;
-    $hasPaymentWindow = $order->status === \App\Models\CustomOrderRequest::STATUS_AWAITING_PAYMENT;
+    $canPayWithPayMongo = $order->canPayWithPayMongo();
     $isExpired = $order->payment_due_at
         ? \Carbon\Carbon::now()->greaterThan(\Carbon\Carbon::parse($order->payment_due_at))
         : false;
     $quoteAmount = $order->final_price ?? $order->estimated_price ?? ($pricing['base_price'] ?? 0);
+    $paymentStatus = strtolower($order->payment_status ?? 'unpaid');
 @endphp
 
 <section class="relative min-h-screen overflow-hidden">
@@ -90,6 +91,10 @@
                         <div class="flex flex-wrap items-center gap-3">
                             <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold {{ $status['class'] }}">
                                 {{ $status['label'] }}
+                            </span>
+
+                            <span class="inline-flex items-center rounded-full border border-brand-border bg-white px-3 py-1 text-xs font-semibold text-brand-primary">
+                                Payment: {{ ucfirst(str_replace('_', ' ', $paymentStatus)) }}
                             </span>
 
                             @if ($order->created_at)
@@ -218,6 +223,11 @@
                             <dd class="text-right font-semibold text-brand-primary">PHP {{ number_format((float) $quoteAmount, 2) }}</dd>
                         </div>
 
+                        <div class="flex items-start justify-between gap-4 rounded-[1.25rem] bg-brand-light/25 p-4">
+                            <dt class="font-medium text-brand-ink/60">Payment status</dt>
+                            <dd class="text-right font-semibold text-brand-primary">{{ ucfirst(str_replace('_', ' ', $paymentStatus)) }}</dd>
+                        </div>
+
                         @if ($order->quoted_at)
                             <div class="flex items-start justify-between gap-4 rounded-[1.25rem] bg-brand-light/25 p-4">
                                 <dt class="font-medium text-brand-ink/60">Quoted on</dt>
@@ -238,8 +248,7 @@
             </div>
 
             {{-- PAYMENT SECTION --}}
-            @if ($hasPaymentWindow)
-                @if (!$isExpired && $order->paymentIsValid())
+            @if ($canPayWithPayMongo)
                     <div class="mt-6 rounded-4xl border border-brand-secondary/25 bg-brand-light/35 p-5 shadow-sm sm:p-6">
 
                         <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -274,30 +283,74 @@
                             </p>
                         @endif
 
-                        <a
-                            href="{{ route('user.payment', ['type' => 'custom-order', 'id' => $order->id]) }}"
-                            class="brand-btn-primary mt-6 w-full justify-center rounded-full py-3.5 text-base shadow-lg shadow-brand-primary/15 transition hover:-translate-y-0.5 hover:shadow-xl hover:shadow-brand-primary/20 sm:w-auto"
-                        >
-                            Pay Now
-                        </a>
+                        <div class="mt-6 rounded-[1.75rem] border border-pink-200 bg-white p-5 shadow-sm">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span class="rounded-full border border-brand-border bg-brand-light/60 px-3 py-1 text-xs font-semibold text-brand-primary">QRPh</span>
+                                <span class="rounded-full border border-brand-border bg-brand-light/60 px-3 py-1 text-xs font-semibold text-brand-primary">Card</span>
+                                <span class="rounded-full border border-brand-border bg-brand-light/60 px-3 py-1 text-xs font-semibold text-brand-primary">E-Wallet</span>
+                            </div>
+
+                            <p class="mt-4 text-sm leading-6 text-brand-ink/70">
+                                Securely complete your quotation through PayMongo hosted checkout. You can pay with QRPh, card, or supported e-wallets such as GCash.
+                            </p>
+
+                            <form method="POST" action="{{ route('custom-order.paymongo.checkout', $order) }}" class="mt-5">
+                                @csrf
+                                <button type="submit" class="brand-btn-primary w-full justify-center rounded-full py-3.5 text-base shadow-lg shadow-brand-primary/15 transition hover:-translate-y-0.5 hover:shadow-xl hover:shadow-brand-primary/20 sm:w-auto">
+                                    Pay Quotation with PayMongo
+                                </button>
+                            </form>
+                        </div>
 
                     </div>
-                @else
-                    <div class="mt-6 rounded-4xl border border-brand-border bg-white p-5 shadow-sm sm:p-6">
+            @elseif ($order->status === \App\Models\CustomOrderRequest::STATUS_AWAITING_PAYMENT)
+                <div class="mt-6 rounded-4xl border border-brand-border bg-white p-5 shadow-sm sm:p-6">
 
-                        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-brand-secondary">
-                            Payment expired
-                        </p>
+                    <p class="text-xs font-semibold uppercase tracking-[0.18em] text-brand-secondary">
+                        Payment not ready
+                    </p>
 
-                        <h2 class="mt-2 font-display text-2xl font-semibold text-brand-primary">
-                            This request is no longer payable
-                        </h2>
+                    <h2 class="mt-2 font-display text-2xl font-semibold text-brand-primary">
+                        Waiting for admin to finalize your quotation
+                    </h2>
 
-                        <p class="mt-2 max-w-2xl text-sm leading-6 text-brand-ink/70">
-                            This custom order was automatically closed because payment was not completed before the deadline.
-                        </p>
-                    </div>
-                @endif
+                    <p class="mt-2 max-w-2xl text-sm leading-6 text-brand-ink/70">
+                        The order is marked as awaiting payment, but a final quotation or payment deadline is still missing.
+                    </p>
+
+                </div>
+            @elseif ($isExpired)
+                <div class="mt-6 rounded-4xl border border-brand-border bg-white p-5 shadow-sm sm:p-6">
+
+                    <p class="text-xs font-semibold uppercase tracking-[0.18em] text-brand-secondary">
+                        Payment expired
+                    </p>
+
+                    <h2 class="mt-2 font-display text-2xl font-semibold text-brand-primary">
+                        This request is no longer payable
+                    </h2>
+
+                    <p class="mt-2 max-w-2xl text-sm leading-6 text-brand-ink/70">
+                        This custom order was automatically closed because payment was not completed before the deadline.
+                    </p>
+
+                </div>
+            @elseif ($order->status === \App\Models\CustomOrderRequest::STATUS_QUOTED || (float) ($order->final_price ?? 0) > 0)
+                <div class="mt-6 rounded-4xl border border-brand-border bg-white p-5 shadow-sm sm:p-6">
+
+                    <p class="text-xs font-semibold uppercase tracking-[0.18em] text-brand-secondary">
+                        Waiting for approval
+                    </p>
+
+                    <h2 class="mt-2 font-display text-2xl font-semibold text-brand-primary">
+                        Waiting for admin to finalize your quotation
+                    </h2>
+
+                    <p class="mt-2 max-w-2xl text-sm leading-6 text-brand-ink/70">
+                        Your quotation amount has been saved, and payment will open once the owner moves this request to awaiting payment.
+                    </p>
+
+                </div>
             @endif
 
             {{-- PAID STATUS --}}

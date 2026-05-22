@@ -23,6 +23,28 @@
             Payment: {{ $order->payment_method }}
         </p>
 
+        <p class="text-sm text-brand-ink/70">
+            Payment Status: {{ ucfirst(str_replace('_', ' ', $order->payment_status ?? 'unpaid')) }}
+        </p>
+
+        @if ($order->paymongo_checkout_id)
+            <p class="text-sm text-brand-ink/70">
+                PayMongo Checkout ID: {{ $order->paymongo_checkout_id }}
+            </p>
+        @endif
+
+        @if ($order->paymongo_payment_id)
+            <p class="text-sm text-brand-ink/70">
+                PayMongo Payment ID: {{ $order->paymongo_payment_id }}
+            </p>
+        @endif
+
+        @if ($order->paid_at)
+            <p class="text-sm text-brand-ink/70">
+                Paid At: {{ $order->paid_at->format('M d, Y h:i A') }}
+            </p>
+        @endif
+
         <hr class="my-6 border-brand-border">
 
         <h3 class="font-semibold text-brand-primary">Items</h3>

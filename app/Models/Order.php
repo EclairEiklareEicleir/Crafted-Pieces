@@ -12,12 +12,20 @@ class Order extends Model
         'email',
         'shipping_address',
         'payment_method',
+        'payment_status',
+        'paymongo_checkout_id',
+        'paymongo_payment_id',
+        'paid_at',
         'subtotal',
         'platform_fee',
         'delivery_fee',
         'vat_amount',
         'total_amount',
         'status',
+    ];
+
+    protected $casts = [
+        'paid_at' => 'datetime',
     ];
 
     public function items()

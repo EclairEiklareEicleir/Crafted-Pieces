@@ -28,7 +28,7 @@
     <div class="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
 
         {{-- LEFT --}}
-        <div class="rounded-[2rem] border border-brand-border bg-brand-light/35 p-6 shadow-sm">
+        <div class="rounded-4xl border border-brand-border bg-brand-light/35 p-6 shadow-sm">
 
             <p class="text-xs font-semibold uppercase tracking-[0.2em] text-brand-secondary">
                 Checkout
@@ -140,11 +140,41 @@
         </div>
 
         {{-- RIGHT --}}
-        <div class="rounded-[2rem] border border-brand-border bg-brand-light/35 p-6 shadow-sm">
+        <div class="rounded-4xl border border-brand-border bg-brand-light/35 p-6 shadow-sm">
 
-            <h2 class="font-display text-2xl font-semibold text-brand-primary">
-                Payment Detail
-            </h2>
+            <div class="rounded-[1.75rem] border border-brand-border/70 bg-white p-5 shadow-sm">
+                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-brand-secondary">
+                    Secure Payment
+                </p>
+
+                <h2 class="mt-2 font-display text-2xl font-semibold text-brand-primary">
+                    Pay safely with PayMongo
+                </h2>
+
+                <p class="mt-3 text-sm leading-6 text-brand-ink/70">
+                    You’ll be redirected to PayMongo’s hosted checkout to complete your payment.
+                    Choose your preferred method there with no extra setup on this page.
+                </p>
+
+                <div class="mt-5 flex flex-wrap gap-2">
+                    <span class="rounded-full border border-brand-border bg-brand-light/60 px-3 py-1 text-xs font-semibold text-brand-primary">
+                        QRPh
+                    </span>
+                    <span class="rounded-full border border-brand-border bg-brand-light/60 px-3 py-1 text-xs font-semibold text-brand-primary">
+                        Card
+                    </span>
+                    <span class="rounded-full border border-brand-border bg-brand-light/60 px-3 py-1 text-xs font-semibold text-brand-primary">
+                        E-Wallet
+                    </span>
+                </div>
+
+                <div class="mt-5 rounded-2xl border border-pink-200 bg-pink-50/70 p-4 text-sm text-brand-primary">
+                    <p class="font-semibold">Included payment options</p>
+                    <p class="mt-1 leading-6 text-brand-ink/70">
+                        QRPh, card payments, and e-wallets such as GCash are supported through PayMongo.
+                    </p>
+                </div>
+            </div>
 
             @if (!session('checkout_success') && !$cartItems->isEmpty())
 
@@ -167,18 +197,15 @@
                               placeholder="Shipping address"
                               required></textarea>
 
-                        <select class="brand-input"
-                            name="payment_method"
-                            required>
+                    <input type="hidden" name="payment_method" value="PayMongo">
 
-                        <option value="GCash">GCash</option>
-                        <option value="Maya">Maya</option>
+                    <div class="rounded-2xl border border-brand-border bg-white px-4 py-3 text-sm text-brand-ink/70">
+                        Payment method: <span class="font-semibold text-brand-primary">PayMongo</span>
+                    </div>
 
-                    </select>
-
-                        <button type="submit"
+                    <button type="submit"
                             class="brand-btn-primary w-full py-3">
-                        Place Order
+                        Continue to Secure Payment
                     </button>
 
                 </form>

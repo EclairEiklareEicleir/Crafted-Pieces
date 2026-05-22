@@ -149,6 +149,10 @@
                     </th>
 
                     <th class="py-3 pr-4">
+                        Payment
+                    </th>
+
+                    <th class="py-3 pr-4">
                         Actions
                     </th>
 
@@ -191,6 +195,12 @@
                         <td class="py-4 pr-4 text-brand-ink/70">
 
                             {{ ucfirst(str_replace('_', ' ', $order->status)) }}
+
+                        </td>
+
+                        <td class="py-4 pr-4 text-brand-ink/70">
+
+                            {{ ucfirst(str_replace('_', ' ', $order->payment_status ?? 'unpaid')) }}
 
                         </td>
 

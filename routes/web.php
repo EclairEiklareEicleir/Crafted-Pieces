@@ -9,6 +9,8 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ShopController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\CustomOrderPayMongoController;
+use App\Http\Controllers\PayMongoController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\CustomOrderController;
@@ -57,6 +59,15 @@ Route::get('/custom-order/{customOrder}', [CustomOrderController::class, 'show']
 Route::post('/custom-order/{customOrder}/message', [CustomOrderController::class, 'message'])
     ->name('custom-order.message');
 
+Route::post('/custom-order/{customOrder}/paymongo/checkout', [CustomOrderPayMongoController::class, 'checkout'])
+    ->name('custom-order.paymongo.checkout');
+
+Route::get('/custom-order/{customOrder}/paymongo/success', [CustomOrderPayMongoController::class, 'success'])
+    ->name('custom-order.paymongo.success');
+
+Route::get('/custom-order/{customOrder}/paymongo/cancel', [CustomOrderPayMongoController::class, 'cancel'])
+    ->name('custom-order.paymongo.cancel');
+
 /*
 |--------------------------------------------------------------------------
 | CART
@@ -72,6 +83,9 @@ Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout');
 Route::post('/checkout', [CheckoutController::class, 'submit'])->name('checkout.submit');
 
 Route::get('/order/success/{order}', [CheckoutController::class, 'success'])->name('checkout.success');
+Route::get('/checkout/paymongo/success/{order}', [PayMongoController::class, 'success'])->name('checkout.paymongo.success');
+Route::get('/checkout/paymongo/cancel/{order}', [PayMongoController::class, 'cancel'])->name('checkout.paymongo.cancel');
+Route::post('/checkout/paymongo/webhook', [PayMongoController::class, 'webhook'])->name('checkout.paymongo.webhook');
 
 /*
 |--------------------------------------------------------------------------

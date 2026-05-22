@@ -2,7 +2,7 @@
 
 @section('content')
 
-<div class="rounded-[2rem] border border-brand-border bg-white p-6 shadow-sm">
+<div class="rounded-4xl border border-brand-border bg-white p-6 shadow-sm">
 
     <div class="flex items-center justify-between">
         <div>
@@ -43,6 +43,10 @@
 
                         <p class="mt-1 text-xs uppercase tracking-[0.18em] text-brand-secondary">
                             {{ str_replace('_', ' ', $request->status) }}
+                        </p>
+
+                        <p class="mt-1 text-[0.7rem] uppercase tracking-[0.18em] text-brand-ink/45">
+                            Payment: {{ str_replace('_', ' ', $request->payment_status ?? 'unpaid') }}
                         </p>
 
                     </div>

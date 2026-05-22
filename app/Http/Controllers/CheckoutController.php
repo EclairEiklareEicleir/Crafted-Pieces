@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Cart;
 use App\Models\Order;
 use App\Models\CustomOrderRequest;
+use App\Services\PayMongoService;
 use App\Services\PricingService;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -51,41 +53,55 @@ class CheckoutController extends Controller
             'full_name' => 'required|string|max:255',
             'email' => 'required|email|max:255',
             'shipping_address' => 'required|string',
-            'payment_method' => ['required', 'string', 'not_in:Bank Transfer'],
-        ], [
-            'payment_method.not_in' => 'Bank Transfer is no longer accepted. Please select another payment method.',
         ]);
 
         $pricing = (new PricingService)->calculate($cartItems);
+        $paymentMethod = 'PayMongo';
 
-        $order = Order::create([
-            'user_id' => Auth::id(),
-
-            'full_name' => $validated['full_name'],
-            'email' => $validated['email'],
-            'shipping_address' => $validated['shipping_address'],
-            'payment_method' => $validated['payment_method'],
-
-            'subtotal' => $pricing['subtotal'],
-            'platform_fee' => $pricing['platform_fee'],
-            'delivery_fee' => $pricing['delivery_fee'],
-            'vat_amount' => $pricing['vat'],
-            'total_amount' => $pricing['total'],
-
-            'status' => 'pending',
-        ]);
-
-        foreach ($cartItems as $item) {
-            $order->items()->create([
-                'product_id' => $item->product_id,
-                'quantity' => $item->quantity,
-                'price' => $item->price,
+        $order = DB::transaction(function () use ($validated, $pricing, $cartItems, $paymentMethod) {
+            $order = Order::create([
+                'user_id' => Auth::id(),
+                'full_name' => $validated['full_name'],
+                'email' => $validated['email'],
+                'shipping_address' => $validated['shipping_address'],
+            'payment_method' => $paymentMethod,
+                'payment_status' => 'pending',
+                'subtotal' => $pricing['subtotal'],
+                'platform_fee' => $pricing['platform_fee'],
+                'delivery_fee' => $pricing['delivery_fee'],
+                'vat_amount' => $pricing['vat'],
+                'total_amount' => $pricing['total'],
+                'status' => 'pending',
             ]);
+
+            foreach ($cartItems as $item) {
+                $order->items()->create([
+                    'product_id' => $item->product_id,
+                    'quantity' => $item->quantity,
+                    'price' => $item->price,
+                ]);
+            }
+
+            return $order->load('items.product');
+        });
+
+        try {
+            $payMongoSession = app(PayMongoService::class)->createCheckoutSession($order);
+
+            $order->update([
+                'paymongo_checkout_id' => $payMongoSession['checkout_session_id'],
+            ]);
+
+            $cart->items()->delete();
+
+            return redirect()->away($payMongoSession['checkout_url']);
+        } catch (\Throwable $e) {
+            report($e);
+
+            return back()
+                ->withInput()
+                ->withErrors(['checkout' => 'Unable to start PayMongo checkout right now. Please try again.']);
         }
-
-        $cart->items()->delete();
-
-        return redirect()->route('checkout.success', $order);
     }
 
     public function success(Order $order)

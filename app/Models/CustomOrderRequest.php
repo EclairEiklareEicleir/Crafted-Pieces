@@ -25,12 +25,23 @@ class CustomOrderRequest extends Model
         'final_price',
         'admin_notes',
 
+        'payment_status',
+        'payment_method',
+        'paymongo_checkout_id',
+        'paymongo_payment_id',
+
         'status',
         'quoted_at',
         'paid_at',
 
         // ✅ ADD THIS FOR PAYMENT DEADLINE SYSTEM
         'payment_due_at',
+    ];
+
+    protected $casts = [
+        'quoted_at' => 'datetime',
+        'paid_at' => 'datetime',
+        'payment_due_at' => 'datetime',
     ];
 
     /*
@@ -111,8 +122,16 @@ class CustomOrderRequest extends Model
 
     public function paymentIsValid(): bool
     {
+        return $this->canPayWithPayMongo();
+    }
+
+    public function canPayWithPayMongo(): bool
+    {
         return $this->status === self::STATUS_AWAITING_PAYMENT
-            && !$this->paymentIsExpired();
+            && (float) ($this->final_price ?? 0) > 0
+            && $this->payment_status !== 'paid'
+            && ! empty($this->payment_due_at)
+            && ! $this->paymentIsExpired();
     }
 
     /*

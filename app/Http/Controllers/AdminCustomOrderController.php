@@ -6,6 +6,7 @@ use App\Models\CustomOrderMessage;
 use App\Models\CustomOrderRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class AdminCustomOrderController extends Controller
 {
@@ -70,6 +71,7 @@ class AdminCustomOrderController extends Controller
         $customOrder->update([
             'final_price' => $validated['final_price'],
             'admin_notes' => $validated['admin_notes'],
+            'quoted_at' => now(),
 
             // quotation stage
             'status' => CustomOrderRequest::STATUS_QUOTED,
@@ -92,7 +94,7 @@ class AdminCustomOrderController extends Controller
     */
     public function accept(CustomOrderRequest $customOrder)
     {
-        logger()->info('ADMIN ACCEPT HIT', [
+        Log::info('ADMIN ACCEPT HIT', [
             'id' => $customOrder->id,
             'status' => $customOrder->status,
         ]);
@@ -107,11 +109,15 @@ class AdminCustomOrderController extends Controller
             CustomOrderRequest::STATUS_QUOTED,
         ])) {
 
-            logger()->warning('ACCEPT BLOCKED', [
+            Log::warning('ACCEPT BLOCKED', [
                 'status' => $customOrder->status
             ]);
 
             abort(403, 'Order cannot be accepted at this stage.');
+        }
+
+        if ((float) ($customOrder->final_price ?? 0) <= 0) {
+            abort(422, 'Please send a valid quotation before moving this request to payment.');
         }
 
         /*
@@ -126,6 +132,10 @@ class AdminCustomOrderController extends Controller
 
             // payment deadline (3 days)
             'payment_due_at' => now()->addDays(3),
+
+            'payment_status' => $customOrder->payment_status === 'paid'
+                ? CustomOrderRequest::STATUS_PAID
+                : ($customOrder->payment_status ?: 'unpaid'),
         ]);
 
         /*
@@ -141,7 +151,7 @@ class AdminCustomOrderController extends Controller
                 'Please complete payment within 3 days.',
         ]);
 
-        logger()->info('ORDER MOVED TO PAYMENT STAGE');
+        Log::info('ORDER MOVED TO PAYMENT STAGE');
 
         return back()->with(
             'success',

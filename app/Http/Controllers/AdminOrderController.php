@@ -108,6 +108,7 @@ class AdminOrderController extends Controller
         ]);
 
         Order::create($validated + [
+            'payment_status' => 'pending',
             'status' => 'pending',
         ]);
 

@@ -12,6 +12,8 @@
         \App\Models\CustomOrderRequest::STATUS_IN_PROGRESS,
         \App\Models\CustomOrderRequest::STATUS_COMPLETED,
     ]);
+    $canMoveToPayment = (float) ($request->final_price ?? 0) > 0
+        && in_array($status, ['pending', 'quoted']);
 @endphp
 
 <div class="grid gap-6 lg:grid-cols-[0.8fr_1.2fr]">
@@ -35,6 +37,8 @@
                 <p><strong>Email:</strong> {{ $request->email }}</p>
                 <p><strong>Theme:</strong> {{ $request->design_theme }}</p>
                 <p><strong>Preferred Size:</strong> {{ $request->preferred_size }}</p>
+                <p><strong>Payment Method:</strong> {{ $request->payment_method ?? '—' }}</p>
+                <p><strong>Payment Status:</strong> {{ ucfirst(str_replace('_', ' ', $request->payment_status ?? 'unpaid')) }}</p>
 
                 <p>
                     <strong>Status:</strong>
@@ -53,6 +57,18 @@
                     </p>
                 @endif
 
+                @if ($request->paymongo_checkout_id)
+                    <p><strong>PayMongo Checkout ID:</strong> {{ $request->paymongo_checkout_id }}</p>
+                @endif
+
+                @if ($request->paymongo_payment_id)
+                    <p><strong>PayMongo Payment ID:</strong> {{ $request->paymongo_payment_id }}</p>
+                @endif
+
+                @if ($request->paid_at)
+                    <p><strong>Paid At:</strong> {{ $request->paid_at->format('M d, Y h:i A') }}</p>
+                @endif
+
             </div>
 
             <div class="mt-6 rounded-3xl bg-brand-light/35 p-4 text-sm text-brand-ink/70">
@@ -60,7 +76,7 @@
             </div>
 
             {{-- FLOW ACTIONS --}}
-            @if (!$isLocked && in_array($status, ['pending', 'awaiting_confirmation', 'quoted']))
+            @if (!$isLocked && $canMoveToPayment)
 
                 <div class="mt-6 rounded-2xl border border-brand-border bg-brand-light/35 p-4">
 
@@ -94,6 +110,12 @@
 
                     </div>
 
+                </div>
+
+            @elseif (!$isLocked)
+
+                <div class="mt-6 rounded-2xl border border-brand-border bg-brand-light/25 p-4 text-sm text-brand-ink/60">
+                    Send and save a valid quotation first, then accept it to open the payment window.
                 </div>
 
             @else
