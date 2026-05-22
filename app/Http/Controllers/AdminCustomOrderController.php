@@ -6,6 +6,8 @@ use App\Models\CustomOrderMessage;
 use App\Models\CustomOrderRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\CustomOrderQuotationMail;
 
 class AdminCustomOrderController extends Controller
 {
@@ -127,6 +129,9 @@ class AdminCustomOrderController extends Controller
             // payment deadline (3 days)
             'payment_due_at' => now()->addDays(3),
         ]);
+
+        Mail::to($customOrder->email)
+            ->send(new CustomOrderQuotationMail($customOrder));
 
         /*
         |--------------------------------------------------------------------------

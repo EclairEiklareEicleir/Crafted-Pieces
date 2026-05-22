@@ -282,3 +282,22 @@ Route::get('/test-success-ui', function () {
     return redirect()->route('home')
         ->with('success', 'This is a TEST success message for global alert UI');
 });
+
+use Illuminate\Support\Facades\Mail;
+
+Route::get('/test-mail', function () {
+
+    Mail::raw('SMTP is working successfully.', function ($message) {
+
+        $message->to('demoniczeno@gmail.com')
+                ->subject('Crafted Pieces SMTP Test')
+                ->from(
+                    env('MAIL_FROM_ADDRESS'),
+                    env('MAIL_FROM_NAME')
+                );
+
+    });
+
+    return 'Mail sent successfully.';
+
+});

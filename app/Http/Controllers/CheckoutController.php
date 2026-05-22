@@ -9,6 +9,9 @@ use App\Services\PricingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\OrderReceiptMail;
+use App\Mail\CustomOrderCreatedMail;
 
 class CheckoutController extends Controller
 {
@@ -85,6 +88,10 @@ class CheckoutController extends Controller
 
         $cart->items()->delete();
 
+        Mail::to($order->email)->send(
+            new OrderReceiptMail($order)
+        );
+
         return redirect()->route('checkout.success', $order);
     }
 
@@ -119,33 +126,46 @@ class CheckoutController extends Controller
         return view('user.payment', compact('type', 'item', 'pricing'));
     }
 
-    public function processPayment(Request $request, $type, $id)
-    {
-        $item = $this->resolvePaymentItem($type, $id);
+public function processPayment(Request $request, $type, $id)
+{
+    $item = $this->resolvePaymentItem($type, $id);
 
-        if ($type === 'custom-order' && $item->paymentIsExpired()) {
-            $item->update(['status' => CustomOrderRequest::STATUS_REJECTED]);
-            return back()->withErrors(['payment' => 'Payment expired']);
-        }
+    if ($type === 'custom-order' && $item->paymentIsExpired()) {
+        $item->update(['status' => CustomOrderRequest::STATUS_REJECTED]);
 
-        if ($item->user_id !== Auth::id()) {
-            abort(403);
-        }
-
-        $item->update([
-            'status' => $type === 'custom-order'
-                ? CustomOrderRequest::STATUS_PAID
-                : 'paid',
-            'paid_at' => now(),
+        return back()->withErrors([
+            'payment' => 'Payment expired'
         ]);
-
-        return redirect()->route(
-            $type === 'custom-order'
-                ? 'custom-order.show'
-                : 'checkout.success',
-            $item
-        )->with('success', 'Payment successful.');
     }
+
+    if ($item->user_id !== Auth::id()) {
+        abort(403);
+    }
+
+    $item->update([
+        'status' => $type === 'custom-order'
+            ? CustomOrderRequest::STATUS_PAID
+            : 'paid',
+
+        'paid_at' => now(),
+    ]);
+
+    if ($type === 'custom-order') {
+
+        Mail::to($item->email)
+            ->send(new CustomOrderCreatedMail($item));
+
+    }
+
+    return redirect()->route(
+        $type === 'custom-order'
+            ? 'custom-order.show'
+            : 'checkout.success',
+
+        $item
+
+    )->with('success', 'Payment successful.');
+}
 
     /*
     |--------------------------------------------------------------------------

@@ -167,3 +167,6 @@
 - Added Password Update in Accounts
 - Modified Reviews: Account holders can now leave reviews and Guest can view reviews
 - Added ReviewSeeder to fill in reviews
+
+## 22/05/26: Email SMTP
+- Added Three Mailing Services: For Quotation, Ordering and Admin Final Pricing
