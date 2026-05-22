@@ -21,7 +21,15 @@
 
 <section class="mx-auto max-w-4xl px-4 py-14">
 
-    <div class="rounded-[2rem] border border-[#eadfd7] bg-white p-6 shadow-sm">
+    <div class="mb-6 flex items-center justify-between gap-3">
+        <x-back-button href="{{ route('orders') }}" label="Back to Orders" />
+
+        <a href="{{ route('orders.receipt.download', $order->id) }}" class="brand-btn-primary px-5 py-3 text-sm">
+            Download Receipt
+        </a>
+    </div>
+
+    <div class="rounded-4xl border border-brand-border bg-white p-6 shadow-sm">
 
         {{-- HEADER --}}
         <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
@@ -36,9 +44,7 @@
                 </p>
             </div>
 
-            <div class="text-sm font-semibold text-[#a86b57]">
-                Status: {{ ucfirst($order->status) }}
-            </div>
+            <x-status-badge :status="$order->status" context="order" />
 
         </div>
 
@@ -57,15 +63,21 @@
 
             @foreach ($order->items as $item)
 
-                @php $product = $item->product; @endphp
+                @php
+                    $product = $item->product;
+                    $itemImage = $item->productVariant?->floating_image_url
+                        ?: \App\Support\ProductImage::floatingUrl($item->variant_image_path)
+                        ?: ($product?->floating_image_url ?? 'https://placehold.co/600x600/png');
+                @endphp
 
                 <div class="flex items-center justify-between py-5">
 
                     <div class="flex items-center gap-4">
 
                         <img
-                            src="{{ $product?->image ? Storage::url($product->image) : 'https://placehold.co/600x600/png' }}"
-                            class="h-16 w-16 rounded-xl object-cover border border-[#eadfd7]"
+                            src="{{ $itemImage }}"
+                            class="h-16 w-16 rounded-xl border border-brand-border bg-brand-surface object-contain p-1.5"
+                            alt="{{ $product?->name ?? 'Product image' }}"
                         >
 
                         <div>
@@ -77,6 +89,12 @@
                             <p class="text-sm text-[#6f5a51]">
                                 Qty: {{ $item->quantity }}
                             </p>
+
+                            @if ($item->yarnColor?->name || $item->variant_name)
+                                <p class="text-xs text-[#8d5848]">
+                                    Yarn color: {{ $item->yarnColor?->name ?? $item->variant_name }}
+                                </p>
+                            @endif
 
                             <p class="text-xs text-[#8d5848]">
                                 PHP {{ number_format($item->price, 2) }} each
@@ -137,17 +155,20 @@
         </div>
 
         {{-- ACTIONS --}}
-        <div class="mt-8 flex items-center justify-between">
+        <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 
-            <a href="{{ route('orders') }}"
-               class="rounded-full border border-[#eadfd7] bg-white px-5 py-2 text-sm font-semibold text-[#5d342b]">
-                Back to Orders
-            </a>
+            <p class="text-sm text-brand-ink/60">
+                Keep this receipt for your records.
+            </p>
 
-            <a href="{{ route('orders.receipt.download', $order->id) }}"
-               class="rounded-full bg-[#5d342b] px-5 py-2 text-sm font-semibold text-white">
-                Download Receipt
-            </a>
+            <div class="flex flex-wrap gap-3">
+                <x-back-button href="{{ route('orders') }}" label="Back to Orders" />
+
+                <a href="{{ route('orders.receipt.download', $order->id) }}"
+                   class="brand-btn-primary px-5 py-3 text-sm">
+                    Download Receipt
+                </a>
+            </div>
 
         </div>
 

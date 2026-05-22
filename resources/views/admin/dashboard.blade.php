@@ -54,7 +54,7 @@
     <div class="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
 
         {{-- REVENUE --}}
-        <div class="rounded-[2rem] border border-[#eadfd7] bg-gradient-to-br from-white to-[#fcfaf8] p-6 shadow-sm">
+        <div class="rounded-4xl border border-[#eadfd7] bg-linear-to-br from-white to-[#fcfaf8] p-6 shadow-sm">
 
             <div class="flex items-center justify-between">
 
@@ -79,7 +79,7 @@
         </div>
 
         {{-- TOTAL ORDERS --}}
-        <div class="rounded-[2rem] border border-[#eadfd7] bg-gradient-to-br from-white to-[#fcfaf8] p-6 shadow-sm">
+        <div class="rounded-4xl border border-[#eadfd7] bg-linear-to-br from-white to-[#fcfaf8] p-6 shadow-sm">
 
             <div class="flex items-center justify-between">
 
@@ -104,7 +104,7 @@
         </div>
 
         {{-- COMMISSIONS --}}
-        <div class="rounded-[2rem] border border-[#eadfd7] bg-gradient-to-br from-white to-[#fcfaf8] p-6 shadow-sm">
+        <div class="rounded-4xl border border-[#eadfd7] bg-linear-to-br from-white to-[#fcfaf8] p-6 shadow-sm">
 
             <div class="flex items-center justify-between">
 
@@ -129,7 +129,7 @@
         </div>
 
         {{-- CONFIRMED --}}
-        <div class="rounded-[2rem] border border-[#eadfd7] bg-gradient-to-br from-white to-[#fcfaf8] p-6 shadow-sm">
+        <div class="rounded-4xl border border-[#eadfd7] bg-linear-to-br from-white to-[#fcfaf8] p-6 shadow-sm">
 
             <div class="flex items-center justify-between">
 
@@ -159,7 +159,7 @@
     <div class="grid gap-5 lg:grid-cols-3">
 
         {{-- TOP PRODUCT --}}
-        <div class="rounded-[2rem] border border-[#eadfd7] bg-white p-6 shadow-sm">
+        <div class="rounded-4xl border border-[#eadfd7] bg-white p-6 shadow-sm">
 
             <p class="text-sm text-[#8f7a70]">
                 Most Popular Product
@@ -176,7 +176,7 @@
         </div>
 
         {{-- MONTHLY SALES --}}
-        <div class="rounded-[2rem] border border-[#eadfd7] bg-white p-6 shadow-sm">
+        <div class="rounded-4xl border border-[#eadfd7] bg-white p-6 shadow-sm">
 
             <p class="text-sm text-[#8f7a70]">
                 Monthly Revenue
@@ -193,7 +193,7 @@
         </div>
 
         {{-- COMPLETION RATE --}}
-        <div class="rounded-[2rem] border border-[#eadfd7] bg-white p-6 shadow-sm">
+        <div class="rounded-4xl border border-[#eadfd7] bg-white p-6 shadow-sm">
 
             <p class="text-sm text-[#8f7a70]">
                 Completion Rate
@@ -215,7 +215,7 @@
     <div class="grid gap-5 lg:grid-cols-3">
 
         {{-- ORDER INSIGHTS --}}
-        <div class="rounded-[2rem] border border-[#eadfd7] bg-white p-6 shadow-sm">
+        <div class="rounded-4xl border border-[#eadfd7] bg-white p-6 shadow-sm">
 
             <h2 class="font-display text-2xl font-semibold text-[#4d3028]">
                 Order Insights
@@ -248,7 +248,7 @@
         </div>
 
         {{-- COMMISSION INSIGHTS --}}
-        <div class="rounded-[2rem] border border-[#eadfd7] bg-white p-6 shadow-sm">
+        <div class="rounded-4xl border border-[#eadfd7] bg-white p-6 shadow-sm">
 
             <h2 class="font-display text-2xl font-semibold text-[#4d3028]">
                 Commission Insights
@@ -281,7 +281,7 @@
         </div>
 
         {{-- QUICK ACTIONS --}}
-        <div class="rounded-[2rem] border border-[#eadfd7] bg-white p-6 shadow-sm">
+        <div class="rounded-4xl border border-[#eadfd7] bg-white p-6 shadow-sm">
 
             <h2 class="font-display text-2xl font-semibold text-[#4d3028]">
                 Quick Actions
@@ -314,7 +314,7 @@
     <div class="grid gap-6 lg:grid-cols-2">
 
         {{-- RECENT ORDERS --}}
-        <div class="rounded-[2rem] border border-[#eadfd7] bg-white p-6 shadow-sm">
+        <div class="rounded-4xl border border-[#eadfd7] bg-white p-6 shadow-sm">
 
             <div class="flex items-center justify-between">
 
@@ -352,9 +352,9 @@
                                     PHP {{ number_format($order->total_amount, 2) }}
                                 </p>
 
-                                <p class="mt-1 text-xs text-[#8f6a5d]">
-                                    {{ ucfirst(str_replace('_', ' ', $order->status)) }}
-                                </p>
+                                <div class="mt-2 flex justify-end">
+                                    <x-status-badge :status="$order->status" context="order" />
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -370,7 +370,7 @@
         </div>
 
         {{-- RECENT COMMISSIONS --}}
-        <div class="rounded-[2rem] border border-[#eadfd7] bg-white p-6 shadow-sm">
+        <div class="rounded-4xl border border-[#eadfd7] bg-white p-6 shadow-sm">
 
             <div class="flex items-center justify-between">
 
@@ -409,9 +409,9 @@
                                     PHP {{ number_format($request->estimated_price, 2) }}
                                 </p>
 
-                                <p class="mt-1 text-xs text-[#8f6a5d]">
-                                    {{ ucfirst(str_replace('_', ' ', $request->status)) }}
-                                </p>
+                                <div class="mt-2 flex justify-end">
+                                    <x-status-badge :status="$request->status" context="custom" />
+                                </div>
                             </div>
                         </div>
 

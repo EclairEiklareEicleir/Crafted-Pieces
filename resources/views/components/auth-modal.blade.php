@@ -1,27 +1,34 @@
 <div id="auth-modal"
-     class="hidden fixed inset-0 z-50 flex items-center justify-center">
+     data-auth-modal
+     class="hidden fixed inset-0 z-50 items-center justify-center px-4 py-6 sm:px-6">
 
-    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+    <button type="button"
+            class="absolute inset-0 cursor-default bg-black/60 backdrop-blur-sm"
+            aria-label="Close authentication modal"
+            onclick="closeAuthModal()"></button>
 
-    <div class="relative w-full max-w-md rounded-[2rem] border border-brand-border bg-white p-8 shadow-2xl shadow-brand-primary/10">
+    <div class="relative w-full max-w-xl overflow-hidden rounded-4xl border border-brand-border bg-white shadow-2xl shadow-brand-primary/10">
 
-        <div class="mb-6 flex items-center gap-3 pr-10">
-            <img src="{{ asset('images/crafted_pieces_logo.png') }}" alt="Crafted Pieces" class="h-12 w-auto rounded-xl object-contain">
-            <div>
-                <p class="text-xs font-semibold uppercase tracking-[0.22em] text-brand-secondary">Crafted Pieces</p>
-                <p class="text-sm text-brand-ink/70">Access your account</p>
+        <div class="border-b border-brand-border bg-brand-surface px-6 py-5 sm:px-8">
+            <div class="flex items-center gap-3 pr-10">
+                <img src="{{ asset('images/crafted_pieces_logo.png') }}" alt="Crafted Pieces" class="h-12 w-auto rounded-xl object-contain">
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-[0.22em] text-brand-secondary">Crafted Pieces</p>
+                    <p class="text-sm text-brand-ink/70">Access your account</p>
+                </div>
             </div>
         </div>
 
         <button type="button"
                 onclick="closeAuthModal()"
-                class="absolute right-4 top-4 text-2xl font-bold text-brand-ink/60 transition hover:text-brand-primary">
-            ×
+                class="absolute right-4 top-4 rounded-full border border-brand-border bg-white/90 p-2 text-brand-ink/60 shadow-sm transition hover:border-brand-secondary hover:text-brand-primary">
+            <span class="sr-only">Close authentication modal</span>
+            <span aria-hidden="true" class="text-2xl leading-none">×</span>
         </button>
 
         {{-- ================= LOGIN ================= --}}
         <form id="login-form"
-              class="auth-form space-y-5 opacity-100 translate-x-0 transition-all duration-300 ease-in-out"
+              class="auth-form space-y-5 p-6 opacity-100 translate-x-0 transition-all duration-300 ease-in-out sm:p-8"
               method="POST"
               action="{{ route('login') }}">
 
@@ -80,7 +87,7 @@
 
         {{-- ================= REGISTER ================= --}}
         <form id="register-form"
-              class="auth-form hidden space-y-5 opacity-0 translate-x-6 transition-all duration-300 ease-in-out"
+              class="auth-form hidden space-y-5 p-6 opacity-0 translate-x-6 transition-all duration-300 ease-in-out sm:p-8"
               method="POST"
               action="{{ route('register') }}">
 
@@ -148,9 +155,9 @@
                 <input type="checkbox" id="privacy-check" class="mt-1 h-4 w-4">
                 <span>
                     I agree to the
-                    <a href="{{ route('privacy.policy') }}" class="font-semibold text-brand-secondary hover:text-brand-primary hover:underline">Privacy Policy</a>
+                    <button type="button" data-legal-modal-open="privacy" class="font-semibold text-brand-secondary hover:text-brand-primary hover:underline">Privacy Policy</button>
                     and
-                    <a href="{{ route('terms.service') }}" class="font-semibold text-brand-secondary hover:text-brand-primary hover:underline">Terms of Service</a>.
+                    <button type="button" data-legal-modal-open="terms" class="font-semibold text-brand-secondary hover:text-brand-primary hover:underline">Terms of Service</button>.
                 </span>
             </label>
 
@@ -170,6 +177,9 @@
                 </button>
             </p>
         </form>
+
+        <x-legal-modal type="privacy" />
+        <x-legal-modal type="terms" />
 
     </div>
 </div>

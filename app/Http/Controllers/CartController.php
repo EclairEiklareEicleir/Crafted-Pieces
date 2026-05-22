@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Product;
+use App\Models\YarnColor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -18,8 +19,11 @@ class CartController extends Controller
             ]);
         }
 
+        /** @var \Illuminate\Session\Store $session */
+        $session = session();
+
         return Cart::firstOrCreate([
-            'session_id' => session()->getId()
+            'session_id' => $session->getId() ?: $session->token() ?: uniqid('session_', true)
         ]);
     }
 
@@ -28,38 +32,68 @@ class CartController extends Controller
         $cart = $this->getCart();
 
         $cartItems = $cart->items()
-            ->with('product')
-            ->get()
-            ->map(function ($item) {
-                return (object) [
-                    'id' => $item->id,
-                    'name' => $item->product?->name ?? 'Deleted Product',
-                    'image' => $item->product?->image,
-                    'price' => $item->price,
-                    'quantity' => $item->quantity,
-                    'slug' => $item->product?->slug,
-                ];
-            });
+            ->with(['product', 'productVariant', 'yarnColor'])
+            ->latest()
+            ->get();
 
         return view('user.cart', compact('cartItems'));
     }
 
-    public function add($slug)
+    public function add(Request $request, $slug)
     {
-        $cart = $this->getCart();
+        $request->validate([
+            'yarn_color_id' => 'required|integer|exists:yarn_colors,id',
+            'product_variant_id' => 'nullable|integer|exists:product_variants,id',
+            'quantity' => 'nullable|integer|min:1|max:99',
+        ]);
 
-        $product = Product::where('slug', $slug)->firstOrFail();
+        $cart = $this->getCart();
+        $quantity = (int) $request->input('quantity', 1);
+
+        $product = Product::with(['variants' => function ($query) {
+            $query->orderBy('sort_order')->orderBy('id');
+        }, 'defaultVariant', 'yarnColors'])->where('slug', $slug)->firstOrFail();
+
+        $availableYarnColors = YarnColor::activeOptionsForProduct($product);
+        $yarnColor = $availableYarnColors->firstWhere('id', (int) $request->yarn_color_id);
+
+        if (! $yarnColor) {
+            return back()->withErrors(['yarn_color_id' => 'Please choose an available yarn color for this product.']);
+        }
+
+        $variant = $product->variantForYarnColor($yarnColor);
+
+        if ($request->filled('product_variant_id')) {
+            $requestedVariant = $product->variants->firstWhere('id', (int) $request->product_variant_id);
+
+            if ($requestedVariant && $product->variantMatchesYarnColor($requestedVariant, $yarnColor)) {
+                $variant = $requestedVariant;
+            }
+        }
 
         $item = $cart->items()
             ->where('product_id', $product->id)
+            ->where('yarn_color_id', $yarnColor->id)
             ->first();
 
         if ($item) {
-            $item->increment('quantity');
+            $item->increment('quantity', $quantity);
+
+            if ($variant && $item->product_variant_id !== $variant->id) {
+                $item->update([
+                    'product_variant_id' => $variant->id,
+                    'variant_image_path' => $variant->image_path,
+                ]);
+            }
         } else {
             $cart->items()->create([
                 'product_id' => $product->id,
-                'quantity' => 1,
+                'product_variant_id' => $variant?->id,
+                'yarn_color_id' => $yarnColor->id,
+                'variant_name' => $yarnColor->name,
+                'variant_hex_color' => $yarnColor->hex_color,
+                'variant_image_path' => $variant?->image_path ?? $product->image,
+                'quantity' => $quantity,
                 'price' => $product->price,
             ]);
         }

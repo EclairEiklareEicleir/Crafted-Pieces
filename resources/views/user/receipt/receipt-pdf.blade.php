@@ -1,3 +1,9 @@
+@php
+    $logoPath = public_path('images/crafted_pieces_logo.png');
+    $logoData = file_exists($logoPath)
+        ? 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath))
+        : null;
+@endphp
 <!DOCTYPE html>
 <html>
 <head>
@@ -8,41 +14,85 @@
         body {
             font-family: DejaVu Sans, sans-serif;
             font-size: 12px;
-            color: #4a3b36;
+            color: #4d3028;
+            background: #fff7fb;
         }
+
+        .card {
+            border: 1px solid #f1d4de;
+            border-radius: 24px;
+            padding: 28px;
+            background: #ffffff;
+        }
+
         .header {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 22px;
         }
+
+        .logo {
+            width: 64px;
+            height: 64px;
+            object-fit: contain;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
         .brand {
             font-size: 18px;
             font-weight: bold;
         }
+
         .muted {
             color: #7a6a63;
             font-size: 11px;
         }
-        .box {
-            border: 1px solid #e5d7cf;
-            padding: 10px;
-            margin-bottom: 15px;
+
+        .panel {
+            border: 1px solid #f1d4de;
+            border-radius: 18px;
+            padding: 14px;
+            margin-bottom: 16px;
+            background: #fff8fb;
         }
-        table {
+
+        .grid {
             width: 100%;
             border-collapse: collapse;
             margin-top: 10px;
         }
-        th, td {
-            border-bottom: 1px solid #eee;
-            padding: 8px;
+
+        .grid th,
+        .grid td {
+            border-bottom: 1px solid #eee2e7;
+            padding: 10px 8px;
             text-align: left;
         }
-        th {
-            background: #f8f4f2;
+
+        .grid th {
+            background: #fdf3f7;
+            color: #8f3153;
+            font-size: 10px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
         }
+
         .right {
             text-align: right;
         }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 999px;
+            font-size: 10px;
+            font-weight: bold;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            background: #fce6ed;
+            color: #8f3153;
+        }
+
         .total {
             font-size: 14px;
             font-weight: bold;
@@ -52,83 +102,97 @@
 
 <body>
 
-<div class="header">
-    <div class="brand">the_crafted_pieces</div>
-    <div class="muted">Official Order Receipt</div>
-</div>
+<div class="card">
+    <div class="header">
+        @if ($logoData)
+            <img src="{{ $logoData }}" class="logo" alt="Crafted Pieces">
+        @endif
 
-<div class="box">
-    <p><strong>Order ID:</strong> #{{ $order->id }}</p>
-    <p><strong>Date:</strong> {{ $order->created_at->format('M d, Y - h:i A') }}</p>
-    <p><strong>Status:</strong> {{ ucfirst($order->status) }}</p>
-    <p><strong>Customer:</strong> {{ $order->full_name }}</p>
-    <p><strong>Email:</strong> {{ $order->email }}</p>
-</div>
+        <div class="brand">Crafted Pieces</div>
+        <div class="muted">Official Order Receipt</div>
+    </div>
 
-<table>
-    <thead>
-        <tr>
-            <th>Item</th>
-            <th class="right">Qty</th>
-            <th class="right">Price</th>
-            <th class="right">Total</th>
-        </tr>
-    </thead>
+    <div class="panel">
+        <table class="grid" style="margin-top:0;">
+            <tbody>
+                <tr>
+                    <td><strong>Order ID:</strong> #{{ $order->id }}</td>
+                    <td class="right"><strong>Date:</strong> {{ $order->created_at->format('M d, Y - h:i A') }}</td>
+                </tr>
+                <tr>
+                    <td><strong>Customer:</strong> {{ $order->full_name }}</td>
+                    <td class="right"><strong>Email:</strong> {{ $order->email }}</td>
+                </tr>
+                <tr>
+                    <td><strong>Payment Method:</strong> {{ $order->payment_method }}</td>
+                    <td class="right"><span class="badge">{{ ucfirst(str_replace('_', ' ', $order->status)) }}</span></td>
+                </tr>
+                @if ($order->shipping_address)
+                    <tr>
+                        <td colspan="2"><strong>Shipping:</strong> {{ $order->shipping_address }}</td>
+                    </tr>
+                @endif
+            </tbody>
+        </table>
+    </div>
 
-    <tbody>
-        @foreach ($order->items as $item)
+    <table class="grid">
+        <thead>
             <tr>
-                <td>{{ $item->product->name }}</td>
-                <td class="right">{{ $item->quantity }}</td>
-                <td class="right">PHP {{ number_format($item->price, 2) }}</td>
-                <td class="right">
-                    PHP {{ number_format($item->quantity * $item->price, 2) }}
-                </td>
+                <th>Item</th>
+                <th class="right">Qty</th>
+                <th class="right">Price</th>
+                <th class="right">Total</th>
             </tr>
-        @endforeach
-    </tbody>
-</table>
+        </thead>
 
-{{-- BREAKDOWN --}}
-<div class="box" style="margin-top:15px;">
-
-    <table style="margin-top:0;">
         <tbody>
-
-            <tr>
-                <td>Subtotal</td>
-                <td class="right">PHP {{ number_format($order->subtotal, 2) }}</td>
-            </tr>
-
-            <tr>
-                <td>Platform Fee</td>
-                <td class="right">PHP {{ number_format($order->platform_fee, 2) }}</td>
-            </tr>
-
-            <tr>
-                <td>Delivery Fee</td>
-                <td class="right">PHP {{ number_format($order->delivery_fee, 2) }}</td>
-            </tr>
-
-            <tr>
-                <td>VAT</td>
-                <td class="right">PHP {{ number_format($order->vat_amount, 2) }}</td>
-            </tr>
-
-            <tr>
-                <td class="total">Total Paid</td>
-                <td class="right total">
-                    PHP {{ number_format($order->total_amount, 2) }}
-                </td>
-            </tr>
-
+            @foreach ($order->items as $item)
+                <tr>
+                    <td>
+                        {{ $item->product->name ?? 'Deleted Product' }}
+                        @if ($item->yarnColor?->name || $item->variant_name)
+                            <div class="muted">Yarn color: {{ $item->yarnColor?->name ?? $item->variant_name }}</div>
+                        @endif
+                    </td>
+                    <td class="right">{{ $item->quantity }}</td>
+                    <td class="right">PHP {{ number_format($item->price, 2) }}</td>
+                    <td class="right">PHP {{ number_format($item->quantity * $item->price, 2) }}</td>
+                </tr>
+            @endforeach
         </tbody>
     </table>
 
-</div>
+    <div class="panel" style="margin-top:16px;">
+        <table class="grid" style="margin-top:0;">
+            <tbody>
+                <tr>
+                    <td>Subtotal</td>
+                    <td class="right">PHP {{ number_format($order->subtotal, 2) }}</td>
+                </tr>
+                <tr>
+                    <td>Platform Fee</td>
+                    <td class="right">PHP {{ number_format($order->platform_fee, 2) }}</td>
+                </tr>
+                <tr>
+                    <td>Delivery Fee</td>
+                    <td class="right">PHP {{ number_format($order->delivery_fee, 2) }}</td>
+                </tr>
+                <tr>
+                    <td>VAT</td>
+                    <td class="right">PHP {{ number_format($order->vat_amount, 2) }}</td>
+                </tr>
+                <tr>
+                    <td class="total">Total Paid</td>
+                    <td class="right total">PHP {{ number_format($order->total_amount, 2) }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 
-<div class="muted" style="text-align:center; margin-top:20px;">
-    Thank you for supporting handmade crochet pieces ❤️
+    <div class="muted" style="text-align:center; margin-top:18px;">
+        Thank you for supporting handmade crochet pieces.
+    </div>
 </div>
 
 </body>

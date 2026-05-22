@@ -1,15 +1,15 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="rounded-[2rem] border border-brand-border bg-white p-6 shadow-sm">
+<div class="rounded-4xl border border-brand-border bg-white p-6 shadow-sm">
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
             <h2 class="font-display text-2xl font-semibold text-brand-primary">View About Content</h2>
             <p class="mt-2 text-sm text-brand-ink/70">Details for the selected About section entry.</p>
         </div>
         <div class="flex flex-wrap gap-2">
+            <x-back-button href="{{ route('admin.about.index') }}" label="Back to About" />
             <a href="{{ route('admin.about.edit', $aboutSection) }}" class="brand-btn-secondary px-5 py-2 text-sm">Edit</a>
-            <a href="{{ route('admin.about.index') }}" class="brand-btn-secondary px-5 py-2 text-sm">Back to list</a>
         </div>
     </div>
 

@@ -63,6 +63,11 @@
                                     <p class="font-semibold">
                                         {{ $item->product->name }}
                                     </p>
+                                    @if ($item->yarnColor?->name || $item->variant_name)
+                                        <p class="text-xs text-brand-ink/55">
+                                            Yarn color: {{ $item->yarnColor?->name ?? $item->variant_name }}
+                                        </p>
+                                    @endif
                                     <p class="text-xs text-brand-ink/55">
                                         {{ $item->quantity }} × PHP {{ number_format($item->price, 2) }}
                                     </p>

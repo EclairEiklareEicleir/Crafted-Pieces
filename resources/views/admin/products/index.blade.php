@@ -24,7 +24,7 @@
     {{-- ========================= --}}
     {{-- CATEGORY MANAGEMENT --}}
     {{-- ========================= --}}
-    <div class="rounded-[2rem] border border-brand-border bg-white p-5 shadow-sm sm:p-6">
+    <div class="rounded-4xl border border-brand-border bg-white p-5 shadow-sm sm:p-6">
 
         <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
 
@@ -44,7 +44,7 @@
             <form method="POST"
                 action="{{ route('admin.categories.store') }}"
                 enctype="multipart/form-data"
-                class="grid gap-3 sm:grid-cols-2 lg:min-w-[46rem] lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)_auto] lg:items-start">
+                class="grid gap-3 sm:grid-cols-2 lg:min-w-184 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)_auto] lg:items-start">
 
                 @csrf
 
@@ -133,7 +133,7 @@
                             @csrf
                             @method('DELETE')
 
-                            <button class="inline-flex items-center justify-center rounded-full border border-[#f3b4c7] bg-[#fff7fa] px-4 py-2 text-xs font-semibold text-[#a43d61] transition hover:border-[#f79eb8] hover:bg-white">
+                            <button class="inline-flex items-center justify-center rounded-full border border-[#f3b4c7] bg-[#fff7fa] px-4 py-2 text-xs font-semibold text-[#a43d61] transition hover:border-brand-accent hover:bg-white">
                                 Delete
                             </button>
 
@@ -237,7 +237,7 @@
                                         @csrf
                                         @method('DELETE')
 
-                                        <button class="inline-flex items-center justify-center rounded-full border border-[#f3b4c7] bg-[#fff7fa] px-4 py-2 text-xs font-semibold text-[#a43d61] transition hover:border-[#f79eb8] hover:bg-white">
+                                        <button class="inline-flex items-center justify-center rounded-full border border-[#f3b4c7] bg-[#fff7fa] px-4 py-2 text-xs font-semibold text-[#a43d61] transition hover:border-brand-accent hover:bg-white">
                                             Delete
                                         </button>
 
@@ -280,7 +280,7 @@
 
                 <div class="absolute inset-0" data-category-modal-close="edit-category-modal-{{ $category->id }}"></div>
 
-                <div class="relative z-10 w-full max-w-2xl overflow-hidden rounded-[2rem] border border-brand-border bg-white shadow-[0_30px_100px_rgba(101,12,42,0.22)]">
+                <div class="relative z-10 w-full max-w-2xl overflow-hidden rounded-4xl border border-brand-border bg-white shadow-[0_30px_100px_rgba(101,12,42,0.22)]">
 
                     <div class="flex items-center justify-between border-b border-brand-border bg-brand-surface px-6 py-5 sm:px-8">
                         <div>
@@ -375,9 +375,123 @@
         @endforeach
 
     {{-- ========================= --}}
+    {{-- YARN COLOR MANAGEMENT --}}
+    {{-- ========================= --}}
+    <div class="rounded-4xl border border-brand-border bg-white p-5 shadow-sm sm:p-6">
+
+        <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+                <h2 class="font-display text-2xl font-semibold text-brand-primary">
+                    Yarn Colors
+                </h2>
+
+                <p class="mt-1 text-sm text-brand-ink/55">
+                    Global colors are available to every product unless a product has its own allowed color list.
+                </p>
+            </div>
+
+            <form method="POST"
+                  action="{{ route('admin.yarn-colors.store') }}"
+                  enctype="multipart/form-data"
+                  class="grid gap-3 lg:min-w-184 lg:grid-cols-[minmax(0,1fr)_8rem_7rem_auto] lg:items-start">
+                @csrf
+
+                <input type="text"
+                       name="name"
+                       value="{{ old('name') }}"
+                       placeholder="Color name"
+                       class="brand-input"
+                       required>
+
+                <input type="text"
+                       name="hex_color"
+                       value="{{ old('hex_color') }}"
+                       placeholder="#f79eb8"
+                       class="brand-input"
+                       pattern="^#[0-9A-Fa-f]{6}$">
+
+                <input type="number"
+                       name="sort_order"
+                       value="{{ old('sort_order', 0) }}"
+                       min="0"
+                       class="brand-input">
+
+                <button class="brand-btn-primary px-5 py-3 text-sm">
+                    Add Color
+                </button>
+
+                <div class="lg:col-span-4">
+                    <input type="file"
+                           name="preview_image"
+                           accept=".jpg,.jpeg,.png,.webp"
+                           class="brand-input bg-white px-4 py-3">
+                    <p class="mt-2 text-xs text-brand-ink/55">
+                        Optional preview image for specialty yarns.
+                    </p>
+                </div>
+            </form>
+        </div>
+
+        <div class="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            @forelse ($yarnColors as $color)
+                <div class="rounded-[1.75rem] border border-brand-border bg-brand-surface p-4">
+                    <form method="POST"
+                          action="{{ route('admin.yarn-colors.update', $color) }}"
+                          enctype="multipart/form-data">
+                        @csrf
+                        @method('PUT')
+
+                        <div class="flex items-center gap-3">
+                            <span class="h-10 w-10 shrink-0 rounded-full border border-brand-border shadow-sm" style="background-color: {{ $color->hex_color ?? '#ffffff' }}"></span>
+
+                            <div class="grid min-w-0 flex-1 gap-2">
+                                <input type="text" name="name" value="{{ $color->name }}" class="brand-input py-2" required>
+                                <div class="grid gap-2 sm:grid-cols-2">
+                                    <input type="text" name="hex_color" value="{{ $color->hex_color }}" class="brand-input py-2" pattern="^#[0-9A-Fa-f]{6}$">
+                                    <input type="number" name="sort_order" value="{{ $color->sort_order }}" min="0" class="brand-input py-2">
+                                </div>
+                                <input type="file"
+                                       name="preview_image"
+                                       accept=".jpg,.jpeg,.png,.webp"
+                                       class="brand-input bg-white px-3 py-2 text-xs">
+                            </div>
+                        </div>
+
+                        <div class="mt-3 flex flex-wrap items-center justify-between gap-3">
+                            <label class="flex items-center gap-2 text-sm text-brand-ink/70">
+                                <input type="checkbox" name="is_active" value="1" @checked($color->is_active)>
+                                Active
+                            </label>
+
+                            <button class="inline-flex items-center justify-center rounded-full border border-brand-secondary/30 bg-white px-4 py-2 text-xs font-semibold text-brand-secondary transition hover:border-brand-secondary hover:bg-brand-light/60">
+                                Save
+                            </button>
+                        </div>
+                    </form>
+
+                    <form method="POST"
+                          action="{{ route('admin.yarn-colors.destroy', $color) }}"
+                          class="mt-3 border-t border-brand-border pt-3">
+                        @csrf
+                        @method('DELETE')
+
+                        <button class="text-xs font-semibold text-red-600">
+                            Delete {{ $color->name }}
+                        </button>
+                    </form>
+                </div>
+            @empty
+                <div class="rounded-[1.75rem] border border-brand-border bg-brand-surface p-6 text-sm text-brand-ink/55">
+                    No yarn colors yet.
+                </div>
+            @endforelse
+        </div>
+    </div>
+
+    {{-- ========================= --}}
     {{-- PRODUCT MANAGEMENT --}}
     {{-- ========================= --}}
-    <div class="rounded-[2rem] border border-brand-border bg-white p-6 shadow-sm">
+    <div class="rounded-4xl border border-brand-border bg-white p-6 shadow-sm">
 
         <div class="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
 
@@ -390,6 +504,10 @@
                 <p class="mt-1 text-sm text-brand-ink/55">
                     Manage active crochet products and custom items.
                 </p>
+
+                <div class="mt-4">
+                    <x-back-button href="{{ route('admin.dashboard') }}" label="Back to Dashboard" />
+                </div>
 
             </div>
 
@@ -454,9 +572,9 @@
 
                                 <div class="flex items-center gap-4">
 
-                                    <img src="{{ asset('storage/' . $product->image) }}"
+                                    <img src="{{ $product->floating_image_url }}"
                                         alt="{{ $product->name }}"
-                                        class="h-14 w-14 rounded-2xl object-cover border border-[#eadfd7]">
+                                        class="h-14 w-14 rounded-2xl object-contain border border-[#eadfd7] bg-brand-surface p-1">
 
                                     <div>
 
@@ -466,6 +584,10 @@
 
                                         <p class="text-xs text-[#8f7a70]">
                                             {{ $product->slug }}
+                                        </p>
+
+                                        <p class="mt-1 text-xs text-brand-ink/55">
+                                            {{ $product->yarnColors->isNotEmpty() ? $product->yarnColors->pluck('name')->join(', ') : 'All active yarn colors' }}
                                         </p>
 
                                     </div>
@@ -497,19 +619,7 @@
                             {{-- STATUS --}}
                             <td class="py-4 pr-4">
 
-                                @if ($product->is_active)
-
-                                    <span class="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
-                                        Active
-                                    </span>
-
-                                @else
-
-                                    <span class="rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-700">
-                                        Inactive
-                                    </span>
-
-                                @endif
+                                <x-status-badge :status="$product->is_active ? 'active' : 'inactive'" context="toggle" />
 
                             </td>
 

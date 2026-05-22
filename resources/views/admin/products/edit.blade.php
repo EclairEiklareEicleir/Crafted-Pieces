@@ -17,10 +17,7 @@
             </p>
         </div>
 
-        <a href="{{ route('admin.products.index') }}"
-           class="brand-btn-secondary px-5 py-3 text-sm">
-            ← Back
-        </a>
+        <x-back-button href="{{ route('admin.products.index') }}" label="Back to Products" />
 
     </div>
 
@@ -106,6 +103,31 @@
                 </select>
             </div>
 
+            {{-- YARN COLORS --}}
+            <div>
+                <label class="text-sm font-medium text-brand-ink/70">Allowed Yarn Colors</label>
+                <p class="mt-1 text-xs text-brand-ink/55">
+                    Leave all unchecked to allow every active global yarn color.
+                </p>
+
+                @php
+                    $selectedColorIds = old('yarn_color_ids', $product->yarnColors->pluck('id')->all());
+                @endphp
+
+                <div class="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                    @foreach ($yarnColors as $color)
+                        <label class="flex cursor-pointer items-center gap-3 rounded-2xl border border-brand-border bg-brand-surface px-4 py-3 text-sm transition hover:border-brand-secondary">
+                            <input type="checkbox"
+                                   name="yarn_color_ids[]"
+                                   value="{{ $color->id }}"
+                                   @checked(in_array($color->id, $selectedColorIds))>
+                            <span class="h-5 w-5 rounded-full border border-brand-border" style="background-color: {{ $color->hex_color ?? '#ffffff' }}"></span>
+                            <span class="font-semibold text-brand-primary">{{ $color->name }}</span>
+                        </label>
+                    @endforeach
+                </div>
+            </div>
+
             {{-- IMAGE UPLOAD --}}
             <div>
                 <label class="text-sm font-medium text-brand-ink/70">Product Image</label>
@@ -117,8 +139,8 @@
 
                 @if ($product->image)
                     <div class="mt-3">
-                        <img src="{{ asset('storage/' . $product->image) }}"
-                             class="h-24 w-24 rounded-2xl border border-brand-border object-cover">
+                        <img src="{{ $product->floating_image_url }}"
+                             class="h-24 w-24 rounded-2xl border border-brand-border bg-brand-surface object-contain p-2">
                     </div>
                 @endif
             </div>

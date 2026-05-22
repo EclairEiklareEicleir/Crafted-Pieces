@@ -10,15 +10,20 @@ use App\Services\PricingService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class CheckoutController extends Controller
 {
-    private function getCart()
+    private function getCart(Request $request): Cart
     {
-        return Auth::check()
-            ? Cart::firstOrCreate(['user_id' => Auth::id()])
-            : Cart::firstOrCreate(['session_id' => session()->getId()]);
+        if (Auth::check()) {
+            return Cart::firstOrCreate(['user_id' => Auth::id()]);
+        }
+
+        $sessionId = $request->session()->getId() ?: $request->session()->token() ?: uniqid('session_', true);
+
+        return Cart::firstOrCreate(['session_id' => $sessionId]);
     }
 
     /*
@@ -27,12 +32,12 @@ class CheckoutController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    public function index()
+    public function index(Request $request)
     {
-        $cart = $this->getCart();
+        $cart = $this->getCart($request);
 
         $cartItems = $cart
-            ? $cart->items()->with('product')->get()
+            ? $cart->items()->with(['product', 'productVariant', 'yarnColor'])->get()
             : collect();
 
         $pricing = (new PricingService)->calculate($cartItems);
@@ -42,8 +47,8 @@ class CheckoutController extends Controller
 
     public function submit(Request $request)
     {
-        $cart = $this->getCart();
-        $cartItems = $cart->items()->with('product')->get();
+        $cart = $this->getCart($request);
+        $cartItems = $cart->items()->with(['product', 'productVariant', 'yarnColor'])->get();
 
         if ($cartItems->isEmpty()) {
             return back()->withErrors(['checkout' => 'Your cart is empty.']);
@@ -77,12 +82,17 @@ class CheckoutController extends Controller
             foreach ($cartItems as $item) {
                 $order->items()->create([
                     'product_id' => $item->product_id,
+                    'product_variant_id' => $item->product_variant_id,
+                    'yarn_color_id' => $item->yarn_color_id,
+                    'variant_name' => $item->variant_name,
+                    'variant_hex_color' => $item->variant_hex_color,
+                    'variant_image_path' => $item->variant_image_path,
                     'quantity' => $item->quantity,
                     'price' => $item->price,
                 ]);
             }
 
-            return $order->load('items.product');
+            return $order->load('items.product', 'items.productVariant', 'items.yarnColor');
         });
 
         try {
@@ -106,6 +116,8 @@ class CheckoutController extends Controller
 
     public function success(Order $order)
     {
+        $order->load('items.product', 'items.productVariant', 'items.yarnColor');
+
         return view('user.order-success', compact('order'));
     }
 
@@ -188,6 +200,16 @@ class CheckoutController extends Controller
     {
         if ($order->user_id !== Auth::id()) {
             abort(403);
+        }
+
+        if (! extension_loaded('gd')) {
+            Log::error('Custom receipt PDF generation failed because the PHP GD extension is missing.', [
+                'custom_order_id' => $order->id,
+                'user_id' => Auth::id(),
+                'php_binary' => PHP_BINARY,
+            ]);
+
+            abort(500, 'PDF receipts require the PHP GD extension. Enable extension=gd in C:\\xampp\\php\\php.ini and restart Apache or php artisan serve.');
         }
 
         $pricingService = new PricingService();

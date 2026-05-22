@@ -38,9 +38,9 @@
 <section class="relative min-h-screen overflow-hidden">
 
     <div class="pointer-events-none absolute inset-0 overflow-hidden">
-        <div class="absolute -left-28 top-12 h-80 w-80 rounded-full bg-[#f79eb8]/30 blur-3xl"></div>
-        <div class="absolute right-[-6rem] top-32 h-96 w-96 rounded-full bg-white/60 blur-3xl"></div>
-        <div class="absolute bottom-[-7rem] left-1/2 h-72 w-72 rounded-full bg-[#cf4f7a]/15 blur-3xl"></div>
+        <div class="absolute -left-28 top-12 h-80 w-80 rounded-full bg-brand-accent/30 blur-3xl"></div>
+        <div class="absolute -right-24 top-32 h-96 w-96 rounded-full bg-white/60 blur-3xl"></div>
+        <div class="absolute -bottom-28 left-1/2 h-72 w-72 rounded-full bg-brand-secondary/15 blur-3xl"></div>
     </div>
 
     <div class="relative mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:px-8 lg:py-20">
@@ -81,7 +81,7 @@
                 @endphp
 
                 <a href="{{ route('custom-order.show', $order) }}" class="group block">
-                    <article class="rounded-[2rem] border border-brand-border bg-white/85 p-5 shadow-[0_24px_60px_-40px_rgba(101,12,42,0.35)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:shadow-[0_30px_80px_-45px_rgba(101,12,42,0.42)] sm:p-6">
+                    <article class="rounded-4xl border border-brand-border bg-white/85 p-5 shadow-[0_24px_60px_-40px_rgba(101,12,42,0.35)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:shadow-[0_30px_80px_-45px_rgba(101,12,42,0.42)] sm:p-6">
 
                         <div class="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
 
@@ -131,7 +131,7 @@
 
                             <div class="flex shrink-0 flex-col gap-4 lg:items-end">
 
-                                <div class="rounded-[1.6rem] bg-brand-light/35 px-5 py-4 text-left shadow-sm lg:min-w-[14rem] lg:text-right">
+                                <div class="rounded-3xl bg-brand-light/35 px-5 py-4 text-left shadow-sm lg:min-w-56 lg:text-right">
                                     <p class="text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-brand-ink/55">
                                         Quote
                                     </p>

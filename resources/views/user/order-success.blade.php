@@ -13,11 +13,20 @@
 
 <section class="mx-auto max-w-3xl px-4 py-16">
 
+    <div class="mb-6">
+        <x-back-button href="{{ route('orders.index') }}" label="Back to Orders" />
+    </div>
+
     <div class="rounded-4xl border border-brand-border bg-white p-8 shadow-sm">
 
         <div class="text-center">
 
-            <div class="text-5xl">🎉</div>
+            <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-brand-border bg-brand-light/50 text-brand-primary shadow-sm">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-7 w-7">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 7.5h15l-1.4 11.2a2 2 0 0 1-2 1.8H7.9a2 2 0 0 1-2-1.8L4.5 7.5Z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 11a3 3 0 1 1 6 0" />
+                </svg>
+            </div>
 
             <h1 class="mt-4 font-display text-3xl font-semibold text-brand-primary">
                 Order Receipt
@@ -39,9 +48,7 @@
 
             <div class="mt-2 flex justify-between">
                 <span>Status</span>
-                <span class="font-semibold text-brand-primary">
-                    {{ ucfirst($order->status) }}
-                </span>
+                <x-status-badge :status="$order->status" context="order" />
             </div>
 
             <div class="mt-2 flex justify-between">
@@ -72,6 +79,12 @@
                             <p class="font-semibold text-brand-primary">
                                 {{ $product->name ?? 'Deleted Product' }}
                             </p>
+
+                            @if ($item->yarnColor?->name || $item->variant_name)
+                                <p class="text-xs text-brand-ink/55">
+                                    Yarn color: {{ $item->yarnColor?->name ?? $item->variant_name }}
+                                </p>
+                            @endif
 
                             <p class="text-xs text-brand-ink/55">
                                 Qty: {{ $item->quantity }}

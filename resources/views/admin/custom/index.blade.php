@@ -14,6 +14,8 @@
                 Commission Inbox
             </h1>
         </div>
+
+        <x-back-button href="{{ route('admin.dashboard') }}" label="Back to Dashboard" />
     </div>
 
     <div class="mt-8 space-y-4">
@@ -41,13 +43,10 @@
                             PHP {{ number_format($request->estimated_price, 2) }}
                         </p>
 
-                        <p class="mt-1 text-xs uppercase tracking-[0.18em] text-brand-secondary">
-                            {{ str_replace('_', ' ', $request->status) }}
-                        </p>
-
-                        <p class="mt-1 text-[0.7rem] uppercase tracking-[0.18em] text-brand-ink/45">
-                            Payment: {{ str_replace('_', ' ', $request->payment_status ?? 'unpaid') }}
-                        </p>
+                        <div class="mt-2 flex flex-wrap justify-end gap-2">
+                            <x-status-badge :status="$request->status" context="custom" />
+                            <x-status-badge :status="$request->payment_status ?? 'unpaid'" context="payment" />
+                        </div>
 
                     </div>
 

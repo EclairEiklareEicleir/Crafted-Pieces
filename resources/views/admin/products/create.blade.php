@@ -17,10 +17,7 @@
             </p>
         </div>
 
-        <a href="{{ route('admin.products.index') }}"
-           class="brand-btn-secondary px-5 py-3 text-sm">
-            ← Back
-        </a>
+        <x-back-button href="{{ route('admin.products.index') }}" label="Back to Products" />
 
     </div>
 
@@ -97,6 +94,27 @@
                     @endforeach
 
                 </select>
+            </div>
+
+            {{-- YARN COLORS --}}
+            <div>
+                <label class="text-sm font-medium text-brand-ink/70">Allowed Yarn Colors</label>
+                <p class="mt-1 text-xs text-brand-ink/55">
+                    Leave all unchecked to allow every active global yarn color.
+                </p>
+
+                <div class="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                    @foreach ($yarnColors as $color)
+                        <label class="flex cursor-pointer items-center gap-3 rounded-2xl border border-brand-border bg-brand-surface px-4 py-3 text-sm transition hover:border-brand-secondary">
+                            <input type="checkbox"
+                                   name="yarn_color_ids[]"
+                                   value="{{ $color->id }}"
+                                   @checked(in_array($color->id, old('yarn_color_ids', [])))>
+                            <span class="h-5 w-5 rounded-full border border-brand-border" style="background-color: {{ $color->hex_color ?? '#ffffff' }}"></span>
+                            <span class="font-semibold text-brand-primary">{{ $color->name }}</span>
+                        </label>
+                    @endforeach
+                </div>
             </div>
 
             {{-- IMAGE UPLOAD --}}

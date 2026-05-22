@@ -30,10 +30,12 @@
                             Shop Crochet
                         </a>
 
-                        <a href="{{ route('custom-order') }}"
-                           class="brand-btn-secondary px-6 py-3 text-sm shadow-sm hover:-translate-y-0.5">
-                            Request Custom Crochet
-                        </a>
+                        @auth
+                            <a href="{{ route('custom-order') }}"
+                               class="brand-btn-secondary px-6 py-3 text-sm shadow-sm hover:-translate-y-0.5">
+                                Request Custom Crochet
+                            </a>
+                        @endauth
 
                     </div>
 
@@ -194,19 +196,49 @@
                     >
                         @csrf
 
+                        @php
+                            $ratingValue = (string) old('rating', '');
+                        @endphp
+
                         <div>
                             <label class="mb-2 block text-sm font-semibold text-brand-primary">
-                                Rating
+                                Your Rating
                             </label>
 
-                            <select name="rating" required class="brand-input">
-                                <option value="">Select rating</option>
-                                <option value="5">5 Stars</option>
-                                <option value="4">4 Stars</option>
-                                <option value="3">3 Stars</option>
-                                <option value="2">2 Stars</option>
-                                <option value="1">1 Star</option>
-                            </select>
+                            <div class="flex flex-wrap gap-2 sm:flex-nowrap">
+                                @foreach ([1, 2, 3, 4, 5] as $rating)
+                                    @php
+                                        $isActive = $ratingValue !== '' && (int) $rating <= (int) $ratingValue;
+                                    @endphp
+
+                                    <label
+                                        class="group inline-flex h-12 w-12 cursor-pointer items-center justify-center rounded-2xl border transition sm:h-14 sm:w-14 {{ $isActive ? 'border-brand-primary bg-brand-light shadow-sm' : 'border-brand-border bg-white/80 opacity-55 hover:opacity-100 hover:border-brand-secondary hover:bg-brand-light/40' }}"
+                                    >
+                                        <input
+                                            type="radio"
+                                            name="rating"
+                                            value="{{ $rating }}"
+                                            class="peer sr-only"
+                                            {{ $ratingValue === (string) $rating ? 'checked' : '' }}
+                                            required
+                                        >
+
+                                        <span class="inline-flex h-8 w-8 items-center justify-center transition group-hover:scale-105 peer-focus-visible:ring-2 peer-focus-visible:ring-brand-accent/60 sm:h-9 sm:w-9 {{ $isActive ? 'opacity-100' : 'opacity-35' }}">
+                                            <img
+                                                src="{{ asset('images/yarn.png') }}"
+                                                alt=""
+                                                class="h-full w-full object-contain"
+                                            >
+                                        </span>
+
+                                        <span class="sr-only">Rate {{ $rating }} out of 5</span>
+                                    </label>
+                                @endforeach
+                            </div>
+
+                            @error('rating')
+                                <p class="mt-2 text-sm text-brand-secondary">{{ $message }}</p>
+                            @enderror
                         </div>
 
                         <div>
@@ -280,8 +312,8 @@
                         <div class="review-card hidden rounded-3xl border border-brand-border bg-white p-5">
 
                             <div class="flex gap-1 text-brand-secondary">
-                                @for ($i = 0; $i < $testimonial->rating; $i++)
-                                    <span>★</span>
+                                @for ($i = 0; $i < 5; $i++)
+                                    <x-yarn-icon class="h-4 w-4 {{ $i < $testimonial->rating ? 'text-brand-secondary' : 'text-brand-light' }}" />
                                 @endfor
                             </div>
 
