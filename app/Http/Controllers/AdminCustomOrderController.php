@@ -6,6 +6,8 @@ use App\Models\CustomOrderMessage;
 use App\Models\CustomOrderRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\CustomOrderQuotationMail;
 use Illuminate\Support\Facades\Log;
 
 class AdminCustomOrderController extends Controller
@@ -137,6 +139,9 @@ class AdminCustomOrderController extends Controller
                 ? CustomOrderRequest::STATUS_PAID
                 : ($customOrder->payment_status ?: 'unpaid'),
         ]);
+
+        Mail::to($customOrder->email)
+            ->send(new CustomOrderQuotationMail($customOrder));
 
         /*
         |--------------------------------------------------------------------------
