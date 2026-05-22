@@ -5,10 +5,11 @@ namespace App\Services;
 use App\Models\CustomOrderRequest;
 use App\Models\Order;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class PayMongoService
 {
-    private string $baseUrl = 'https://api.paymongo.com/v2';
+    private string $baseUrl = 'https://api.paymongo.com/v1';
 
     public function createCheckoutSession(Order $order): array
     {
@@ -63,6 +64,12 @@ class PayMongoService
 
     public function retrieveCheckoutSession(string $checkoutSessionId): array
     {
+
+            Log::info('Retrieving PayMongo checkout session', [
+            'checkout_session_id' => $checkoutSessionId,
+            'base_url' => $this->baseUrl,
+            'env_key_partial' => substr(config('services.paymongo.secret_key'), 0, 5) . '...',
+        ]);
         $response = Http::withBasicAuth(config('services.paymongo.secret_key'), '')
             ->acceptJson()
             ->get($this->baseUrl . '/checkout_sessions/' . $checkoutSessionId)

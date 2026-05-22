@@ -6,6 +6,9 @@ use App\Models\CustomOrderMessage;
 use App\Models\CustomOrderRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Notification;
+use App\Models\User;
+
 
 class CustomOrderController extends Controller
 {
@@ -99,6 +102,17 @@ public function show(CustomOrderRequest $customOrder)
             'estimated_price' => $estimate,
             'status' => CustomOrderRequest::STATUS_PENDING,
         ]);
+
+        $admins = User::where('role', 'owner')->get();
+
+        foreach ($admins as $admin) {
+            Notification::create([
+                'user_id' => $admin->id,
+                'title' => 'New Custom Order Request',
+                'message' => 'A customer submitted a new custom order request.',
+                'link' => route('admin.custom.index'),
+            ]);
+        }
 
         return redirect()->route('custom-order.show', $order);
     }

@@ -23,6 +23,8 @@ use App\Http\Controllers\AdminSettingController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\AdminAboutSectionController;
 use App\Http\Controllers\AdminFaqController;
+use App\Http\Controllers\NotificationController;
+
 /*
 |--------------------------------------------------------------------------
 | MAIN PAGES
@@ -263,6 +265,16 @@ Route::middleware(['auth', 'role:owner'])->group(function () {
 Route::post('/login', [AuthController::class, 'login'])->name('login');
 Route::post('/register', [AuthController::class, 'register'])->name('register');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+/*
+|--------------------------------------------------------------------------
+| NOTIFICATIONS
+|--------------------------------------------------------------------------
+*/
+Route::middleware('auth')->group(function () {
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::get('/notifications/{notification}', [NotificationController::class, 'show'])->name('notifications.show');
+});
 
 /*
 |--------------------------------------------------------------------------

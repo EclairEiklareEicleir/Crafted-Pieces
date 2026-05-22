@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\CustomOrderRequest;
 use App\Services\PayMongoService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class CustomOrderPayMongoController extends Controller
 {
@@ -34,7 +35,17 @@ class CustomOrderPayMongoController extends Controller
 
         if ($customOrder->payment_status === 'pending' && $customOrder->paymongo_checkout_id) {
             try {
+                Log::info('Attempting to retrieve PayMongo checkout session', [
+                    'order_id' => $customOrder->id,
+                    'checkout_id' => $customOrder->paymongo_checkout_id,
+                    'env_key' => substr(config('services.paymongo.secret'), 0, 5) . '...', // partial key for safety
+                ]);
                 $existingSession = $payMongoService->retrieveCheckoutSession($customOrder->paymongo_checkout_id);
+
+                Log::info('Retrieved PayMongo checkout session', [
+    'session' => $existingSession,
+]);
+                
 
                 if ($payMongoService->isPaid($existingSession)) {
                     $customOrder->update([
@@ -77,38 +88,47 @@ class CustomOrderPayMongoController extends Controller
         }
     }
 
-    public function success(Request $request, CustomOrderRequest $customOrder, PayMongoService $payMongoService)
-    {
-        if (auth()->check() && $customOrder->user_id !== auth()->id()) {
-            abort(403);
-        }
-
-        if ($customOrder->paymongo_checkout_id && $customOrder->payment_status !== 'paid') {
-            try {
-                $checkoutSession = $payMongoService->retrieveCheckoutSession($customOrder->paymongo_checkout_id);
-
-                if ($payMongoService->isPaid($checkoutSession)) {
-                    $customOrder->update([
-                        'payment_status' => 'paid',
-                        'paymongo_payment_id' => $payMongoService->extractPaymentId($checkoutSession),
-                        'paid_at' => now(),
-                        'status' => CustomOrderRequest::STATUS_PAID,
-                        'payment_method' => 'PayMongo',
-                    ]);
-                }
-            } catch (\Throwable $e) {
-                report($e);
-            }
-        }
-
-        return view('user.custom-order.paymongo-status', [
-            'order' => $customOrder->fresh(),
-            'title' => $customOrder->fresh()->payment_status === 'paid' ? 'Payment Confirmed' : 'Payment Pending',
-            'message' => $customOrder->fresh()->payment_status === 'paid'
-                ? 'Your PayMongo payment for this quotation has been confirmed.'
-                : 'We are waiting for PayMongo to confirm your custom order payment.',
-        ]);
+public function success(Request $request, CustomOrderRequest $customOrder, PayMongoService $payMongoService)
+{
+    // Ensure user owns this order
+    if (auth()->check() && $customOrder->user_id !== auth()->id()) {
+        abort(403);
     }
+
+    if ($customOrder->paymongo_checkout_id && $customOrder->payment_status !== 'paid') {
+        try {
+            // Retrieve the checkout session from PayMongo v2
+            $checkoutSession = $payMongoService->retrieveCheckoutSession($customOrder->paymongo_checkout_id);
+
+            // Check if the payment intent has succeeded
+            $paymentIntent = $checkoutSession['data']['attributes']['payment_intent'] ?? null;
+
+            if ($paymentIntent && $paymentIntent['attributes']['status'] === 'succeeded') {
+                $customOrder->update([
+                    'payment_status' => 'paid',
+                    'paymongo_payment_id' => $paymentIntent['id'],
+                    'paid_at' => now(),
+                    'status' => CustomOrderRequest::STATUS_PAID,
+                    'payment_method' => 'PayMongo',
+                ]);
+            }
+
+        } catch (\Throwable $e) {
+            report($e);
+            // Optionally, flash an error message to the session
+        }
+    }
+
+    $customOrder->refresh(); // Always refresh once before passing to view
+
+    return view('user.custom-order.paymongo-status', [
+        'order' => $customOrder,
+        'title' => $customOrder->payment_status === 'paid' ? 'Payment Confirmed' : 'Payment Pending',
+        'message' => $customOrder->payment_status === 'paid'
+            ? 'Your PayMongo payment for this quotation has been confirmed.'
+            : 'We are waiting for PayMongo to confirm your custom order payment.',
+    ]);
+}
 
     public function cancel(Request $request, CustomOrderRequest $customOrder)
     {

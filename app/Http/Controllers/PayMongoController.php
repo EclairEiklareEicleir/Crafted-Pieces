@@ -7,6 +7,9 @@ use App\Models\Order;
 use App\Services\PayMongoService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\OrderReceiptMail;
+use App\Mail\CustomOrderCreatedMail;
 
 class PayMongoController extends Controller
 {
@@ -102,6 +105,10 @@ class PayMongoController extends Controller
                     'paid_at' => now(),
                 ]);
 
+                    Mail::to($payable->email)->send(
+                        new OrderReceiptMail($payable->fresh())
+                    );
+
                 return response()->json(['message' => 'Order marked as paid.'], 200);
             }
 
@@ -114,6 +121,10 @@ class PayMongoController extends Controller
                     'paid_at' => now(),
                     'status' => CustomOrderRequest::STATUS_PAID,
                 ]);
+
+                Mail::to($payable->email)
+                    ->send(new CustomOrderCreatedMail($payable->fresh()));
+
 
                 return response()->json(['message' => 'Custom order marked as paid.'], 200);
             }

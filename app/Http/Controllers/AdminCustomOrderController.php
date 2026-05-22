@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\CustomOrderQuotationMail;
 use Illuminate\Support\Facades\Log;
+use App\Models\Notification;
 
 class AdminCustomOrderController extends Controller
 {
@@ -55,6 +56,13 @@ class AdminCustomOrderController extends Controller
             'message' => $httpRequest->message,
         ]);
 
+        Notification::create([
+            'user_id' => $customOrder->user_id,
+            'title' => 'New Admin Reply',
+            'message' => 'Admin replied to your custom order request.',
+            'link' => route('custom-order.show', $customOrder),
+        ]);
+
         return back();
     }
 
@@ -77,6 +85,13 @@ class AdminCustomOrderController extends Controller
 
             // quotation stage
             'status' => CustomOrderRequest::STATUS_QUOTED,
+        ]);
+
+        Notification::create([
+            'user_id' => $customOrder->user_id,
+            'title' => 'Quotation Received',
+            'message' => 'Your custom order has been quoted and awaiting payment.',
+            'link' => route('custom-order.show', $customOrder),
         ]);
 
         CustomOrderMessage::create([
@@ -177,6 +192,13 @@ class AdminCustomOrderController extends Controller
 
         $customOrder->update([
             'status' => CustomOrderRequest::STATUS_REJECTED
+        ]);
+
+        Notification::create([
+            'user_id' => $customOrder->user_id,
+            'title' => 'Request Rejected',
+            'message' => 'Admin rejected your custom order request.',
+            'link' => route('custom-order.show', $customOrder),
         ]);
 
         CustomOrderMessage::create([

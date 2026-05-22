@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use Illuminate\Http\Request;
+use App\Models\Notification;
 
 class AdminOrderController extends Controller
 {
@@ -50,6 +51,17 @@ class AdminOrderController extends Controller
         $order->update([
             'status' => $request->status
         ]);
+
+        if ($request->status === 'shipped' && $order->user_id) {
+
+            Notification::create([
+                'user_id' => $order->user_id,
+                'title' => 'Order Shipped',
+                'message' => 'Your order has been shipped and is on the way.',
+                'link' => '#',
+            ]);
+
+        }
 
         return back()->with('success', 'Order status updated.');
     }

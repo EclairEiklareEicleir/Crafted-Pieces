@@ -14,6 +14,20 @@
 
 @php
     $adminUser = auth()->user();
+
+    // 🔔 NOTIFICATIONS (ADDED)
+    $adminNotifications = auth()->check()
+        ? \App\Models\Notification::where('user_id', auth()->id())
+            ->latest()
+            ->take(5)
+            ->get()
+        : collect();
+
+    $adminUnreadCount = auth()->check()
+        ? \App\Models\Notification::where('user_id', auth()->id())
+            ->where('is_read', false)
+            ->count()
+        : 0;
 @endphp
 
 <div class="min-h-screen xl:grid xl:grid-cols-[18rem_minmax(0,1fr)]">
@@ -29,58 +43,31 @@
 
         <nav class="space-y-2 px-4 py-5 text-sm">
             <a href="{{ route('admin.dashboard') }}" class="brand-admin-nav-link {{ request()->routeIs('admin.dashboard') ? 'bg-brand-light text-brand-primary' : '' }}">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-5 w-5 shrink-0">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 11.5 12 4l8 7.5" />
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.5 10.5V20h11V10.5" />
-                </svg>
-                <span>Dashboard</span>
+                Dashboard
             </a>
 
             <a href="{{ route('admin.products.index') }}" class="brand-admin-nav-link {{ request()->routeIs('admin.products.*') ? 'bg-brand-light text-brand-primary' : '' }}">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-5 w-5 shrink-0">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 7.5 12 3l7.5 4.5v9L12 21l-7.5-4.5v-9Z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 12v9" />
-                </svg>
-                <span>Products</span>
+                Products
             </a>
 
             <a href="{{ route('admin.orders.index') }}" class="brand-admin-nav-link {{ request()->routeIs('admin.orders.*') ? 'bg-brand-light text-brand-primary' : '' }}">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-5 w-5 shrink-0">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 6.5h15l-1.4 11.2a2 2 0 0 1-2 1.8H7.9a2 2 0 0 1-2-1.8L4.5 6.5Z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 10.5a3 3 0 1 1 6 0" />
-                </svg>
-                <span>Orders</span>
+                Orders
             </a>
 
             <a href="{{ route('admin.custom.index') }}" class="brand-admin-nav-link {{ request()->routeIs('admin.custom.*') ? 'bg-brand-light text-brand-primary' : '' }}">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-5 w-5 shrink-0">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 4.5h12A1.5 1.5 0 0 1 19.5 6v12A1.5 1.5 0 0 1 18 19.5H6A1.5 1.5 0 0 1 4.5 18V6A1.5 1.5 0 0 1 6 4.5Z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 9h8M8 12.5h8M8 16h5" />
-                </svg>
-                <span>Custom Orders</span>
+                Custom Orders
             </a>
 
             <a href="{{ route('admin.about.edit') }}" class="brand-admin-nav-link {{ request()->routeIs('admin.about.*') ? 'bg-brand-light text-brand-primary' : '' }}">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-5 w-5 shrink-0">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5a7.5 7.5 0 1 1 0 15 7.5 7.5 0 0 1 0-15Z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8.5v3h3" />
-                </svg>
-                <span>About</span>
+                About
             </a>
 
             <a href="{{ route('admin.faq.index') }}" class="brand-admin-nav-link {{ request()->routeIs('admin.faq.*') ? 'bg-brand-light text-brand-primary' : '' }}">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-5 w-5 shrink-0">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z" />
-                </svg>
-                <span>FAQ</span>
+                FAQ
             </a>
 
             <a href="{{ route('admin.settings.index') }}" class="brand-admin-nav-link {{ request()->routeIs('admin.settings.*') ? 'bg-brand-light text-brand-primary' : '' }}">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-5 w-5 shrink-0">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" d="m19.4 13.5-.2-2 .2-2-2-.9a7.5 7.5 0 0 0-.9-2l.8-2-1.4-1.4-2 .8a7.5 7.5 0 0 0-2-.9l-.9-2h-2l-.9 2a7.5 7.5 0 0 0-2 .9l-2-.8-1.4 1.4.8 2a7.5 7.5 0 0 0-.9 2l-2 .9.2 2-.2 2 2 .9a7.5 7.5 0 0 0 .9 2l-.8 2 1.4 1.4 2-.8a7.5 7.5 0 0 0 2 .9l.9 2h2l.9-2a7.5 7.5 0 0 0 2-.9l2 .8 1.4-1.4-.8-2a7.5 7.5 0 0 0 .9-2l2-.9Z" />
-                </svg>
-                <span>Settings</span>
+                Settings
             </a>
         </nav>
 
@@ -94,39 +81,12 @@
     <div class="flex min-w-0 flex-col">
         <header class="sticky top-0 z-30 border-b border-brand-border/80 bg-brand-surface/78 backdrop-blur-xl">
             <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
+
                 <div class="flex items-center gap-3">
-                    <details class="relative xl:hidden">
-                        <summary class="brand-icon-button list-none cursor-pointer">
-                            <span class="sr-only">Open admin menu</span>
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-5 w-5">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M4 12h16M4 17h16" />
-                            </svg>
-                        </summary>
-
-                        <div class="brand-dropdown-panel left-0 w-[min(20rem,calc(100vw-2rem))] p-4">
-                            <div class="flex items-center gap-3 rounded-3xl bg-brand-light p-4">
-                                <img src="{{ asset('images/crafted_pieces_logo.png') }}" alt="Crafted Pieces" class="h-12 w-auto rounded-xl object-contain">
-                                <div>
-                                    <p class="text-xs font-semibold uppercase tracking-[0.2em] text-brand-secondary">Crafted Pieces</p>
-                                    <p class="text-sm text-brand-ink/70">Admin navigation</p>
-                                </div>
-                            </div>
-
-                            <nav class="mt-4 grid gap-2 text-sm">
-                                <a href="{{ route('admin.dashboard') }}" class="brand-dropdown-link {{ request()->routeIs('admin.dashboard') ? 'bg-brand-light text-brand-primary' : '' }}">Dashboard</a>
-                                <a href="{{ route('admin.products.index') }}" class="brand-dropdown-link {{ request()->routeIs('admin.products.*') ? 'bg-brand-light text-brand-primary' : '' }}">Products</a>
-                                <a href="{{ route('admin.orders.index') }}" class="brand-dropdown-link {{ request()->routeIs('admin.orders.*') ? 'bg-brand-light text-brand-primary' : '' }}">Orders</a>
-                                <a href="{{ route('admin.custom.index') }}" class="brand-dropdown-link {{ request()->routeIs('admin.custom.*') ? 'bg-brand-light text-brand-primary' : '' }}">Custom Orders</a>
-                                <a href="{{ route('admin.about.edit') }}" class="brand-dropdown-link {{ request()->routeIs('admin.about.*') ? 'bg-brand-light text-brand-primary' : '' }}">About</a>
-                                <a href="{{ route('admin.faq.index') }}" class="brand-dropdown-link {{ request()->routeIs('admin.faq.*') ? 'bg-brand-light text-brand-primary' : '' }}">FAQ</a>
-                                <a href="{{ route('admin.settings.index') }}" class="brand-dropdown-link {{ request()->routeIs('admin.settings.*') ? 'bg-brand-light text-brand-primary' : '' }}">Settings</a>
-                                <a href="{{ route('home') }}" class="brand-dropdown-link">Back to Store</a>
-                            </nav>
-                        </div>
-                    </details>
-
                     <div>
-                        <p class="text-xs font-semibold uppercase tracking-[0.22em] text-brand-secondary">Crafted Pieces</p>
+                        <p class="text-xs font-semibold uppercase tracking-[0.22em] text-brand-secondary">
+                            Crafted Pieces
+                        </p>
                         <h1 class="text-lg font-semibold text-brand-primary sm:text-xl">
                             {{ $pageTitle ?? 'Dashboard' }}
                         </h1>
@@ -134,12 +94,56 @@
                 </div>
 
                 <div class="flex items-center gap-3">
-                    <a href="{{ route('home') }}" class="hidden sm:inline-flex brand-btn-secondary px-4 py-2 text-sm">
-                        Store
-                    </a>
 
+                    {{-- 🔔 NOTIFICATIONS --}}
                     <details class="relative">
-                        <summary class="brand-icon-button list-none cursor-pointer" aria-label="Open admin profile menu" title="Profile menu">
+                        <summary class="brand-icon-button relative list-none cursor-pointer"
+                                 aria-label="Notifications"
+                                 title="Notifications">
+
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-5 w-5">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                      d="M15 17h5l-1.4-1.4A2 2 0 0 1 18 14.2V11a6 6 0 1 0-12 0v3.2a2 2 0 0 1-.6 1.4L4 17h5" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 17a3 3 0 0 0 6 0" />
+                            </svg>
+
+                            @if ($adminUnreadCount > 0)
+                                <span class="brand-badge absolute -right-1 -top-1">
+                                    {{ $adminUnreadCount }}
+                                </span>
+                            @endif
+                        </summary>
+
+                        <div class="brand-dropdown-panel right-0 w-72 p-3">
+                            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-brand-secondary">
+                                Notifications
+                            </p>
+
+                            <div class="mt-2 grid gap-2">
+                                @forelse ($adminNotifications as $notif)
+                                    <a href="{{ route('notifications.show', $notif) }}"
+                                       class="block rounded-xl border border-brand-border bg-white p-2 hover:bg-brand-light">
+
+                                        <p class="text-sm font-semibold text-brand-primary">
+                                            {{ $notif->title }}
+                                        </p>
+
+                                        <p class="text-xs text-brand-ink/70 line-clamp-2">
+                                            {{ $notif->message }}
+                                        </p>
+                                    </a>
+                                @empty
+                                    <p class="text-sm text-brand-ink/60">
+                                        No notifications.
+                                    </p>
+                                @endforelse
+                            </div>
+                        </div>
+                    </details>
+
+                    {{-- PROFILE --}}
+                    <details class="relative">
+                        <summary class="brand-icon-button list-none cursor-pointer">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-5 w-5">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M20 21a8 8 0 1 0-16 0" />
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" />
@@ -148,14 +152,23 @@
 
                         <div class="brand-dropdown-panel right-0 w-64 p-3">
                             <div class="rounded-3xl bg-brand-light p-4">
-                                <p class="text-xs font-semibold uppercase tracking-[0.2em] text-brand-secondary">Admin account</p>
-                                <p class="mt-2 text-sm font-semibold text-brand-primary">{{ $adminUser?->name ?? 'Admin' }}</p>
-                                <p class="text-xs text-brand-ink/70">{{ $adminUser?->email }}</p>
+                                <p class="text-xs font-semibold uppercase tracking-[0.2em] text-brand-secondary">
+                                    Admin account
+                                </p>
+
+                                <p class="mt-2 text-sm font-semibold text-brand-primary">
+                                    {{ $adminUser?->name ?? 'Admin' }}
+                                </p>
+
+                                <p class="text-xs text-brand-ink/70">
+                                    {{ $adminUser?->email }}
+                                </p>
                             </div>
 
                             <div class="mt-3 grid gap-1">
-                                <a href="{{ route('admin.dashboard') }}" class="brand-dropdown-link {{ request()->routeIs('admin.dashboard') ? 'bg-brand-light text-brand-primary' : '' }}">Dashboard</a>
+                                <a href="{{ route('admin.dashboard') }}" class="brand-dropdown-link">Dashboard</a>
                                 <a href="{{ route('home') }}" class="brand-dropdown-link">View Store</a>
+
                                 <form method="POST" action="{{ route('logout') }}">
                                     @csrf
                                     <button type="submit" class="brand-dropdown-link w-full text-left">
@@ -165,6 +178,7 @@
                             </div>
                         </div>
                     </details>
+
                 </div>
             </div>
         </header>

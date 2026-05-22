@@ -168,5 +168,7 @@
 - Modified Reviews: Account holders can now leave reviews and Guest can view reviews
 - Added ReviewSeeder to fill in reviews
 
-## 22/05/26: Email SMTP
+## 22/05/26: Email SMTP, Notifications, Minor Fix
 - Added Three Mailing Services: For Quotation, Ordering and Admin Final Pricing
+- Added Notifications
+- Fixed Custom Order not updating payment status

@@ -4,10 +4,25 @@
         @php
             $user = auth()->user();
             $isOwner = $user?->role === 'owner';
+
+            // NOTIFICATIONS (ONLY FOR LOGGED IN USERS)
+            $unreadNotifications = auth()->check()
+                ? \App\Models\Notification::where('user_id', auth()->id())
+                    ->latest()
+                    ->take(5)
+                    ->get()
+                : collect();
+
+            $unreadCount = auth()->check()
+                ? \App\Models\Notification::where('user_id', auth()->id())
+                    ->where('is_read', false)
+                    ->count()
+                : 0;
         @endphp
 
         <div class="grid items-center gap-4 lg:grid-cols-[1fr_auto_1fr]">
             <div class="flex items-center gap-2 justify-self-start">
+
                 <a href="{{ route('shop') }}"
                    class="brand-icon-button"
                    aria-label="Browse shop"
@@ -46,9 +61,12 @@
                                 About
                             </a>
 
-                            <a href="{{ route('custom-order') }}" class="brand-dropdown-link whitespace-nowrap {{ request()->routeIs('custom-order') ? 'bg-brand-light text-brand-primary' : '' }}">
-                                Custom Order
-                            </a>
+                            @auth
+                                <a href="{{ route('custom-order') }}"
+                                   class="brand-dropdown-link whitespace-nowrap {{ request()->routeIs('custom-order') ? 'bg-brand-light text-brand-primary' : '' }}">
+                                    Custom Order
+                                </a>
+                            @endauth
 
                             @auth
                                 <div class="grid gap-1 rounded-2xl border border-brand-border p-2">
@@ -129,10 +147,12 @@
                         About
                     </a>
 
-                    <a href="{{ route('custom-order') }}"
-                       class="whitespace-nowrap {{ request()->routeIs('custom-order') ? 'text-brand-primary' : 'text-brand-ink/75 hover:text-brand-primary' }}">
-                        Custom Order
-                    </a>
+                    @auth
+                        <a href="{{ route('custom-order') }}"
+                           class="whitespace-nowrap {{ request()->routeIs('custom-order') ? 'text-brand-primary' : 'text-brand-ink/75 hover:text-brand-primary' }}">
+                            Custom Order
+                        </a>
+                    @endauth
 
                     @auth
                         <div class="relative group">
@@ -181,6 +201,7 @@
 
             <div class="flex items-center justify-end gap-2 justify-self-end">
 
+                {{-- CART --}}
                 <a href="{{ route('cart') }}" class="brand-icon-button relative" aria-label="Cart" title="Cart">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-5 w-5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M3 4h2l2.4 10.2a2 2 0 0 0 2 1.6h7.8a2 2 0 0 0 2-1.5L21 8H7.2" />
@@ -192,6 +213,55 @@
                     @endif
                 </a>
 
+                {{-- NOTIFICATIONS --}}
+                @auth
+                    <details class="relative">
+                        <summary class="brand-icon-button relative list-none cursor-pointer"
+                                 aria-label="Notifications"
+                                 title="Notifications">
+
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-5 w-5">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                      d="M15 17h5l-1.4-1.4A2 2 0 0 1 18 14.2V11a6 6 0 1 0-12 0v3.2a2 2 0 0 1-.6 1.4L4 17h5" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 17a3 3 0 0 0 6 0" />
+                            </svg>
+
+                            @if ($unreadCount > 0)
+                                <span class="brand-badge absolute -right-1 -top-1">
+                                    {{ $unreadCount }}
+                                </span>
+                            @endif
+                        </summary>
+
+                        <div class="brand-dropdown-panel right-0 w-72 p-3">
+                            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-brand-secondary">
+                                Notifications
+                            </p>
+
+                            <div class="mt-2 grid gap-2">
+                                @forelse ($unreadNotifications as $notif)
+                                    <a href="{{ $notif->link ?? '#' }}"
+                                       class="block rounded-xl border border-brand-border bg-white p-2 hover:bg-brand-light">
+
+                                        <p class="text-sm font-semibold text-brand-primary">
+                                            {{ $notif->title }}
+                                        </p>
+
+                                        <p class="text-xs text-brand-ink/70 line-clamp-2">
+                                            {{ $notif->message }}
+                                        </p>
+                                    </a>
+                                @empty
+                                    <p class="text-sm text-brand-ink/60">
+                                        No new notifications.
+                                    </p>
+                                @endforelse
+                            </div>
+                        </div>
+                    </details>
+                @endauth
+
+                {{-- PROFILE --}}
                 @auth
                     <details class="relative">
                         <summary class="brand-icon-button list-none cursor-pointer" aria-label="Open profile menu" title="Profile menu">
