@@ -98,23 +98,11 @@
                         <div>
 
                             @if($setting->type === 'boolean')
-
-                                <span class="rounded-full bg-brand-light px-3 py-1 text-xs font-semibold text-brand-primary">
-                                    Toggle Setting
-                                </span>
-
+                                <x-status-badge label="Toggle Setting" />
                             @elseif($setting->type === 'percent')
-
-                                <span class="rounded-full bg-brand-light px-3 py-1 text-xs font-semibold text-brand-primary">
-                                    Percentage Fee
-                                </span>
-
+                                <x-status-badge label="Percentage Fee" />
                             @else
-
-                                <span class="rounded-full bg-brand-light px-3 py-1 text-xs font-semibold text-brand-primary">
-                                    Fixed Amount
-                                </span>
-
+                                <x-status-badge label="Fixed Amount" />
                             @endif
 
                         </div>

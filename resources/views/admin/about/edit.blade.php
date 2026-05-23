@@ -1,10 +1,14 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="rounded-[2rem] border border-brand-border bg-white p-6 shadow-sm">
+<div class="rounded-4xl border border-brand-border bg-white p-6 shadow-sm">
     <div>
         <h2 class="font-display text-2xl font-semibold text-brand-primary">About Section Settings</h2>
         <p class="mt-2 text-sm text-brand-ink/70">Manage the About page content that appears on the public website.</p>
+    </div>
+
+    <div class="mt-4">
+        <x-back-button href="{{ route('admin.about.index') }}" label="Back to About" />
     </div>
 
     <form method="POST" action="{{ route('admin.about.update') }}" class="mt-8 space-y-6">

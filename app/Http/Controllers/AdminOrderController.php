@@ -37,7 +37,7 @@ class AdminOrderController extends Controller
     // SHOW SINGLE ORDER
     public function show(Order $order)
     {
-        $order->load('items.product');
+        $order->load('items.product', 'items.productVariant', 'items.yarnColor');
         return view('admin.orders.show', compact('order'));
     }
 

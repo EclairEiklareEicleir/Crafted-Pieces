@@ -19,10 +19,12 @@
             </p>
         </div>
 
-        <a href="{{ route('custom-order') }}"
-           class="brand-btn-primary px-5 py-3 text-sm shadow-md hover:-translate-y-0.5">
-            Request a quote
-        </a>
+        @auth
+            <a href="{{ route('custom-order') }}"
+               class="brand-btn-primary px-5 py-3 text-sm shadow-md hover:-translate-y-0.5">
+                Request a quote
+            </a>
+        @endauth
 
     </div>
 

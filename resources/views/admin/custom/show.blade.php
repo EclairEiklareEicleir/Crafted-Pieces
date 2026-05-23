@@ -18,6 +18,10 @@
 
 <div class="grid gap-6 lg:grid-cols-[0.8fr_1.2fr]">
 
+    <div class="lg:col-span-2">
+        <x-back-button href="{{ route('admin.custom.index') }}" label="Back to Inbox" />
+    </div>
+
     {{-- LEFT INFO --}}
     <div class="space-y-6">
 
@@ -38,12 +42,16 @@
                 <p><strong>Theme:</strong> {{ $request->design_theme }}</p>
                 <p><strong>Preferred Size:</strong> {{ $request->preferred_size }}</p>
                 <p><strong>Payment Method:</strong> {{ $request->payment_method ?? '—' }}</p>
-                <p><strong>Payment Status:</strong> {{ ucfirst(str_replace('_', ' ', $request->payment_status ?? 'unpaid')) }}</p>
 
-                <p>
+                <div class="flex flex-wrap items-center gap-3">
+                    <strong>Payment Status:</strong>
+                    <x-status-badge :status="$request->payment_status ?? 'unpaid'" context="payment" />
+                </div>
+
+                <div class="flex flex-wrap items-center gap-3">
                     <strong>Status:</strong>
-                    {{ ucfirst($request->status) }}
-                </p>
+                    <x-status-badge :status="$request->status" context="custom" />
+                </div>
 
                 <p>
                     <strong>Estimated Price:</strong>
@@ -179,28 +187,30 @@
     </div>
 
     {{-- RIGHT CHAT --}}
-    <div class="rounded-4xl border border-brand-border bg-white p-6 shadow-sm">
+    <div class="rounded-4xl border border-brand-border bg-white p-6 shadow-sm lg:flex lg:min-h-[44rem] lg:flex-col">
 
         <h2 class="font-display text-2xl font-semibold text-brand-primary">
             Conversation
         </h2>
 
-        <x-custom-order-thread
-            :messages="$request->messages"
-            thread-id="admin-message-thread"
-            :viewer-id="auth()->id()"
-            :customer-id="$request->user_id"
-            viewer-label="You"
-            customer-label="Customer"
-            owner-label="Admin Owner"
-        />
+        <div class="mt-5 flex min-h-0 flex-1 flex-col">
+            <x-custom-order-thread
+                :messages="$request->messages"
+                thread-id="admin-message-thread"
+                :viewer-id="auth()->id()"
+                :customer-id="$request->user_id"
+                viewer-label="You"
+                customer-label="Customer"
+                owner-label="Admin Owner"
+            />
+        </div>
 
         {{-- MESSAGE FORM --}}
         @if (!$isLocked)
 
             <form method="POST"
-                  action="{{ route('admin.custom.message', $request->id) }}"
-                  class="sticky bottom-0 mt-6 rounded-[1.75rem] border border-brand-border bg-brand-light/30 p-4 shadow-sm backdrop-blur sm:p-5">
+                action="{{ route('admin.custom.message', $request->id) }}"
+                class="mt-6 rounded-[1.75rem] border border-brand-border bg-brand-light/30 p-4 shadow-sm backdrop-blur sm:p-5">
 
                 @csrf
 

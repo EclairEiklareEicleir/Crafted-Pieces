@@ -31,7 +31,7 @@ class HomeController extends Controller
                 ];
             });
 
-        $featuredProducts = Product::latest()->take(8)->get();
+        $featuredProducts = Product::with(['defaultVariant', 'variants', 'yarnColors'])->latest()->take(8)->get();
 
         $steps = [
             ['title'=>'Browse','desc'=>'Explore handmade crochet pieces available in our shop.'],

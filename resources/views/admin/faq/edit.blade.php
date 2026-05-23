@@ -1,13 +1,13 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="rounded-[2rem] border border-brand-border bg-white p-6 shadow-sm">
+<div class="rounded-4xl border border-brand-border bg-white p-6 shadow-sm">
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
             <h2 class="font-display text-2xl font-semibold text-brand-primary">Edit FAQ</h2>
             <p class="mt-2 text-sm text-brand-ink/70">Update the frequently asked question and answer.</p>
         </div>
-        <a href="{{ route('admin.faq.index') }}" class="brand-btn-secondary px-5 py-2 text-sm">Back to FAQ List</a>
+        <x-back-button href="{{ route('admin.faq.index') }}" label="Back to FAQ" />
     </div>
 
     <form method="POST" action="{{ route('admin.faq.update', $faq) }}" class="mt-8 space-y-6">

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Services\PricingService;
 
@@ -19,7 +20,17 @@ class OrderController extends Controller
             abort(403);
         }
 
-        $order->load('items.product');
+        if (! extension_loaded('gd')) {
+            Log::error('Receipt PDF generation failed because the PHP GD extension is missing.', [
+                'order_id' => $order->id,
+                'user_id' => Auth::id(),
+                'php_binary' => PHP_BINARY,
+            ]);
+
+            abort(500, 'PDF receipts require the PHP GD extension. Enable extension=gd in C:\\xampp\\php\\php.ini and restart Apache or php artisan serve.');
+        }
+
+        $order->load('items.product', 'items.productVariant', 'items.yarnColor');
 
         $pricing = (new PricingService())
             ->calculateFromOrder($order);
@@ -36,7 +47,7 @@ class OrderController extends Controller
     // =========================
     public function index()
     {
-        $orders = Order::with('items.product')
+        $orders = Order::with('items.product', 'items.productVariant', 'items.yarnColor')
             ->where('user_id', Auth::id())
             ->latest()
             ->get();
@@ -53,7 +64,7 @@ class OrderController extends Controller
             abort(403);
         }
 
-        $order->load('items.product');
+        $order->load('items.product', 'items.productVariant', 'items.yarnColor');
         return view('user.orders.show', compact('order'));
     }
 
@@ -75,7 +86,7 @@ class OrderController extends Controller
             'email' => 'required|email'
         ]);
 
-        $order = Order::with('items.product')
+        $order = Order::with('items.product', 'items.productVariant', 'items.yarnColor')
             ->where('id', $request->order_id)
             ->where('email', $request->email)
             ->first();

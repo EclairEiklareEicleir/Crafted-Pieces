@@ -1,13 +1,16 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="rounded-[2rem] border border-brand-border bg-white p-6 shadow-sm">
+<div class="rounded-4xl border border-brand-border bg-white p-6 shadow-sm">
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
             <h2 class="font-display text-2xl font-semibold text-brand-primary">FAQ Management</h2>
             <p class="mt-2 text-sm text-brand-ink/70">Create, edit, and manage frequently asked questions on the public website.</p>
         </div>
-        <a href="{{ route('admin.faq.create') }}" class="brand-btn-primary px-5 py-2 text-sm">+ New FAQ</a>
+        <div class="flex flex-wrap gap-2">
+            <x-back-button href="{{ route('admin.dashboard') }}" label="Back to Dashboard" />
+            <a href="{{ route('admin.faq.create') }}" class="brand-btn-primary px-5 py-2 text-sm">+ New FAQ</a>
+        </div>
     </div>
 
     @if ($faqs->count())
@@ -29,11 +32,7 @@
                                 <p class="font-medium text-brand-primary">{{ $faq->question }}</p>
                             </td>
                             <td class="px-3 py-3">
-                                @if ($faq->active)
-                                    <span class="inline-flex rounded-full bg-green-100 px-2 py-1 text-xs font-semibold text-green-700">Active</span>
-                                @else
-                                    <span class="inline-flex rounded-full bg-gray-100 px-2 py-1 text-xs font-semibold text-gray-700">Inactive</span>
-                                @endif
+                                <x-status-badge :status="$faq->active ? 'active' : 'inactive'" context="toggle" />
                             </td>
                             <td class="px-3 py-3">
                                 <div class="flex gap-2">

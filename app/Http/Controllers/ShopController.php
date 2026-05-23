@@ -15,6 +15,7 @@ class ShopController extends Controller
         $categories = Category::all();
 
         $products = Product::query()
+            ->with(['defaultVariant', 'variants', 'yarnColors'])
             ->when($activeCategory, function ($query) use ($activeCategory) {
 
                 $query->whereHas('category', function ($q) use ($activeCategory) {

@@ -2,24 +2,21 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>403 - Forbidden</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ config('app.name', 'Crafted Pieces') }}</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/crafted-pieces-logo.png') }}">
+    <link rel="shortcut icon" href="{{ asset('images/crafted-pieces-logo.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/crafted-pieces-logo.png') }}">
     @vite(['resources/css/app.css'])
 </head>
 
-<body class="flex items-center justify-center min-h-screen bg-brand-light text-brand-ink">
-
-    <div class="text-center space-y-4">
-        <h1 class="text-6xl font-bold text-red-500">403</h1>
-
-        <p class="text-lg text-brand-secondary">
-            You do not have permission to access this page.
-        </p>
-
-        <a href="{{ route('home') }}"
-           class="inline-block mt-4 px-6 py-3 bg-brand-primary text-white rounded-xl">
-            Go Home
-        </a>
-    </div>
-
+<body class="text-brand-ink antialiased">
+    <x-error-shell
+        code="403"
+        title="Access denied"
+        message="You do not have permission to view this page."
+        primary-label="Back Home"
+        secondary-label="Go Back"
+    />
 </body>
 </html>

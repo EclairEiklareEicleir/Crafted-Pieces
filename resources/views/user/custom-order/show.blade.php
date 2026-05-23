@@ -58,6 +58,10 @@
 
     <div class="relative mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:px-8 lg:py-20">
 
+        <div class="mb-6">
+            <x-back-button href="{{ route('custom-order.index') }}" label="Back to Orders" />
+        </div>
+
         <div class="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
                 <span class="brand-pill bg-white/80 ring-1 ring-brand-border backdrop-blur">
@@ -389,22 +393,24 @@
                     </p>
                 </div>
 
-                <x-custom-order-thread
-                    :messages="$order->messages"
-                    thread-id="customer-message-thread"
-                    :viewer-id="auth()->id()"
-                    :customer-id="auth()->id()"
-                    viewer-label="You"
-                    customer-label="Customer"
-                    owner-label="Admin Owner"
-                />
+                <div class="mt-5 flex min-h-0 flex-1 flex-col">
+                    <x-custom-order-thread
+                        :messages="$order->messages"
+                        thread-id="customer-message-thread"
+                        :viewer-id="auth()->id()"
+                        :customer-id="auth()->id()"
+                        viewer-label="You"
+                        customer-label="Customer"
+                        owner-label="Admin Owner"
+                    />
+                </div>
 
                 {{-- MESSAGE FORM --}}
                 @if (!$isLocked)
                     <form
                         method="POST"
                         action="{{ route('custom-order.message', $order->id) }}"
-                        class="sticky bottom-0 mt-6 rounded-[1.75rem] border border-brand-border bg-brand-light/30 p-4 shadow-sm backdrop-blur sm:p-5"
+                        class="mt-6 rounded-[1.75rem] border border-brand-border bg-brand-light/30 p-4 shadow-sm backdrop-blur sm:p-5"
                     >
 
                         @csrf

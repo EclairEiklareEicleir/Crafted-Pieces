@@ -4,6 +4,17 @@
 
 <section class="mx-auto max-w-3xl py-14 px-4">
 
+    <div class="mb-6 flex items-center justify-between gap-3">
+        <x-back-button href="{{ route('orders.track.form') }}" label="Back to Tracking" />
+
+        <a href="{{ route('orders.receipt.download', $order->id) }}"
+           class="brand-btn-primary inline-flex items-center px-6 py-2 text-sm">
+
+            Download Receipt
+
+        </a>
+    </div>
+
     <div class="rounded-2xl border border-brand-border bg-white p-6">
 
         {{-- HEADER (same as receipt) --}}
@@ -42,6 +53,12 @@
                         PHP {{ number_format($item->quantity * $item->price, 2) }}
                     </span>
                 </div>
+
+                @if ($item->yarnColor?->name || $item->variant_name)
+                    <div class="mt-1 text-xs text-brand-ink/55">
+                        Yarn color: {{ $item->yarnColor?->name ?? $item->variant_name }}
+                    </div>
+                @endif
             @endforeach
 
         </div>
@@ -79,18 +96,6 @@
             </div>
 
         </div>
-
-    </div>
-
-    {{-- DOWNLOAD RECEIPT --}}
-    <div class="mt-6 flex justify-end">
-
-        <a href="{{ route('orders.receipt.download', $order->id) }}"
-        class="brand-btn-primary inline-flex items-center px-6 py-2 text-sm">
-
-            Download Receipt
-
-        </a>
 
     </div>
 

@@ -1,14 +1,17 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="rounded-[2rem] border border-brand-border bg-white p-6 shadow-sm">
+<div class="rounded-4xl border border-brand-border bg-white p-6 shadow-sm">
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
             <h2 class="font-display text-2xl font-semibold text-brand-primary">About Section</h2>
             <p class="mt-2 text-sm text-brand-ink/70">Manage the About page content displayed on the store.</p>
         </div>
 
-        <a href="{{ route('admin.about.create') }}" class="brand-btn-primary px-5 py-2 text-sm whitespace-nowrap">+ Add New Content</a>
+        <div class="flex flex-wrap gap-2">
+            <x-back-button href="{{ route('admin.dashboard') }}" label="Back to Dashboard" />
+            <a href="{{ route('admin.about.create') }}" class="brand-btn-primary px-5 py-2 text-sm whitespace-nowrap">+ Add New Content</a>
+        </div>
     </div>
 
     @if (session('success'))

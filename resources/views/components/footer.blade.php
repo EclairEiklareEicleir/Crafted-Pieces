@@ -28,9 +28,11 @@
                     Shop All
                 </a>
 
-                <a class="flex items-center gap-2 transition hover:text-brand-primary" href="{{ route('custom-order') }}">
-                    Custom Orders
-                </a>
+                @auth
+                    <a class="flex items-center gap-2 transition hover:text-brand-primary" href="{{ route('custom-order') }}">
+                        Custom Orders
+                    </a>
+                @endauth
 
                 <a class="flex items-center gap-2 transition hover:text-brand-primary" href="{{ route('about') }}">
                     About Us

@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\Category;
+use App\Models\YarnColor;
+use App\Support\ProductImage;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class AdminProductController extends Controller
 {
@@ -14,7 +16,8 @@ class AdminProductController extends Controller
     {
         return view('admin.products.index', [
             'categories' => Category::latest()->get(),
-            'products' => Product::with('category')->latest()->get(),
+            'products' => Product::with(['category', 'defaultVariant', 'yarnColors'])->latest()->get(),
+            'yarnColors' => YarnColor::ordered()->get(),
         ]);
     }
 
@@ -22,6 +25,7 @@ class AdminProductController extends Controller
     {
         return view('admin.products.create', [
             'categories' => Category::all(),
+            'yarnColors' => YarnColor::ordered()->get(),
         ]);
     }
 
@@ -35,6 +39,8 @@ class AdminProductController extends Controller
             'category_id' => 'nullable|exists:categories,id',
             'product_type' => 'required|in:standard,custom',
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'yarn_color_ids' => 'nullable|array',
+            'yarn_color_ids.*' => 'integer|exists:yarn_colors,id',
         ]);
 
         $slug = Str::slug($request->name);
@@ -51,10 +57,10 @@ class AdminProductController extends Controller
         $imagePath = null;
 
         if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('products', 'public');
+            $imagePath = $this->storeFloatingProductImage($request);
         }
 
-        Product::create([
+        $product = Product::create([
             'name' => $request->name,
             'slug' => $slug,
             'description' => $request->description,
@@ -66,6 +72,8 @@ class AdminProductController extends Controller
             'is_active' => true,
         ]);
 
+        $product->yarnColors()->sync($request->input('yarn_color_ids', []));
+
         return redirect()->route('admin.products.index')
             ->with('success', 'Product created successfully.');
     }
@@ -73,8 +81,9 @@ class AdminProductController extends Controller
     public function edit(Product $product)
     {
         return view('admin.products.edit', [
-            'product' => $product,
+            'product' => $product->load('yarnColors'),
             'categories' => Category::all(),
+            'yarnColors' => YarnColor::ordered()->get(),
         ]);
     }
 
@@ -88,6 +97,8 @@ class AdminProductController extends Controller
             'category_id' => 'nullable|exists:categories,id',
             'product_type' => 'required|in:standard,custom',
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'yarn_color_ids' => 'nullable|array',
+            'yarn_color_ids.*' => 'integer|exists:yarn_colors,id',
         ]);
 
         $slug = Str::slug($request->name);
@@ -115,7 +126,7 @@ class AdminProductController extends Controller
             }
 
             // store new image
-            $imagePath = $request->file('image')->store('products', 'public');
+            $imagePath = $this->storeFloatingProductImage($request);
         }
 
         $product->update([
@@ -129,6 +140,8 @@ class AdminProductController extends Controller
             'image' => $imagePath,
             'is_active' => $request->boolean('is_active'),
         ]);
+
+        $product->yarnColors()->sync($request->input('yarn_color_ids', []));
 
         return redirect()->route('admin.products.index')
             ->with('success', 'Product updated successfully.');
@@ -145,5 +158,21 @@ class AdminProductController extends Controller
 
         return redirect()->route('admin.products.index')
             ->with('success', 'Product deleted successfully.');
+    }
+
+    private function storeFloatingProductImage(Request $request): string
+    {
+        $storedPath = $request->file('image')->store('products', 'public');
+        $sourcePath = storage_path('app/public/' . $storedPath);
+        $floatingPath = 'products/transparent/' . pathinfo($storedPath, PATHINFO_FILENAME) . '.png';
+        $targetPath = storage_path('app/public/' . $floatingPath);
+
+        if (ProductImage::createTransparentCopy($sourcePath, $targetPath)) {
+            Storage::disk('public')->delete($storedPath);
+
+            return $floatingPath;
+        }
+
+        return $storedPath;
     }
 }

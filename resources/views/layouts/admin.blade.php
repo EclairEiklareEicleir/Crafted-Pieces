@@ -5,7 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ $pageTitle ?? 'Admin' }}</title>
+    <title>{{ config('app.name', 'Crafted Pieces') }}</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/crafted-pieces-logo.png') }}">
+    <link rel="shortcut icon" href="{{ asset('images/crafted-pieces-logo.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/crafted-pieces-logo.png') }}">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>

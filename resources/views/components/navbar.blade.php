@@ -62,8 +62,12 @@
                             </a>
 
                             @auth
+<<<<<<< HEAD
                                 <a href="{{ route('custom-order') }}"
                                    class="brand-dropdown-link whitespace-nowrap {{ request()->routeIs('custom-order') ? 'bg-brand-light text-brand-primary' : '' }}">
+=======
+                                <a href="{{ route('custom-order') }}" class="brand-dropdown-link whitespace-nowrap {{ request()->routeIs('custom-order') ? 'bg-brand-light text-brand-primary' : '' }}">
+>>>>>>> origin/feature/product-variants-yarn-ui
                                     Custom Order
                                 </a>
                             @endauth

@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>the_crafted_pieces</title>
+    <title>{{ config('app.name', 'Crafted Pieces') }}</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/crafted-pieces-logo.png') }}">
+    <link rel="shortcut icon" href="{{ asset('images/crafted-pieces-logo.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/crafted-pieces-logo.png') }}">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
@@ -14,7 +17,7 @@
 
     @if (session('success') || $errors->any())
 
-        <div id="global-alert" class="fixed right-4 top-4 z-[9999] w-full max-w-lg px-4">
+        <div id="global-alert" class="fixed right-4 top-4 z-9999 w-full max-w-lg px-4">
 
             <div id="global-alert-box"
                  class="translate-x-[120%] rounded-2xl border border-[#eadfd7] bg-white shadow-2xl transition-all duration-500 ease-out">
@@ -94,7 +97,7 @@
 
                 openAuthModal();
 
-                const form = @json($authForm);
+                const form = '{{ $authForm }}';
 
                 if (form === 'register') {
                     showRegister();
@@ -109,26 +112,60 @@
     <script>
         let authState = 'login';
 
+        function updateModalLock() {
+            const openModal = document.querySelector('[data-auth-modal]:not(.hidden), [data-legal-modal]:not(.hidden)');
+            document.body.classList.toggle('overflow-hidden', Boolean(openModal));
+        }
+
+        function openLegalModal(type) {
+            const modal = document.querySelector(`[data-legal-modal="${type}"]`);
+
+            if (!modal) return;
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            updateModalLock();
+        }
+
+        function closeLegalModal(type) {
+            const modal = document.querySelector(`[data-legal-modal="${type}"]`);
+
+            if (!modal) return;
+
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            updateModalLock();
+        }
+
         function openAuthModal() {
             const modal = document.getElementById('auth-modal');
+
+            if (!modal) return;
+
             modal.classList.remove('hidden');
+            modal.classList.add('flex');
 
             requestAnimationFrame(() => {
                 modal.classList.add('opacity-100');
                 modal.classList.remove('opacity-0');
             });
 
+            updateModalLock();
             renderAuth();
         }
 
         function closeAuthModal() {
             const modal = document.getElementById('auth-modal');
 
+            if (!modal) return;
+
             modal.classList.remove('opacity-100');
             modal.classList.add('opacity-0');
 
             setTimeout(() => {
                 modal.classList.add('hidden');
+                modal.classList.remove('flex');
+                updateModalLock();
             }, 200);
         }
 
@@ -222,6 +259,25 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             initRegisterGuard();
+
+            document.querySelectorAll('[data-auth-modal-open]').forEach((button) => {
+                button.addEventListener('click', () => {
+                    openAuthModal();
+                    showLogin();
+                });
+            });
+
+            document.querySelectorAll('[data-legal-modal-open]').forEach((button) => {
+                button.addEventListener('click', () => {
+                    openLegalModal(button.dataset.legalModalOpen);
+                });
+            });
+
+            document.querySelectorAll('[data-legal-modal-close]').forEach((button) => {
+                button.addEventListener('click', () => {
+                    closeLegalModal(button.dataset.legalModalClose);
+                });
+            });
         });
     </script>
 

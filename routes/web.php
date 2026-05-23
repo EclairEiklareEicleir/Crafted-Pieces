@@ -23,6 +23,7 @@ use App\Http\Controllers\AdminSettingController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\AdminAboutSectionController;
 use App\Http\Controllers\AdminFaqController;
+use App\Http\Controllers\AdminYarnColorController;
 use App\Http\Controllers\NotificationController;
 
 /*
@@ -229,6 +230,15 @@ Route::middleware(['auth', 'role:owner'])->group(function () {
 
     Route::delete('/admin/products/{product}', [AdminProductController::class, 'destroy'])
         ->name('admin.products.destroy');
+
+    Route::post('/admin/yarn-colors', [AdminYarnColorController::class, 'store'])
+        ->name('admin.yarn-colors.store');
+
+    Route::put('/admin/yarn-colors/{yarnColor}', [AdminYarnColorController::class, 'update'])
+        ->name('admin.yarn-colors.update');
+
+    Route::delete('/admin/yarn-colors/{yarnColor}', [AdminYarnColorController::class, 'destroy'])
+        ->name('admin.yarn-colors.destroy');
 
     /*
     |--------------------------------------------------------------------------

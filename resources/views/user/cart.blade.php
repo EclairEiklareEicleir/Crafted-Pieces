@@ -11,7 +11,7 @@
     <div class="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
 
         {{-- CART ITEMS --}}
-        <div class="rounded-[2rem] border border-brand-border bg-white p-6 shadow-sm">
+        <div class="rounded-4xl border border-brand-border bg-white p-6 shadow-sm">
 
             <p class="text-xs font-semibold uppercase tracking-[0.2em] text-brand-secondary">
                 Cart review
@@ -37,7 +37,7 @@
 
 
         {{-- SUMMARY --}}
-        <div class="rounded-[2rem] border border-brand-border bg-brand-light/40 p-6">
+        <div class="rounded-4xl border border-brand-border bg-brand-light/40 p-6">
 
             <h2 class="font-display text-2xl font-semibold text-brand-primary">
                 Summary
@@ -56,8 +56,13 @@
                         <div class="flex justify-between">
                             <div>
                                 <p class="font-semibold">
-                                    {{ $item->name }}
+                                    {{ $item->product?->name ?? 'Deleted Product' }}
                                 </p>
+                                @if ($item->yarnColor?->name || $item->variant_name)
+                                    <p class="text-xs text-brand-ink/55">
+                                        Yarn color: {{ $item->yarnColor?->name ?? $item->variant_name }}
+                                    </p>
+                                @endif
                                 <p class="text-xs text-brand-ink/55">
                                     {{ $item->quantity }} × PHP {{ number_format($item->price) }}
                                 </p>
