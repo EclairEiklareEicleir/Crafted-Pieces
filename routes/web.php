@@ -25,6 +25,7 @@ use App\Http\Controllers\AdminAboutSectionController;
 use App\Http\Controllers\AdminFaqController;
 use App\Http\Controllers\AdminYarnColorController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\ChatbotController;
 
 /*
 |--------------------------------------------------------------------------
@@ -285,6 +286,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::get('/notifications/{notification}', [NotificationController::class, 'show'])->name('notifications.show');
 });
+
+Route::post('/chatbot/message', [ChatbotController::class, 'message'])->name('chatbot.message');
+
 
 /*
 |--------------------------------------------------------------------------
