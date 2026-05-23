@@ -72,6 +72,9 @@
             <a href="{{ route('admin.settings.index') }}" class="brand-admin-nav-link {{ request()->routeIs('admin.settings.*') ? 'bg-brand-light text-brand-primary' : '' }}">
                 Settings
             </a>
+            <a href="{{ route('admin.chatbot.index') }}" class="brand-admin-nav-link {{ request()->routeIs('admin.chatbot.*') ? 'bg-brand-light text-brand-primary' : '' }}">
+                Chatbot
+            </a>
         </nav>
 
         <div class="mt-auto border-t border-brand-border p-4">

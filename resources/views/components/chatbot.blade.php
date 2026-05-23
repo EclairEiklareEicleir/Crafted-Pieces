@@ -186,9 +186,10 @@
                         .getAttribute('content'),
                 },
 
-                body: JSON.stringify({
-                    message: message
-                })
+body: JSON.stringify({
+    message: message,
+    context: window.chatbotContext ?? null
+})
             });
 
             const data = await response.json();

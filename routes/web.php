@@ -26,6 +26,7 @@ use App\Http\Controllers\AdminFaqController;
 use App\Http\Controllers\AdminYarnColorController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ChatbotController;
+use App\Http\Controllers\AdminChatbotFaqController;
 
 /*
 |--------------------------------------------------------------------------
@@ -289,7 +290,17 @@ Route::middleware('auth')->group(function () {
 
 Route::post('/chatbot/message', [ChatbotController::class, 'message'])->name('chatbot.message');
 
+Route::prefix('admin')->name('admin.')->group(function () {
 
+    Route::get('/chatbot', [AdminChatbotFaqController::class, 'index'])->name('chatbot.index');
+    Route::get('/chatbot/create', [AdminChatbotFaqController::class, 'create'])->name('chatbot.create');
+    Route::post('/chatbot', [AdminChatbotFaqController::class, 'store'])->name('chatbot.store');
+
+    Route::get('/chatbot/{faq}/edit', [AdminChatbotFaqController::class, 'edit'])->name('chatbot.edit');
+    Route::put('/chatbot/{faq}', [AdminChatbotFaqController::class, 'update'])->name('chatbot.update');
+
+    Route::delete('/chatbot/{faq}', [AdminChatbotFaqController::class, 'destroy'])->name('chatbot.destroy');
+});
 /*
 |--------------------------------------------------------------------------
 | ERROR PAGES
