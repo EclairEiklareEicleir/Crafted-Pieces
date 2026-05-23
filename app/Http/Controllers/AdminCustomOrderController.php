@@ -221,6 +221,21 @@ class AdminCustomOrderController extends Controller
         );
     }
 
+    public function destroy(CustomOrderRequest $customOrder)
+    {
+        try {
+            $customOrder->delete();
+
+            return redirect()
+                ->route('admin.custom.index')
+                ->with('success', 'Custom order request deleted.');
+        } catch (\Throwable $e) {
+            report($e);
+
+            return back()->with('error', 'Unable to delete this custom order request right now.');
+        }
+    }
+
     public function downloadReceipt(CustomOrderRequest $customOrder)
     {
         if (! extension_loaded('gd')) {

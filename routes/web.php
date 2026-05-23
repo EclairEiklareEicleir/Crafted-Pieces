@@ -7,6 +7,7 @@ use App\Http\Controllers\StaticController;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ShopController;
+use App\Http\Controllers\SearchController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\CustomOrderPayMongoController;
@@ -38,6 +39,8 @@ use App\Http\Controllers\AdminChatbotFaqController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/shop', [ShopController::class, 'index'])->name('shop');
+Route::get('/search', [SearchController::class, 'index'])->name('products.search');
+Route::get('/search/suggestions', [SearchController::class, 'suggestions'])->name('products.search.suggestions');
 Route::get('/product/{slug}', [ProductController::class, 'show'])->name('product.show');
 Route::get('/about', [StaticController::class, 'about'])->name('about');
 Route::get('/privacy-policy', [StaticController::class, 'privacy'])->name('privacy.policy');
@@ -49,31 +52,39 @@ Route::get('/terms-of-service', [StaticController::class, 'terms'])->name('terms
 |--------------------------------------------------------------------------
 */
 
-// FORM ONLY (NO VARIABLES PASSED)
-Route::get('/custom-order', function () {
-    return view('user.custom-order');
-})->name('custom-order');
+Route::middleware(['customer.login'])->group(function () {
 
-// CREATE REQUEST
-Route::post('/custom-order', [CustomOrderController::class, 'store'])
-    ->name('custom-order.submit');
+    // FORM ONLY (NO VARIABLES PASSED)
+    Route::get('/custom-order', function () {
+        return view('user.custom-order');
+    })->name('custom-order');
 
-// TICKET / CHAT VIEW
-Route::get('/custom-order/{customOrder}', [CustomOrderController::class, 'show'])
-    ->name('custom-order.show');
+    // CREATE REQUEST
+    Route::post('/custom-order', [CustomOrderController::class, 'store'])
+        ->name('custom-order.submit');
 
-// MESSAGE
-Route::post('/custom-order/{customOrder}/message', [CustomOrderController::class, 'message'])
-    ->name('custom-order.message');
+    // TICKET / CHAT VIEW
+    Route::get('/custom-order/{customOrder}', [CustomOrderController::class, 'show'])
+        ->name('custom-order.show');
 
-Route::post('/custom-order/{customOrder}/paymongo/checkout', [CustomOrderPayMongoController::class, 'checkout'])
-    ->name('custom-order.paymongo.checkout');
+    // MESSAGE
+    Route::post('/custom-order/{customOrder}/message', [CustomOrderController::class, 'message'])
+        ->name('custom-order.message');
 
-Route::get('/custom-order/{customOrder}/paymongo/success', [CustomOrderPayMongoController::class, 'success'])
-    ->name('custom-order.paymongo.success');
+    Route::post('/custom-order/{customOrder}/paymongo/checkout', [CustomOrderPayMongoController::class, 'checkout'])
+        ->name('custom-order.paymongo.checkout');
 
-Route::get('/custom-order/{customOrder}/paymongo/cancel', [CustomOrderPayMongoController::class, 'cancel'])
-    ->name('custom-order.paymongo.cancel');
+    Route::get('/custom-order/{customOrder}/paymongo/success', [CustomOrderPayMongoController::class, 'success'])
+        ->middleware('signed')
+        ->name('custom-order.paymongo.success');
+
+    Route::get('/custom-order/{customOrder}/paymongo/cancel', [CustomOrderPayMongoController::class, 'cancel'])
+        ->middleware('signed')
+        ->name('custom-order.paymongo.cancel');
+
+    Route::get('/custom-order/{order}/receipt', [CheckoutController::class, 'downloadCustomReceipt'])
+        ->name('custom-order.receipt');
+});
 
 /*
 |--------------------------------------------------------------------------
@@ -90,8 +101,12 @@ Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout');
 Route::post('/checkout', [CheckoutController::class, 'submit'])->name('checkout.submit');
 
 Route::get('/order/success/{order}', [CheckoutController::class, 'success'])->name('checkout.success');
-Route::get('/checkout/paymongo/success/{order}', [PayMongoController::class, 'success'])->name('checkout.paymongo.success');
-Route::get('/checkout/paymongo/cancel/{order}', [PayMongoController::class, 'cancel'])->name('checkout.paymongo.cancel');
+Route::get('/checkout/paymongo/success/{order}', [PayMongoController::class, 'success'])
+    ->middleware('signed')
+    ->name('checkout.paymongo.success');
+Route::get('/checkout/paymongo/cancel/{order}', [PayMongoController::class, 'cancel'])
+    ->middleware('signed')
+    ->name('checkout.paymongo.cancel');
 Route::post('/checkout/paymongo/webhook', [PayMongoController::class, 'webhook'])->name('checkout.paymongo.webhook');
 
 /*
@@ -104,7 +119,6 @@ Route::get('/track-order', [OrderController::class, 'trackForm'])->name('orders.
 Route::post('/track-order', [OrderController::class, 'track'])->name('orders.track');
 Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
 Route::get('/orders/{order}/receipt', [OrderController::class, 'downloadReceipt'])->name('orders.receipt.download');
-Route::get('/custom-order/{order}/receipt', [CheckoutController::class, 'downloadCustomReceipt'])->name('custom-order.receipt');
 
 Route::middleware(['auth', 'role:user'])->group(function () {
 
@@ -151,6 +165,9 @@ Route::middleware(['auth', 'role:owner'])->group(function () {
 
     Route::get('/custom-requests/{customOrder}/receipt', [AdminCustomOrderController::class, 'downloadReceipt'])
         ->name('admin.custom.receipt');
+
+    Route::delete('/custom-requests/{customOrder}', [AdminCustomOrderController::class, 'destroy'])
+        ->name('admin.custom.destroy');
 
     Route::post('/custom-requests/{customOrder}/message', [AdminCustomOrderController::class, 'message'])
         ->name('admin.custom.message');

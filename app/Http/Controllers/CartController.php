@@ -6,59 +6,49 @@ use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Product;
 use App\Models\YarnColor;
+use App\Support\SessionCart;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class CartController extends Controller
 {
-    private function getCart()
+    private function getCart(bool $create = true)
     {
-        if (Auth::check()) {
-            return Cart::firstOrCreate([
-                'user_id' => Auth::id()
-            ]);
-        }
-
-        return null;
+        return Cart::current($create);
     }
 
     public function index()
     {
-        $cart = $this->getCart();
+        if (Auth::check()) {
+            $cart = $this->getCart(false);
 
-        $cartItems = $cart
-            ? $cart->items()->with(['product', 'productVariant', 'yarnColor'])->latest()->get()
-            : collect();
+            $cartItems = $cart
+                ? $cart->items()->with(['product', 'productVariant', 'yarnColor'])->latest()->get()
+                : collect();
+        } else {
+            $cartItems = SessionCart::items();
+        }
 
         return view('user.cart', compact('cartItems'));
     }
 
     public function add(Request $request, $slug)
     {
-        if (! Auth::check()) {
-            return back()
-                ->withErrors(['auth' => 'Please log in to add items to your cart.'])
-                ->with('auth_form', 'login');
-        }
-
         $request->validate([
             'yarn_color_id' => 'required|integer|exists:yarn_colors,id',
             'product_variant_id' => 'nullable|integer|exists:product_variants,id',
             'quantity' => 'nullable|integer|min:1|max:99',
         ]);
 
-        $cart = $this->getCart();
-        if (! $cart) {
-            return back()
-                ->withErrors(['auth' => 'Please log in to add items to your cart.'])
-                ->with('auth_form', 'login');
-        }
-
         $quantity = (int) $request->input('quantity', 1);
 
         $product = Product::with(['variants' => function ($query) {
             $query->orderBy('sort_order')->orderBy('id');
         }, 'defaultVariant', 'yarnColors'])->where('slug', $slug)->firstOrFail();
+
+        if ($message = $this->productAvailabilityMessage($product, $quantity)) {
+            return back()->withErrors(['product' => $message]);
+        }
 
         $availableYarnColors = YarnColor::activeOptionsForProduct($product);
         $yarnColor = $availableYarnColors->firstWhere('id', (int) $request->yarn_color_id);
@@ -77,10 +67,33 @@ class CartController extends Controller
             }
         }
 
+        if (! Auth::check()) {
+            $newQuantity = SessionCart::quantityFor($product, $yarnColor) + $quantity;
+
+            if ($message = $this->productAvailabilityMessage($product, $newQuantity)) {
+                return back()->withErrors(['quantity' => $message]);
+            }
+
+            SessionCart::add($product, $variant, $yarnColor, $quantity);
+
+            return back()->with('success', 'Added to cart');
+        }
+
+        $cart = $this->getCart();
+        if (! $cart) {
+            return back()->withErrors(['cart' => 'Unable to access your cart. Please refresh and try again.']);
+        }
+
         $item = $cart->items()
             ->where('product_id', $product->id)
             ->where('yarn_color_id', $yarnColor->id)
             ->first();
+
+        $newQuantity = (int) ($item?->quantity ?? 0) + $quantity;
+
+        if ($message = $this->productAvailabilityMessage($product, $newQuantity)) {
+            return back()->withErrors(['quantity' => $message]);
+        }
 
         if ($item) {
             $item->increment('quantity', $quantity);
@@ -109,24 +122,51 @@ class CartController extends Controller
 
     public function update(Request $request, $id)
     {
-        if (! Auth::check()) {
-            return back()
-                ->withErrors(['auth' => 'Please log in to update your cart.'])
-                ->with('auth_form', 'login');
-        }
-
         $request->validate([
             'quantity' => 'required|integer|min:1|max:99',
         ]);
 
-        $item = CartItem::where('id', $id)
-            ->whereHas('cart', function ($query) {
-                $query->where('user_id', Auth::id());
+        $quantity = (int) $request->quantity;
+
+        if (! Auth::check()) {
+            $item = SessionCart::item((string) $id);
+
+            if (! $item) {
+                return back()->withErrors(['cart' => 'That cart item could not be found.']);
+            }
+
+            if ($message = $this->productAvailabilityMessage($item->product, $quantity)) {
+                return back()->withErrors(['quantity' => $message]);
+            }
+
+            SessionCart::update((string) $id, $quantity);
+
+            return back()->with('success', 'Cart updated');
+        }
+
+        $cart = $this->getCart(false);
+
+        if (! $cart) {
+            return back()->withErrors(['cart' => 'Your cart is empty.']);
+        }
+
+        $item = CartItem::with('product')
+            ->where('id', $id)
+            ->whereHas('cart', function ($query) use ($cart) {
+                $query->where('id', $cart->id);
             })
-            ->firstOrFail();
+            ->first();
+
+        if (! $item) {
+            return back()->withErrors(['cart' => 'That cart item could not be found.']);
+        }
+
+        if ($message = $this->productAvailabilityMessage($item->product, $quantity)) {
+            return back()->withErrors(['quantity' => $message]);
+        }
 
         $item->update([
-            'quantity' => $request->quantity
+            'quantity' => $quantity
         ]);
 
         return back()->with('success', 'Cart updated');
@@ -135,18 +175,52 @@ class CartController extends Controller
     public function remove($id)
     {
         if (! Auth::check()) {
-            return back()
-                ->withErrors(['auth' => 'Please log in to update your cart.'])
-                ->with('auth_form', 'login');
+            if (! SessionCart::remove((string) $id)) {
+                return back()->withErrors(['cart' => 'That cart item could not be found.']);
+            }
+
+            return back()->with('success', 'Item removed');
         }
 
-        CartItem::where('id', $id)
-            ->whereHas('cart', function ($query) {
-                $query->where('user_id', Auth::id());
+        $cart = $this->getCart(false);
+
+        if (! $cart) {
+            return back()->withErrors(['cart' => 'Your cart is empty.']);
+        }
+
+        $item = CartItem::where('id', $id)
+            ->whereHas('cart', function ($query) use ($cart) {
+                $query->where('id', $cart->id);
             })
-            ->firstOrFail()
-            ->delete();
+            ->first();
+
+        if (! $item) {
+            return back()->withErrors(['cart' => 'That cart item could not be found.']);
+        }
+
+        $item->delete();
 
         return back()->with('success', 'Item removed');
+    }
+
+    private function productAvailabilityMessage(?Product $product, int $quantity): ?string
+    {
+        if (! $product) {
+            return 'This product is no longer available.';
+        }
+
+        if (! $product->is_active) {
+            return 'This product is not available right now.';
+        }
+
+        if ($product->stock < 1) {
+            return 'This product is out of stock.';
+        }
+
+        if ($quantity > $product->stock) {
+            return 'Only ' . $product->stock . ' item(s) are available for this product.';
+        }
+
+        return null;
     }
 }

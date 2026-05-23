@@ -7,7 +7,7 @@
     <div class="mb-6 flex items-center justify-between gap-3">
         <x-back-button href="{{ route('orders.track.form') }}" label="Back to Tracking" />
 
-        <a href="{{ route('orders.receipt.download', $order->id) }}"
+        <a href="{{ $receiptUrl }}"
               data-no-loading="true"
            class="brand-btn-primary inline-flex items-center px-6 py-2 text-sm">
 
@@ -21,7 +21,7 @@
         {{-- HEADER (same as receipt) --}}
         <div class="mb-4 border-b pb-4 text-center">
             <h1 class="text-2xl font-semibold text-brand-primary">
-                Order Receipt #{{ $order->id }}
+                Order Receipt {{ $order->public_reference }}
             </h1>
 
             <p class="text-sm text-brand-ink/70">
@@ -32,10 +32,12 @@
         {{-- CUSTOMER --}}
         <div class="mb-4 space-y-1 text-sm text-brand-ink/70">
 
+            <p><strong>Reference:</strong> {{ $order->public_reference }}</p>
             <p><strong>Name:</strong> {{ $order->full_name }}</p>
             <p><strong>Email:</strong> {{ $order->email }}</p>
             <p><strong>Shipping:</strong> {{ $order->shipping_address }}</p>
-            <p><strong>Payment:</strong> {{ ucfirst($order->payment_method) }}</p>
+            <p><strong>Payment:</strong> {{ ucfirst($order->payment_method ?? 'PayMongo') }}</p>
+            <p><strong>Payment Status:</strong> {{ ucfirst(str_replace('_', ' ', $order->payment_status ?? 'unpaid')) }}</p>
 
         </div>
 

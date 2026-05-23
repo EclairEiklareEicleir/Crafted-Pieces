@@ -6,6 +6,7 @@ use App\Models\CustomOrderRequest;
 use App\Models\Order;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\URL;
 
 class PayMongoService
 {
@@ -23,8 +24,8 @@ class PayMongoService
         return $this->createSession([
             'description' => 'Order #' . $order->id,
             'reference_number' => 'ORDER-' . $order->id,
-            'success_url' => route('checkout.paymongo.success', $order),
-            'cancel_url' => route('checkout.paymongo.cancel', $order),
+            'success_url' => URL::signedRoute('checkout.paymongo.success', ['order' => $order]),
+            'cancel_url' => URL::signedRoute('checkout.paymongo.cancel', ['order' => $order]),
             'billing' => [
                 'name' => $order->full_name,
                 'email' => $order->email,
@@ -42,8 +43,8 @@ class PayMongoService
         return $this->createSession([
             'description' => 'Custom Order #' . $customOrder->id . ' - ' . $customOrder->item_type,
             'reference_number' => 'CUSTOM-' . $customOrder->id,
-            'success_url' => route('custom-order.paymongo.success', $customOrder),
-            'cancel_url' => route('custom-order.paymongo.cancel', $customOrder),
+            'success_url' => URL::signedRoute('custom-order.paymongo.success', ['customOrder' => $customOrder]),
+            'cancel_url' => URL::signedRoute('custom-order.paymongo.cancel', ['customOrder' => $customOrder]),
             'billing' => [
                 'name' => $customOrder->name,
                 'email' => $customOrder->email,
@@ -68,7 +69,7 @@ class PayMongoService
             Log::info('Retrieving PayMongo checkout session', [
             'checkout_session_id' => $checkoutSessionId,
             'base_url' => $this->baseUrl,
-            'env_key_partial' => substr(config('services.paymongo.secret_key'), 0, 5) . '...',
+                'env_key_partial' => substr((string) config('services.paymongo.secret_key'), 0, 5) . '...',
         ]);
         $response = Http::withBasicAuth(config('services.paymongo.secret_key'), '')
             ->acceptJson()
@@ -90,7 +91,19 @@ class PayMongoService
     {
         $status = strtolower((string) data_get($payload, 'data.attributes.status', ''));
 
-        return in_array($status, ['paid', 'succeeded', 'successful'], true);
+        if (in_array($status, ['paid', 'succeeded', 'successful'], true)) {
+            return true;
+        }
+
+        $paymentIntentStatus = strtolower((string) data_get($payload, 'data.attributes.payment_intent.attributes.status', ''));
+
+        if (in_array($paymentIntentStatus, ['paid', 'succeeded', 'successful'], true)) {
+            return true;
+        }
+
+        $paymentStatus = strtolower((string) data_get($payload, 'data.attributes.payments.data.0.attributes.status', ''));
+
+        return in_array($paymentStatus, ['paid', 'succeeded', 'successful'], true);
     }
 
     private function createSession(array $attributes): array

@@ -7,6 +7,8 @@ use App\Models\Order;
 use App\Models\CustomOrderRequest;
 use App\Services\PayMongoService;
 use App\Services\PricingService;
+use App\Support\SessionCart;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,13 +17,9 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class CheckoutController extends Controller
 {
-    private function getCart(Request $request): ?Cart
+    private function getCart(Request $request, bool $create = true): ?Cart
     {
-        if (Auth::check()) {
-            return Cart::firstOrCreate(['user_id' => Auth::id()]);
-        }
-
-        return null;
+        return Auth::check() ? Cart::current($create) : null;
     }
 
     /*
@@ -32,11 +30,7 @@ class CheckoutController extends Controller
 
     public function index(Request $request)
     {
-        $cart = $this->getCart($request);
-
-        $cartItems = $cart
-            ? $cart->items()->with(['product', 'productVariant', 'yarnColor'])->get()
-            : collect();
+        $cartItems = $this->currentCartItems($request);
 
         $pricing = (new PricingService)->calculate($cartItems);
 
@@ -45,23 +39,15 @@ class CheckoutController extends Controller
 
     public function submit(Request $request)
     {
-        if (! Auth::check()) {
-            return back()
-                ->withErrors(['auth' => 'Please log in to complete checkout.'])
-                ->with('auth_form', 'login');
-        }
-
-        $cart = $this->getCart($request);
-        if (! $cart) {
-            return back()
-                ->withErrors(['auth' => 'Please log in to complete checkout.'])
-                ->with('auth_form', 'login');
-        }
-
-        $cartItems = $cart->items()->with(['product', 'productVariant', 'yarnColor'])->get();
+        $cart = $this->getCart($request, false);
+        $cartItems = $this->currentCartItems($request);
 
         if ($cartItems->isEmpty()) {
             return back()->withErrors(['checkout' => 'Your cart is empty.']);
+        }
+
+        if ($message = $this->cartAvailabilityMessage($cartItems)) {
+            return back()->withErrors(['checkout' => $message]);
         }
 
         $validated = $request->validate([
@@ -72,10 +58,12 @@ class CheckoutController extends Controller
 
         $pricing = (new PricingService)->calculate($cartItems);
         $paymentMethod = 'PayMongo';
+        $guestSessionId = $request->session()->getId();
 
-        $order = DB::transaction(function () use ($validated, $pricing, $cartItems, $paymentMethod) {
+        $order = DB::transaction(function () use ($validated, $pricing, $cartItems, $paymentMethod, $guestSessionId) {
             $order = Order::create([
                 'user_id' => Auth::id(),
+                'guest_session_id' => Auth::check() ? null : $guestSessionId,
                 'full_name' => $validated['full_name'],
                 'email' => $validated['email'],
                 'shipping_address' => $validated['shipping_address'],
@@ -112,7 +100,11 @@ class CheckoutController extends Controller
                 'paymongo_checkout_id' => $payMongoSession['checkout_session_id'],
             ]);
 
-            $cart->items()->delete();
+            if (Auth::check()) {
+                $cart?->items()->delete();
+            } else {
+                SessionCart::clear();
+            }
 
             return redirect()->away($payMongoSession['checkout_url']);
         } catch (\Throwable $e) {
@@ -124,8 +116,12 @@ class CheckoutController extends Controller
         }
     }
 
-    public function success(Order $order)
+    public function success(Request $request, Order $order)
     {
+        if (! $this->canAccessOrder($request, $order)) {
+            abort(403);
+        }
+
         $order->load('items.product', 'items.productVariant', 'items.yarnColor');
 
         return view('user.order-success', compact('order'));
@@ -234,5 +230,63 @@ class CheckoutController extends Controller
         ]);
 
         return $pdf->download('custom-receipt-' . $order->id . '.pdf');
+    }
+
+    private function canAccessOrder(Request $request, Order $order): bool
+    {
+        if (Auth::check() && $order->user_id === Auth::id()) {
+            return true;
+        }
+
+        if (! Auth::check() && $order->user_id === null && $order->guest_session_id === $request->session()->getId()) {
+            return true;
+        }
+
+        return $request->hasValidSignature();
+    }
+
+    private function currentCartItems(Request $request): Collection
+    {
+        if (! Auth::check()) {
+            return SessionCart::items();
+        }
+
+        $cart = $this->getCart($request, false);
+
+        return $cart
+            ? $cart->items()->with(['product', 'productVariant', 'yarnColor'])->get()
+            : collect();
+    }
+
+    private function cartAvailabilityMessage(Collection $cartItems): ?string
+    {
+        foreach ($cartItems as $item) {
+            if ($message = $this->productAvailabilityMessage($item->product, (int) $item->quantity)) {
+                return $message;
+            }
+        }
+
+        return null;
+    }
+
+    private function productAvailabilityMessage(?\App\Models\Product $product, int $quantity): ?string
+    {
+        if (! $product) {
+            return 'One of the products in your cart is no longer available.';
+        }
+
+        if (! $product->is_active) {
+            return $product->name . ' is not available right now.';
+        }
+
+        if ($product->stock < 1) {
+            return $product->name . ' is out of stock.';
+        }
+
+        if ($quantity > $product->stock) {
+            return 'Only ' . $product->stock . ' item(s) are available for ' . $product->name . '.';
+        }
+
+        return null;
     }
 }

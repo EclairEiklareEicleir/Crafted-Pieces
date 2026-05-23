@@ -2,19 +2,23 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\CustomOrderCreatedMail;
+use App\Mail\OrderReceiptMail;
 use App\Models\CustomOrderRequest;
 use App\Models\Order;
 use App\Services\PayMongoService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\OrderReceiptMail;
-use App\Mail\CustomOrderCreatedMail;
 
 class PayMongoController extends Controller
 {
     public function success(Request $request, Order $order, PayMongoService $payMongoService)
     {
+        if (! $this->canAccessOrder($request, $order)) {
+            abort(403);
+        }
+
         if ($order->payment_method !== 'PayMongo') {
             abort(404);
         }
@@ -24,9 +28,12 @@ class PayMongoController extends Controller
                 $checkoutSession = $payMongoService->retrieveCheckoutSession($order->paymongo_checkout_id);
 
                 if ($payMongoService->isPaid($checkoutSession)) {
+                    $paymentIntentId = $payMongoService->extractPaymentId($checkoutSession);
+
                     $order->update([
                         'payment_status' => 'paid',
-                        'paymongo_payment_id' => $payMongoService->extractPaymentId($checkoutSession),
+                        'paymongo_checkout_id' => $order->paymongo_checkout_id,
+                        'paymongo_payment_id' => $paymentIntentId,
                         'paid_at' => now(),
                     ]);
                 }
@@ -35,17 +42,23 @@ class PayMongoController extends Controller
             }
         }
 
+        $order->refresh();
+
         return view('user.paymongo-status', [
-            'order' => $order->fresh(),
-            'title' => $order->fresh()->payment_status === 'paid' ? 'Payment Confirmed' : 'Payment Pending',
-            'message' => $order->fresh()->payment_status === 'paid'
+            'order' => $order,
+            'title' => $order->payment_status === 'paid' ? 'Payment Confirmed' : 'Payment Pending',
+            'message' => $order->payment_status === 'paid'
                 ? 'Your PayMongo payment has been confirmed.'
                 : 'We are waiting for PayMongo to confirm your payment. This page will update once the webhook or session verification completes.',
         ]);
     }
 
-    public function cancel(Order $order)
+    public function cancel(Request $request, Order $order)
     {
+        if (! $this->canAccessOrder($request, $order)) {
+            abort(403);
+        }
+
         if ($order->payment_method !== 'PayMongo') {
             abort(404);
         }
@@ -105,9 +118,9 @@ class PayMongoController extends Controller
                     'paid_at' => now(),
                 ]);
 
-                    Mail::to($payable->email)->send(
-                        new OrderReceiptMail($payable->fresh())
-                    );
+                Mail::to($payable->email)->send(
+                    new OrderReceiptMail($payable->fresh())
+                );
 
                 return response()->json(['message' => 'Order marked as paid.'], 200);
             }
@@ -124,7 +137,6 @@ class PayMongoController extends Controller
 
                 Mail::to($payable->email)
                     ->send(new CustomOrderCreatedMail($payable->fresh()));
-
 
                 return response()->json(['message' => 'Custom order marked as paid.'], 200);
             }
@@ -217,5 +229,20 @@ class PayMongoController extends Controller
         }
 
         return false;
+    }
+
+    private function canAccessOrder(Request $request, Order $order): bool
+    {
+        if ($request->hasValidSignature()) {
+            return true;
+        }
+
+        if (auth()->check() && $order->user_id === auth()->id()) {
+            return true;
+        }
+
+        return ! auth()->check()
+            && $order->user_id === null
+            && $order->guest_session_id === $request->session()->getId();
     }
 }

@@ -52,6 +52,11 @@
             </div>
 
             <div class="mt-2 flex justify-between">
+                <span>Payment Status</span>
+                <x-status-badge :status="$order->payment_status ?? 'unpaid'" context="payment" />
+            </div>
+
+            <div class="mt-2 flex justify-between">
                 <span>Date</span>
                 <span class="font-semibold text-brand-primary">
                     {{ $order->created_at->format('M d, Y') }}

@@ -12,6 +12,17 @@ class Cart extends Model
         'session_id',
     ];
 
+    public static function current(bool $create = true): ?self
+    {
+        if (! auth()->check()) {
+            return null;
+        }
+
+        return $create
+            ? static::firstOrCreate(['user_id' => auth()->id()])
+            : static::where('user_id', auth()->id())->first();
+    }
+
     public function items()
     {
         return $this->hasMany(CartItem::class);

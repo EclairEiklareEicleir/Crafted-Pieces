@@ -117,7 +117,7 @@
         let authState = 'login';
 
         function updateModalLock() {
-            const openModal = document.querySelector('[data-auth-modal]:not(.hidden), [data-legal-modal]:not(.hidden)');
+            const openModal = document.querySelector('[data-auth-modal]:not(.hidden), [data-legal-modal]:not(.hidden), [data-search-modal]:not(.hidden)');
             document.body.classList.toggle('overflow-hidden', Boolean(openModal));
         }
 

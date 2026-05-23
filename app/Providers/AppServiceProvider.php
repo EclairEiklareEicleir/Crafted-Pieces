@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\Cart;
+use App\Support\SessionCart;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -26,11 +27,11 @@ class AppServiceProvider extends ServiceProvider
         View::composer('components.navbar', function ($view) {
 
             /** @var Cart|null $cart */
-            $cart = Auth::check()
-                ? Cart::where('user_id', Auth::id())->first()
-                : null;
+            $cart = Auth::check() ? Cart::current(false) : null;
 
-            $cartCount = $cart ? $cart->items()->sum('quantity') : 0;
+            $cartCount = Auth::check()
+                ? ($cart ? $cart->items()->sum('quantity') : 0)
+                : SessionCart::count();
             $unreadCount = 0;
 
             if (Auth::check()) {

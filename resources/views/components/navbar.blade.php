@@ -22,15 +22,16 @@
         <div class="grid items-center gap-4 lg:grid-cols-[1fr_auto_1fr]">
             <div class="flex items-center gap-2 justify-self-start">
 
-                <a href="{{ route('shop') }}"
-                   class="brand-icon-button"
-                   aria-label="Browse shop"
-                   title="Browse shop">
+                <button type="button"
+                        class="brand-icon-button"
+                        aria-label="Search products"
+                        title="Search products"
+                        data-search-open>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-5 w-5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z" />
                         <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-4.35-4.35" />
                     </svg>
-                </a>
+                </button>
 
                 <details class="relative lg:hidden">
                     <summary class="brand-icon-button list-none cursor-pointer">
@@ -340,5 +341,310 @@
 
             </div>
         </div>
+
+        <div data-search-modal
+             class="fixed inset-0 z-[60] hidden items-start justify-center bg-brand-primary/30 px-4 pb-6 pt-20 backdrop-blur-sm sm:pt-24"
+             aria-hidden="true">
+
+            <button type="button"
+                    class="absolute inset-0 cursor-default"
+                    data-search-close
+                    aria-label="Close search overlay"></button>
+
+            <div class="relative z-10 w-full max-w-2xl overflow-hidden rounded-[2rem] border border-brand-border bg-white shadow-2xl shadow-brand-primary/20">
+
+                <div class="flex items-start justify-between gap-4 border-b border-brand-border bg-brand-surface px-5 py-4 sm:px-6">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-brand-secondary">
+                            Search products
+                        </p>
+
+                        <h2 class="mt-1 text-xl font-semibold text-brand-primary">
+                            Find crochet pieces, yarn colors, and more
+                        </h2>
+                    </div>
+
+                    <button type="button"
+                            class="brand-icon-button h-10 w-10 shrink-0"
+                            data-search-close
+                            aria-label="Close search">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <form method="GET"
+                      action="{{ route('products.search') }}"
+                      class="space-y-4 px-5 py-5 sm:px-6"
+                      data-search-form>
+
+                    <label class="sr-only" for="storefront-search-input">Search products</label>
+
+                    <div class="relative">
+                        <span class="pointer-events-none absolute inset-y-0 left-4 flex items-center text-brand-secondary">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-5 w-5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-4.35-4.35" />
+                            </svg>
+                        </span>
+
+                        <input id="storefront-search-input"
+                               type="search"
+                               name="q"
+                               value=""
+                               placeholder="Search by name, category, description, or price"
+                               class="brand-input h-14 rounded-full pl-12 pr-36 text-base"
+                               autocomplete="off"
+                               maxlength="120"
+                               required
+                               data-search-input>
+
+                        <div class="absolute inset-y-0 right-2 flex items-center gap-2">
+                            <button type="button"
+                                    class="hidden rounded-full px-3 py-2 text-sm font-semibold text-brand-ink/60 transition hover:text-brand-primary sm:inline-flex"
+                                    data-search-close>
+                                Cancel
+                            </button>
+
+                            <button type="submit"
+                                    class="brand-btn-primary h-10 rounded-full px-4 py-0 text-sm shadow-none">
+                                Search
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between gap-3">
+                            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-brand-secondary">
+                                Live suggestions
+                            </p>
+
+                            <p class="text-xs text-brand-ink/55" data-search-feedback>
+                                Start typing to see products.
+                            </p>
+                        </div>
+
+                        <div class="max-h-72 overflow-y-auto rounded-[1.5rem] border border-brand-border bg-brand-surface/70 p-2 shadow-sm"
+                             data-search-results>
+                            <p class="rounded-[1.25rem] px-4 py-3 text-sm text-brand-ink/60">
+                                Type at least 2 characters to see suggestions.
+                            </p>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
+
+    @once
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const modal = document.querySelector('[data-search-modal]');
+
+                if (!modal) {
+                    return;
+                }
+
+                const openButtons = document.querySelectorAll('[data-search-open]');
+                const closeButtons = modal.querySelectorAll('[data-search-close]');
+                const form = modal.querySelector('[data-search-form]');
+                const input = modal.querySelector('[data-search-input]');
+                const results = modal.querySelector('[data-search-results]');
+                const feedback = modal.querySelector('[data-search-feedback]');
+                const suggestionsUrl = @json(route('products.search.suggestions'));
+
+                let debounceTimer = null;
+                let activeController = null;
+
+                const setFeedback = (message) => {
+                    if (!feedback) {
+                        return;
+                    }
+
+                    feedback.textContent = message;
+                };
+
+                const setResultsMessage = (message) => {
+                    if (!results) {
+                        return;
+                    }
+
+                    results.innerHTML = '';
+
+                    const text = document.createElement('p');
+                    text.className = 'rounded-[1.25rem] px-4 py-3 text-sm text-brand-ink/60';
+                    text.textContent = message;
+
+                    results.appendChild(text);
+                };
+
+                const renderSuggestions = (items) => {
+                    if (!results) {
+                        return;
+                    }
+
+                    results.innerHTML = '';
+
+                    if (!items.length) {
+                        setResultsMessage('No matching products found.');
+                        return;
+                    }
+
+                    items.forEach((item) => {
+                        const link = document.createElement('a');
+                        link.href = item.url;
+                        link.className = 'flex items-center gap-3 rounded-[1.25rem] border border-transparent bg-white px-3 py-2.5 transition hover:border-brand-secondary hover:bg-brand-light/40';
+
+                        const image = document.createElement('img');
+                        image.src = item.image_url;
+                        image.alt = item.name;
+                        image.className = 'h-12 w-12 shrink-0 rounded-2xl object-cover bg-brand-surface';
+                        image.loading = 'lazy';
+
+                        const textWrap = document.createElement('div');
+                        textWrap.className = 'min-w-0 flex-1';
+
+                        const title = document.createElement('p');
+                        title.className = 'truncate text-sm font-semibold text-brand-primary';
+                        title.textContent = item.name;
+
+                        const meta = document.createElement('p');
+                        meta.className = 'truncate text-xs text-brand-ink/60';
+                        meta.textContent = [item.category_name, `PHP ${item.price}`].filter(Boolean).join(' • ');
+
+                        textWrap.append(title, meta);
+                        link.append(image, textWrap);
+                        results.appendChild(link);
+                    });
+                };
+
+                const openModal = () => {
+                    modal.classList.remove('hidden');
+                    modal.classList.add('flex');
+                    modal.setAttribute('aria-hidden', 'false');
+
+                    if (typeof updateModalLock === 'function') {
+                        updateModalLock();
+                    } else {
+                        document.body.classList.add('overflow-hidden');
+                    }
+
+                    window.setTimeout(() => {
+                        input?.focus();
+                        input?.select();
+                    }, 50);
+                };
+
+                const closeModal = () => {
+                    modal.classList.add('hidden');
+                    modal.classList.remove('flex');
+                    modal.setAttribute('aria-hidden', 'true');
+
+                    if (typeof updateModalLock === 'function') {
+                        updateModalLock();
+                    } else {
+                        document.body.classList.remove('overflow-hidden');
+                    }
+                };
+
+                const fetchSuggestions = async () => {
+                    const term = (input?.value || '').trim();
+
+                    if (activeController) {
+                        activeController.abort();
+                    }
+
+                    if (term.length < 2) {
+                        setFeedback('Start typing to see products.');
+                        setResultsMessage('Type at least 2 characters to see suggestions.');
+                        return;
+                    }
+
+                    activeController = new AbortController();
+                    setFeedback('Searching...');
+                    setResultsMessage('Searching products...');
+
+                    try {
+                        const url = new URL(suggestionsUrl, window.location.origin);
+                        url.searchParams.set('q', term);
+
+                        const response = await fetch(url.toString(), {
+                            headers: {
+                                Accept: 'application/json',
+                            },
+                            signal: activeController.signal,
+                        });
+
+                        if (!response.ok) {
+                            throw new Error('Search suggestions request failed.');
+                        }
+
+                        const payload = await response.json();
+                        const items = Array.isArray(payload.data) ? payload.data : [];
+
+                        setFeedback(items.length ? `${items.length} suggestion${items.length === 1 ? '' : 's'} found.` : 'No matching products found.');
+                        renderSuggestions(items);
+                    } catch (error) {
+                        if (error?.name === 'AbortError') {
+                            return;
+                        }
+
+                        setFeedback('Search suggestions unavailable.');
+                        setResultsMessage('Type a keyword and press Search to open the results page.');
+                    }
+                };
+
+                openButtons.forEach((button) => {
+                    button.addEventListener('click', openModal);
+                });
+
+                closeButtons.forEach((button) => {
+                    button.addEventListener('click', closeModal);
+                });
+
+                modal.addEventListener('click', (event) => {
+                    if (event.target === modal) {
+                        closeModal();
+                    }
+                });
+
+                document.addEventListener('keydown', (event) => {
+                    if (event.key === 'Escape' && !modal.classList.contains('hidden')) {
+                        closeModal();
+                    }
+                });
+
+                input?.addEventListener('input', () => {
+                    const term = input.value.trim();
+
+                    if (debounceTimer) {
+                        window.clearTimeout(debounceTimer);
+                    }
+
+                    if (term.length < 2) {
+                        setFeedback('Start typing to see products.');
+                        setResultsMessage('Type at least 2 characters to see suggestions.');
+                        return;
+                    }
+
+                    debounceTimer = window.setTimeout(fetchSuggestions, 250);
+                });
+
+                form?.addEventListener('submit', (event) => {
+                    const trimmedValue = (input?.value || '').trim();
+
+                    if (!trimmedValue) {
+                        event.preventDefault();
+                        input?.focus();
+                        return;
+                    }
+
+                    if (input) {
+                        input.value = trimmedValue;
+                    }
+
+                    closeModal();
+                });
+            });
+        </script>
+    @endonce
 </header>

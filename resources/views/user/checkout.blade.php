@@ -188,11 +188,13 @@
 
                           <input class="brand-input bg-white text-brand-ink"
                            name="full_name"
+                           value="{{ old('full_name', auth()->user()?->name) }}"
                            placeholder="Full name"
                            required>
 
                           <input class="brand-input bg-white text-brand-ink"
                            name="email"
+                           value="{{ old('email', auth()->user()?->email) }}"
                            placeholder="Email address"
                            required>
 
@@ -200,7 +202,7 @@
                               name="shipping_address"
                               rows="4"
                               placeholder="Shipping address"
-                              required></textarea>
+                              required>{{ old('shipping_address') }}</textarea>
 
                     <input type="hidden" name="payment_method" value="PayMongo">
 

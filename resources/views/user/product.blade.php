@@ -69,11 +69,6 @@
             {{-- ACTIONS --}}
             <div class="mt-8 rounded-[1.75rem] border border-brand-border bg-white p-6">
 
-                @php
-                    $currentUser = auth()->user();
-                    $canAddToCart = $currentUser && $currentUser->role === 'user';
-                @endphp
-
                 <h2 class="font-display text-2xl font-semibold text-brand-primary">
                     Order notes
                 </h2>
@@ -96,41 +91,39 @@
                                 </p>
 
                                 <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                                @foreach ($availableYarnColors as $color)
-                                    @php
-                                        $variant = $product->variantForYarnColor($color);
-                                        $variantImage = $variant?->floating_image_url;
-                                    @endphp
+                                    @foreach ($availableYarnColors as $color)
+                                        @php
+                                            $variant = $product->variantForYarnColor($color);
+                                            $variantImage = $variant?->floating_image_url;
+                                        @endphp
 
-                                    <label class="group/color flex cursor-pointer items-center gap-3 rounded-2xl border border-brand-border bg-brand-light/20 px-3 py-3 text-sm transition hover:border-brand-secondary hover:bg-brand-light/35">
-                                        <input type="radio"
-                                               name="yarn_color_id"
-                                               value="{{ $color->id }}"
-                                               data-yarn-color-option
-                                               data-variant-id="{{ $variant?->id }}"
-                                               data-variant-image="{{ $variantImage }}"
-                                               {{ $selectedYarnColor?->id === $color->id ? 'checked' : '' }}
-                                               required>
+                                        <label class="group/color flex cursor-pointer items-center gap-3 rounded-2xl border border-brand-border bg-brand-light/20 px-3 py-3 text-sm transition hover:border-brand-secondary hover:bg-brand-light/35">
+                                            <input type="radio"
+                                                   name="yarn_color_id"
+                                                   value="{{ $color->id }}"
+                                                   data-yarn-color-option
+                                                   data-variant-id="{{ $variant?->id }}"
+                                                   data-variant-image="{{ $variantImage }}"
+                                                   {{ $selectedYarnColor?->id === $color->id ? 'checked' : '' }}
+                                                   required>
 
-                                        <span class="h-5 w-5 shrink-0 rounded-full border border-brand-border shadow-sm" style="background-color: {{ $color->hex_color ?? '#ffffff' }}"></span>
+                                            <span class="h-5 w-5 shrink-0 rounded-full border border-brand-border shadow-sm" style="background-color: {{ $color->hex_color ?? '#ffffff' }}"></span>
 
-                                        <span class="min-w-0">
-                                            <span class="block font-semibold text-brand-primary">{{ $color->name }}</span>
-                                            @if ($color->hex_color)
-                                                <span class="mt-1 inline-flex items-center gap-2 text-xs text-brand-ink/60">
-                                                    {{ $color->hex_color }}
-                                                </span>
-                                            @endif
-                                        </span>
-                                    </label>
-                                @endforeach
+                                            <span class="min-w-0">
+                                                <span class="block font-semibold text-brand-primary">{{ $color->name }}</span>
+                                                @if ($color->hex_color)
+                                                    <span class="mt-1 inline-flex items-center gap-2 text-xs text-brand-ink/60">
+                                                        {{ $color->hex_color }}
+                                                    </span>
+                                                @endif
+                                            </span>
+                                        </label>
+                                    @endforeach
                                 </div>
                             </div>
                         @endif
 
-                        <button type="{{ $canAddToCart ? 'submit' : 'button' }}"
-                                @unless ($canAddToCart) onclick="openAuthModal()" @endunless
-                                class="brand-btn-primary px-5 py-3 text-sm shadow-md hover:-translate-y-0.5">
+                        <button type="submit" class="brand-btn-primary px-5 py-3 text-sm shadow-md hover:-translate-y-0.5">
                             Add to cart
                         </button>
                     </form>

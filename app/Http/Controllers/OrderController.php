@@ -8,15 +8,16 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Services\PricingService;
+use Illuminate\Support\Facades\URL;
 
 class OrderController extends Controller
 {
     // =========================
     // RECEIPT
     // =========================
-    public function downloadReceipt(Order $order)
+    public function downloadReceipt(Request $request, Order $order)
     {
-        if (Auth::id() !== $order->user_id) {
+        if (! $this->canAccessOrder($request, $order)) {
             abort(403);
         }
 
@@ -58,9 +59,9 @@ class OrderController extends Controller
     // =========================
     // VIEW SINGLE ORDER (NEW)
     // =========================
-    public function show(Order $order)
+    public function show(Request $request, Order $order)
     {
-        if (Auth::id() !== $order->user_id) {
+        if (! $this->canAccessOrder($request, $order)) {
             abort(403);
         }
 
@@ -82,27 +83,49 @@ class OrderController extends Controller
     public function track(Request $request)
     {
         $request->validate([
-            'order_id' => 'required|integer',
-            'email' => 'required|email'
+            'order_reference' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
         ]);
 
+        $orderReference = strtoupper(trim((string) $request->order_reference));
+
         $order = Order::with('items.product', 'items.productVariant', 'items.yarnColor')
-            ->where('id', $request->order_id)
+            ->where('public_reference', $orderReference)
             ->where('email', $request->email)
             ->first();
 
         if (! $order) {
             return back()->withErrors([
-                'error' => 'Order not found. Please check your details.'
+                'order_reference' => 'Order not found. Please check your details.',
             ]);
         }
 
         $pricing = (new PricingService())
             ->calculateFromOrder($order);
 
+        $receiptUrl = URL::temporarySignedRoute(
+            'orders.receipt.download',
+            now()->addDays(7),
+            ['order' => $order]
+        );
+
         return view('user.orders.track-result', [
             'order' => $order,
-            'pricing' => $pricing
+            'pricing' => $pricing,
+            'receiptUrl' => $receiptUrl,
         ]);
+    }
+
+    private function canAccessOrder(Request $request, Order $order): bool
+    {
+        if (Auth::check() && $order->user_id === Auth::id()) {
+            return true;
+        }
+
+        if (! Auth::check() && $order->user_id === null && $order->guest_session_id === $request->session()->getId()) {
+            return true;
+        }
+
+        return $request->hasValidSignature();
     }
 }

@@ -20,6 +20,11 @@
 
         <div class="mt-8 rounded-2xl border border-brand-border bg-brand-light/35 p-6 text-sm text-brand-ink/75">
             <div class="flex justify-between gap-4">
+                <span>Order Reference</span>
+                <span class="font-semibold text-brand-primary">{{ $order->public_reference ?? '#'.$order->id }}</span>
+            </div>
+
+            <div class="flex justify-between gap-4">
                 <span>Order ID</span>
                 <span class="font-semibold text-brand-primary">#{{ $order->id }}</span>
             </div>
@@ -31,7 +36,7 @@
 
             <div class="mt-2 flex justify-between gap-4">
                 <span>Payment Status</span>
-                <span class="font-semibold text-brand-primary">{{ ucfirst($order->payment_status) }}</span>
+                <span class="font-semibold text-brand-primary">{{ ucfirst(str_replace('_', ' ', $order->payment_status ?? 'unpaid')) }}</span>
             </div>
 
             @if ($order->paid_at)
