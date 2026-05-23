@@ -24,7 +24,7 @@
     <div class="mb-6 flex items-center justify-between gap-3">
         <x-back-button href="{{ route('orders') }}" label="Back to Orders" />
 
-        <a href="{{ route('orders.receipt.download', $order->id) }}" class="brand-btn-primary px-5 py-3 text-sm">
+        <a href="{{ route('orders.receipt.download', $order->id) }}" data-no-loading="true" class="brand-btn-primary px-5 py-3 text-sm">
             Download Receipt
         </a>
     </div>
@@ -165,6 +165,7 @@
                 <x-back-button href="{{ route('orders') }}" label="Back to Orders" />
 
                 <a href="{{ route('orders.receipt.download', $order->id) }}"
+                         data-no-loading="true"
                    class="brand-btn-primary px-5 py-3 text-sm">
                     Download Receipt
                 </a>

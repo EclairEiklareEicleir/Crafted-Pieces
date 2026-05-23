@@ -11,7 +11,7 @@ class CustomOrderPayMongoController extends Controller
 {
     public function checkout(Request $request, CustomOrderRequest $customOrder, PayMongoService $payMongoService)
     {
-        if (auth()->check() && $customOrder->user_id !== auth()->id()) {
+        if (! auth()->check() || $customOrder->user_id !== auth()->id()) {
             abort(403);
         }
 
@@ -38,7 +38,7 @@ class CustomOrderPayMongoController extends Controller
                 Log::info('Attempting to retrieve PayMongo checkout session', [
                     'order_id' => $customOrder->id,
                     'checkout_id' => $customOrder->paymongo_checkout_id,
-                    'env_key' => substr(config('services.paymongo.secret'), 0, 5) . '...', // partial key for safety
+                    'env_key' => substr((string) (config('services.paymongo.secret') ?? ''), 0, 5) . '...', // partial key for safety
                 ]);
                 $existingSession = $payMongoService->retrieveCheckoutSession($customOrder->paymongo_checkout_id);
 
@@ -91,7 +91,7 @@ class CustomOrderPayMongoController extends Controller
 public function success(Request $request, CustomOrderRequest $customOrder, PayMongoService $payMongoService)
 {
     // Ensure user owns this order
-    if (auth()->check() && $customOrder->user_id !== auth()->id()) {
+    if (! auth()->check() || $customOrder->user_id !== auth()->id()) {
         abort(403);
     }
 
@@ -132,7 +132,7 @@ public function success(Request $request, CustomOrderRequest $customOrder, PayMo
 
     public function cancel(Request $request, CustomOrderRequest $customOrder)
     {
-        if (auth()->check() && $customOrder->user_id !== auth()->id()) {
+        if (! auth()->check() || $customOrder->user_id !== auth()->id()) {
             abort(403);
         }
 

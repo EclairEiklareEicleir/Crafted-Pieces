@@ -23,6 +23,8 @@ use App\Http\Controllers\AdminSettingController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\AdminAboutSectionController;
 use App\Http\Controllers\AdminFaqController;
+use App\Http\Controllers\AdminOrderHistoryController;
+use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\AdminYarnColorController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ChatbotController;
@@ -147,6 +149,9 @@ Route::middleware(['auth', 'role:owner'])->group(function () {
     Route::get('/custom-requests/{customOrder}', [AdminCustomOrderController::class, 'show'])
         ->name('admin.custom.show');
 
+    Route::get('/custom-requests/{customOrder}/receipt', [AdminCustomOrderController::class, 'downloadReceipt'])
+        ->name('admin.custom.receipt');
+
     Route::post('/custom-requests/{customOrder}/message', [AdminCustomOrderController::class, 'message'])
         ->name('admin.custom.message');
 
@@ -197,6 +202,9 @@ Route::middleware(['auth', 'role:owner'])->group(function () {
 
     Route::get('/admin/orders/{order}', [AdminOrderController::class, 'show'])
         ->name('admin.orders.show');
+
+    Route::get('/admin/orders/{order}/receipt', [AdminOrderController::class, 'downloadReceipt'])
+        ->name('admin.orders.receipt');
 
     Route::post('/admin/orders/{order}/status', [AdminOrderController::class, 'updateStatus'])
         ->name('admin.orders.status');
@@ -266,6 +274,24 @@ Route::middleware(['auth', 'role:owner'])->group(function () {
 
     Route::post('/admin/settings', [AdminSettingController::class, 'update'])
         ->name('admin.settings.update');
+
+    Route::get('/admin/users', [AdminUserController::class, 'index'])
+        ->name('admin.users.index');
+
+    Route::get('/admin/users/{user}', [AdminUserController::class, 'show'])
+        ->name('admin.users.show');
+
+    Route::get('/admin/users/{user}/edit', [AdminUserController::class, 'edit'])
+        ->name('admin.users.edit');
+
+    Route::put('/admin/users/{user}', [AdminUserController::class, 'update'])
+        ->name('admin.users.update');
+
+    Route::patch('/admin/users/{user}/status', [AdminUserController::class, 'toggleStatus'])
+        ->name('admin.users.status');
+
+    Route::get('/admin/order-history', [AdminOrderHistoryController::class, 'index'])
+        ->name('admin.history.index');
 });
 
 /*
@@ -290,7 +316,7 @@ Route::middleware('auth')->group(function () {
 
 Route::post('/chatbot/message', [ChatbotController::class, 'message'])->name('chatbot.message');
 
-Route::prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'role:owner'])->prefix('admin')->name('admin.')->group(function () {
 
     Route::get('/chatbot', [AdminChatbotFaqController::class, 'index'])->name('chatbot.index');
     Route::get('/chatbot/create', [AdminChatbotFaqController::class, 'create'])->name('chatbot.create');

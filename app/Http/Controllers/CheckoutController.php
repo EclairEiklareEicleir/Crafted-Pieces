@@ -15,15 +15,13 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class CheckoutController extends Controller
 {
-    private function getCart(Request $request): Cart
+    private function getCart(Request $request): ?Cart
     {
         if (Auth::check()) {
             return Cart::firstOrCreate(['user_id' => Auth::id()]);
         }
 
-        $sessionId = $request->session()->getId() ?: $request->session()->token() ?: uniqid('session_', true);
-
-        return Cart::firstOrCreate(['session_id' => $sessionId]);
+        return null;
     }
 
     /*
@@ -47,7 +45,19 @@ class CheckoutController extends Controller
 
     public function submit(Request $request)
     {
+        if (! Auth::check()) {
+            return back()
+                ->withErrors(['auth' => 'Please log in to complete checkout.'])
+                ->with('auth_form', 'login');
+        }
+
         $cart = $this->getCart($request);
+        if (! $cart) {
+            return back()
+                ->withErrors(['auth' => 'Please log in to complete checkout.'])
+                ->with('auth_form', 'login');
+        }
+
         $cartItems = $cart->items()->with(['product', 'productVariant', 'yarnColor'])->get();
 
         if ($cartItems->isEmpty()) {
@@ -69,7 +79,7 @@ class CheckoutController extends Controller
                 'full_name' => $validated['full_name'],
                 'email' => $validated['email'],
                 'shipping_address' => $validated['shipping_address'],
-            'payment_method' => $paymentMethod,
+                'payment_method' => $paymentMethod,
                 'payment_status' => 'pending',
                 'subtotal' => $pricing['subtotal'],
                 'platform_fee' => $pricing['platform_fee'],
@@ -131,7 +141,7 @@ class CheckoutController extends Controller
     {
         $item = $this->resolvePaymentItem($type, $id);
 
-        if (Auth::check() && $item->user_id !== Auth::id()) {
+        if (! Auth::check() || $item->user_id !== Auth::id()) {
             abort(403);
         }
 
@@ -156,7 +166,7 @@ class CheckoutController extends Controller
             return back()->withErrors(['payment' => 'Payment expired']);
         }
 
-        if ($item->user_id !== Auth::id()) {
+        if (! Auth::check() || $item->user_id !== Auth::id()) {
             abort(403);
         }
 
@@ -198,7 +208,7 @@ class CheckoutController extends Controller
 
     public function downloadCustomReceipt(CustomOrderRequest $order)
     {
-        if ($order->user_id !== Auth::id()) {
+        if (! Auth::check() || $order->user_id !== Auth::id()) {
             abort(403);
         }
 

@@ -18,7 +18,6 @@
 @php
     $adminUser = auth()->user();
 
-    // 🔔 NOTIFICATIONS (ADDED)
     $adminNotifications = auth()->check()
         ? \App\Models\Notification::where('user_id', auth()->id())
             ->latest()
@@ -28,7 +27,7 @@
 
     $adminUnreadCount = auth()->check()
         ? \App\Models\Notification::where('user_id', auth()->id())
-            ->where('is_read', false)
+            ->unread()
             ->count()
         : 0;
 @endphp
@@ -46,34 +45,53 @@
 
         <nav class="space-y-2 px-4 py-5 text-sm">
             <a href="{{ route('admin.dashboard') }}" class="brand-admin-nav-link {{ request()->routeIs('admin.dashboard') ? 'bg-brand-light text-brand-primary' : '' }}">
-                Dashboard
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-4 w-4 shrink-0" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 11.5 12 4l9 7.5" /><path stroke-linecap="round" stroke-linejoin="round" d="M6.5 10.5V20h11V10.5" /></svg>
+                <span>Dashboard</span>
             </a>
 
             <a href="{{ route('admin.products.index') }}" class="brand-admin-nav-link {{ request()->routeIs('admin.products.*') ? 'bg-brand-light text-brand-primary' : '' }}">
-                Products
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-4 w-4 shrink-0" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 7.5 12 3l7.5 4.5-7.5 4.5L4.5 7.5Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 7.5V16.5L12 21l7.5-4.5V7.5" /></svg>
+                <span>Products</span>
             </a>
 
             <a href="{{ route('admin.orders.index') }}" class="brand-admin-nav-link {{ request()->routeIs('admin.orders.*') ? 'bg-brand-light text-brand-primary' : '' }}">
-                Orders
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-4 w-4 shrink-0" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6h2.5l1.5 9.5h9.75l1.5-6.5H8.15" /><circle cx="10" cy="19" r="1.5" /><circle cx="17" cy="19" r="1.5" /></svg>
+                <span>Orders</span>
+            </a>
+
+            <a href="{{ route('admin.history.index') }}" class="brand-admin-nav-link {{ request()->routeIs('admin.history.*') ? 'bg-brand-light text-brand-primary' : '' }}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-4 w-4 shrink-0" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v5l3 2" /><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 7.5A9 9 0 1 1 4.5 16.5" /><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 4.5v3h3" /></svg>
+                <span>Order History</span>
             </a>
 
             <a href="{{ route('admin.custom.index') }}" class="brand-admin-nav-link {{ request()->routeIs('admin.custom.*') ? 'bg-brand-light text-brand-primary' : '' }}">
-                Custom Orders
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-4 w-4 shrink-0" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M7 4.75h10A2.25 2.25 0 0 1 19.25 7v10A2.25 2.25 0 0 1 17 19.25H7A2.25 2.25 0 0 1 4.75 17V7A2.25 2.25 0 0 1 7 4.75Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M8 8.5h8M8 12h8M8 15.5h5" /></svg>
+                <span>Custom Orders</span>
+            </a>
+
+            <a href="{{ route('admin.users.index') }}" class="brand-admin-nav-link {{ request()->routeIs('admin.users.*') ? 'bg-brand-light text-brand-primary' : '' }}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-4 w-4 shrink-0" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 20.25v-1.5A4.75 4.75 0 0 0 11.75 14H7.5a4.75 4.75 0 0 0-4.75 4.75v1.5" /><circle cx="9.75" cy="8.5" r="3.25" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 11.25h4.5M18.75 9v4.5" /></svg>
+                <span>User Management</span>
             </a>
 
             <a href="{{ route('admin.about.edit') }}" class="brand-admin-nav-link {{ request()->routeIs('admin.about.*') ? 'bg-brand-light text-brand-primary' : '' }}">
-                About
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-4 w-4 shrink-0" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 17v-5" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 8.25h.01" /><circle cx="12" cy="12" r="8.25" /></svg>
+                <span>About</span>
             </a>
 
             <a href="{{ route('admin.faq.index') }}" class="brand-admin-nav-link {{ request()->routeIs('admin.faq.*') ? 'bg-brand-light text-brand-primary' : '' }}">
-                FAQ
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-4 w-4 shrink-0" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18h.01" /><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75a2.25 2.25 0 1 1 3.3 1.99c-.88.47-1.55 1.2-1.55 2.26V15" /><circle cx="12" cy="12" r="8.25" /></svg>
+                <span>FAQ</span>
             </a>
 
             <a href="{{ route('admin.settings.index') }}" class="brand-admin-nav-link {{ request()->routeIs('admin.settings.*') ? 'bg-brand-light text-brand-primary' : '' }}">
-                Settings
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-4 w-4 shrink-0" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 4.5h3M7.5 7.5l-1.2-1.2M16.5 7.5l1.2-1.2M4.5 10.5v3M19.5 10.5v3M7.5 16.5l-1.2 1.2M16.5 16.5l1.2 1.2M10.5 19.5h3" /><circle cx="12" cy="12" r="3.5" /></svg>
+                <span>Settings</span>
             </a>
+
             <a href="{{ route('admin.chatbot.index') }}" class="brand-admin-nav-link {{ request()->routeIs('admin.chatbot.*') ? 'bg-brand-light text-brand-primary' : '' }}">
-                Chatbot
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-4 w-4 shrink-0" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 18.75 4.5 20l1.25-3A8.25 8.25 0 1 1 7.5 18.75Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h.01M12 12h.01M15 12h.01" /></svg>
+                <span>Chatbot</span>
             </a>
         </nav>
 
@@ -144,6 +162,11 @@
                                     </p>
                                 @endforelse
                             </div>
+
+                            <a href="{{ route('notifications.index') }}"
+                               class="mt-3 block rounded-xl border border-brand-border px-3 py-2 text-center text-sm font-medium text-brand-primary transition hover:bg-brand-light">
+                                View all notifications
+                            </a>
                         </div>
                     </details>
 
@@ -190,6 +213,30 @@
         </header>
 
         <main class="p-4 sm:p-6 lg:p-8">
+            <div class="mx-auto mb-6 grid max-w-7xl gap-3">
+                @if (session('success'))
+                    <div class="rounded-3xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 shadow-sm">
+                        {{ session('success') }}
+                    </div>
+                @endif
+
+                @if (session('error'))
+                    <div class="rounded-3xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 shadow-sm">
+                        {{ session('error') }}
+                    </div>
+                @endif
+
+                @if ($errors->any())
+                    <div class="rounded-3xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 shadow-sm">
+                        <ul class="list-disc space-y-1 pl-5">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+            </div>
+
             @yield('content')
         </main>
     </div>

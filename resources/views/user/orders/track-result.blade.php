@@ -8,6 +8,7 @@
         <x-back-button href="{{ route('orders.track.form') }}" label="Back to Tracking" />
 
         <a href="{{ route('orders.receipt.download', $order->id) }}"
+              data-no-loading="true"
            class="brand-btn-primary inline-flex items-center px-6 py-2 text-sm">
 
             Download Receipt

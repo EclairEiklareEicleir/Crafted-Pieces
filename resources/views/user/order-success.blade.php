@@ -154,6 +154,7 @@
             </a>
 
             <a href="{{ route('orders.receipt.download', $order->id) }}"
+                    data-no-loading="true"
                     class="brand-btn-secondary flex-1 px-6 py-3 text-center">
                 Download Receipt
             </a>

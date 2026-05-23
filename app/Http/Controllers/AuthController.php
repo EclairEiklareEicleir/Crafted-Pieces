@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use App\Models\User;
 
 class AuthController extends Controller
 {
@@ -21,9 +21,21 @@ class AuthController extends Controller
             'password' => ['required', 'string'],
         ]);
 
+        $existingUser = User::where('email', trim($validated['email']))->first();
+
+        if ($existingUser && $existingUser->status !== User::STATUS_ACTIVE) {
+            return back()
+                ->withErrors([
+                    'email' => 'Your account has been disabled. Please contact the administrator.',
+                ])
+                ->withInput()
+                ->with('auth_form', 'login');
+        }
+
         $credentials = [
             'email' => trim($validated['email']),
             'password' => $validated['password'],
+            'status' => User::STATUS_ACTIVE,
         ];
 
         if (Auth::attempt($credentials)) {
@@ -60,6 +72,7 @@ class AuthController extends Controller
             'email' => trim($validated['email']),
             'password' => Hash::make($validated['password']),
             'role' => 'user',
+            'status' => User::STATUS_ACTIVE,
         ]);
 
         Auth::login($user);

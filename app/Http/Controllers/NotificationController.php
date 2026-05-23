@@ -19,9 +19,7 @@ class NotificationController extends Controller
     {
         abort_unless($notification->user_id === auth()->id(), 403);
 
-        $notification->update([
-            'is_read' => true
-        ]);
+        $notification->markAsRead();
 
         return redirect($notification->link ?? route('home'));
     }

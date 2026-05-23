@@ -68,18 +68,6 @@
                     Out for Delivery
                 </option>
 
-                <option value="delivered" {{ request('status') === 'delivered' ? 'selected' : '' }}>
-                    Delivered
-                </option>
-
-                <option value="received" {{ request('status') === 'received' ? 'selected' : '' }}>
-                    Received
-                </option>
-
-                <option value="cancelled" {{ request('status') === 'cancelled' ? 'selected' : '' }}>
-                    Cancelled
-                </option>
-
             </select>
 
         </form>
@@ -100,16 +88,20 @@
 
                 <option value="">Bulk Action</option>
 
+                <option value="pending">
+                    Mark Pending
+                </option>
+
+                <option value="processing">
+                    Mark Processing
+                </option>
+
                 <option value="shipped">
                     Mark Shipped
                 </option>
 
-                <option value="delivered">
-                    Mark Delivered
-                </option>
-
-                <option value="received">
-                    Mark Received
+                <option value="out_for_delivery">
+                    Mark Out for Delivery
                 </option>
 
                 <option value="delete">
@@ -305,7 +297,7 @@
                         <td colspan="6"
                             class="py-6 text-center text-gray-500">
 
-                            No orders found.
+                            No active orders found.
 
                         </td>
 

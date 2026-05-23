@@ -186,17 +186,17 @@
                 <form class="mt-6 space-y-4" method="POST" action="{{ route('checkout.submit') }}">
                     @csrf
 
-                          <input class="brand-input"
+                          <input class="brand-input bg-white text-brand-ink"
                            name="full_name"
                            placeholder="Full name"
                            required>
 
-                          <input class="brand-input"
+                          <input class="brand-input bg-white text-brand-ink"
                            name="email"
                            placeholder="Email address"
                            required>
 
-                    <textarea class="brand-input"
+                      <textarea class="brand-input bg-white text-brand-ink"
                               name="shipping_address"
                               rows="4"
                               placeholder="Shipping address"

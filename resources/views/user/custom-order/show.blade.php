@@ -78,7 +78,7 @@
             </div>
 
             @if ($order->status === \App\Models\CustomOrderRequest::STATUS_PAID)
-                <a href="{{ route('custom-order.receipt', $order->id) }}" class="brand-btn-secondary w-full justify-center sm:w-auto">
+                <a href="{{ route('custom-order.receipt', $order->id) }}" data-no-loading="true" class="brand-btn-secondary w-full justify-center sm:w-auto">
                     Download Receipt
                 </a>
             @endif

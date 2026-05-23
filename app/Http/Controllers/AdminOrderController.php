@@ -5,13 +5,66 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use Illuminate\Http\Request;
 use App\Models\Notification;
+use Illuminate\Validation\Rule;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Log;
 
 class AdminOrderController extends Controller
 {
+    private const ACTIVE_ORDER_STATUSES = [
+        'pending',
+        'processing',
+        'shipped',
+        'out_for_delivery',
+    ];
+
+    private const ORDER_STATUSES = [
+        'pending',
+        'processing',
+        'shipped',
+        'out_for_delivery',
+        'delivered',
+        'received',
+        'cancelled',
+    ];
+
+    private const ORDER_STATUS_NOTIFICATIONS = [
+        'pending' => [
+            'title' => 'Order Status Updated',
+            'message' => 'Your order is now pending.',
+        ],
+        'processing' => [
+            'title' => 'Order Status Updated',
+            'message' => 'Your order is now being processed.',
+        ],
+        'shipped' => [
+            'title' => 'Order Shipped',
+            'message' => 'Your order has been shipped.',
+        ],
+        'out_for_delivery' => [
+            'title' => 'Order Out for Delivery',
+            'message' => 'Your order is out for delivery.',
+        ],
+        'delivered' => [
+            'title' => 'Order Delivered',
+            'message' => 'Your order has been delivered.',
+        ],
+        'received' => [
+            'title' => 'Order Received',
+            'message' => 'Your order has been marked as received.',
+        ],
+        'cancelled' => [
+            'title' => 'Order Cancelled',
+            'message' => 'Your order has been cancelled.',
+        ],
+    ];
+
     // LIST + FILTER + SEARCH + PAGINATION
     public function index(Request $request)
     {
-        $query = Order::query()->latest();
+        $query = Order::query()
+            ->whereIn('status', self::ACTIVE_ORDER_STATUSES)
+            ->latest();
 
         // SEARCH (name/email/id)
         if ($request->filled('search')) {
@@ -45,23 +98,14 @@ class AdminOrderController extends Controller
     public function updateStatus(Request $request, Order $order)
     {
         $request->validate([
-            'status' => 'required|string'
+            'status' => ['required', 'string', Rule::in(self::ORDER_STATUSES)],
         ]);
 
-        $order->update([
-            'status' => $request->status
-        ]);
-
-        if ($request->status === 'shipped' && $order->user_id) {
-
-            Notification::create([
-                'user_id' => $order->user_id,
-                'title' => 'Order Shipped',
-                'message' => 'Your order has been shipped and is on the way.',
-                'link' => '#',
-            ]);
-
+        if ($order->status === $request->status) {
+            return back()->with('success', 'Order status is already up to date.');
         }
+
+        $this->applyStatusUpdate($order, $request->status);
 
         return back()->with('success', 'Order status updated.');
     }
@@ -78,31 +122,22 @@ class AdminOrderController extends Controller
     {
         $request->validate([
             'orders' => 'required|array',
-            'action' => 'required|string'
+            'action' => ['required', 'string', Rule::in(array_merge(['delete'], self::ORDER_STATUSES))],
         ]);
 
-        $orders = Order::whereIn('id', $request->orders);
+        $selectedOrders = Order::whereIn('id', $request->orders)->with('user')->get();
 
         switch ($request->action) {
 
             case 'delete':
-                $orders->delete();
-                break;
-
-            case 'shipped':
-                $orders->update(['status' => 'shipped']);
-                break;
-
-            case 'delivered':
-                $orders->update(['status' => 'delivered']);
-                break;
-
-            case 'received':
-                $orders->update(['status' => 'received']);
+                Order::whereIn('id', $request->orders)->delete();
                 break;
 
             default:
-                abort(400, 'Invalid bulk action');
+                $selectedOrders->each(function (Order $order) use ($request) {
+                    $this->applyStatusUpdate($order, $request->action);
+                });
+                break;
         }
 
         return back()->with('success', 'Bulk action completed.');
@@ -129,5 +164,58 @@ class AdminOrderController extends Controller
     public function create()
     {
         return view('admin.orders.create');
+    }
+
+    public function downloadReceipt(Order $order)
+    {
+        if (! extension_loaded('gd')) {
+            Log::error('Admin receipt PDF generation failed because the PHP GD extension is missing.', [
+                'order_id' => $order->id,
+                'php_binary' => PHP_BINARY,
+            ]);
+
+            abort(500, 'PDF receipts require the PHP GD extension. Enable extension=gd in C:\\xampp\\php\\php.ini and restart Apache or php artisan serve.');
+        }
+
+        $order->load('items.product', 'items.productVariant', 'items.yarnColor');
+
+        $pricing = [
+            'subtotal' => $order->subtotal ?? $order->computed_subtotal,
+            'platform_fee' => $order->platform_fee ?? 0,
+            'delivery_fee' => $order->delivery_fee ?? 0,
+            'vat' => $order->vat_amount ?? 0,
+            'total' => $order->total_amount ?? 0,
+        ];
+
+        $pdf = Pdf::loadView('user.receipt.receipt-pdf', [
+            'order' => $order,
+            'pricing' => $pricing,
+        ]);
+
+        return $pdf->download('receipt-order-' . $order->id . '.pdf');
+    }
+
+    private function applyStatusUpdate(Order $order, string $status): void
+    {
+        if ($order->status !== $status) {
+            $order->update(['status' => $status]);
+        }
+
+        $this->notifyOrderCustomer($order, $status);
+    }
+
+    private function notifyOrderCustomer(Order $order, string $status): void
+    {
+        $notification = self::ORDER_STATUS_NOTIFICATIONS[$status] ?? null;
+
+        if (! $notification) {
+            return;
+        }
+
+        Notification::notifyUser($order->user, [
+            'title' => $notification['title'],
+            'message' => $notification['message'],
+            'link' => route('orders.show', $order),
+        ]);
     }
 }

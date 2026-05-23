@@ -10,14 +10,30 @@ function scrollMessageThreadsToBottom() {
 
 function setupGlobalLoadingOverlay() {
 	const overlay = document.querySelector('[data-brand-loading-overlay]');
+	let fallbackHideTimer = null;
 
 	if (!overlay) {
 		return;
 	}
 
+	const hideOverlay = () => {
+		if (fallbackHideTimer) {
+			window.clearTimeout(fallbackHideTimer);
+			fallbackHideTimer = null;
+		}
+
+		overlay.classList.remove('is-visible');
+		overlay.hidden = true;
+	};
+
 	const showOverlay = () => {
+		if (fallbackHideTimer) {
+			window.clearTimeout(fallbackHideTimer);
+		}
+
 		overlay.hidden = false;
 		overlay.classList.add('is-visible');
+		fallbackHideTimer = window.setTimeout(hideOverlay, 2500);
 	};
 
 	document.addEventListener('submit', (event) => {
@@ -27,7 +43,13 @@ function setupGlobalLoadingOverlay() {
 			return;
 		}
 
-		if (form.dataset.noGlobalLoader === 'true') {
+		if (form.matches('[data-no-loading]') || form.dataset.noGlobalLoader === 'true') {
+			return;
+		}
+
+		const submitter = event.submitter;
+
+		if (submitter instanceof HTMLElement && submitter.closest('[data-no-loading], [download]')) {
 			return;
 		}
 
@@ -43,7 +65,7 @@ function setupGlobalLoadingOverlay() {
 
 		const link = target.closest('a');
 
-		if (!link || link.dataset.noGlobalLoader === 'true' || link.hasAttribute('download') || link.target === '_blank') {
+		if (!link || link.closest('[data-no-loading]') || link.hasAttribute('download') || link.target === '_blank') {
 			return;
 		}
 
@@ -57,8 +79,15 @@ function setupGlobalLoadingOverlay() {
 	}, true);
 
 	window.addEventListener('pageshow', () => {
-		overlay.classList.remove('is-visible');
-		overlay.hidden = true;
+		hideOverlay();
+	});
+
+	window.addEventListener('focus', hideOverlay);
+
+	document.addEventListener('visibilitychange', () => {
+		if (!document.hidden) {
+			hideOverlay();
+		}
 	});
 }
 

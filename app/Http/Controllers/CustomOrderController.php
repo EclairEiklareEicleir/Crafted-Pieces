@@ -33,7 +33,7 @@ class CustomOrderController extends Controller
     */
 public function show(CustomOrderRequest $customOrder)
 {
-    if ($customOrder->user_id !== Auth::id()) {
+        if (! Auth::check() || $customOrder->user_id !== Auth::id()) {
         abort(403);
     }
 
@@ -56,7 +56,7 @@ public function show(CustomOrderRequest $customOrder)
     */
     public function message(Request $request, CustomOrderRequest $customOrder)
     {
-        if ($customOrder->user_id !== Auth::id()) {
+        if (! Auth::check() || $customOrder->user_id !== Auth::id()) {
             abort(403);
         }
 
@@ -80,6 +80,12 @@ public function show(CustomOrderRequest $customOrder)
     */
     public function store(Request $request)
     {
+        if (! Auth::check()) {
+            return back()
+                ->withErrors(['auth' => 'Please log in to submit a custom order.'])
+                ->with('auth_form', 'login');
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255',
@@ -106,8 +112,7 @@ public function show(CustomOrderRequest $customOrder)
         $admins = User::where('role', 'owner')->get();
 
         foreach ($admins as $admin) {
-            Notification::create([
-                'user_id' => $admin->id,
+            Notification::notifyUser($admin, [
                 'title' => 'New Custom Order Request',
                 'message' => 'A customer submitted a new custom order request.',
                 'link' => route('admin.custom.index'),
@@ -124,7 +129,7 @@ public function show(CustomOrderRequest $customOrder)
     */
     public function pay(Request $request, CustomOrderRequest $customOrder)
     {
-        if ($customOrder->user_id !== Auth::id()) {
+        if (! Auth::check() || $customOrder->user_id !== Auth::id()) {
             abort(403);
         }
 

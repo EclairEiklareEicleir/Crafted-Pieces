@@ -19,28 +19,28 @@ class CartController extends Controller
             ]);
         }
 
-        /** @var \Illuminate\Session\Store $session */
-        $session = session();
-
-        return Cart::firstOrCreate([
-            'session_id' => $session->getId() ?: $session->token() ?: uniqid('session_', true)
-        ]);
+        return null;
     }
 
     public function index()
     {
         $cart = $this->getCart();
 
-        $cartItems = $cart->items()
-            ->with(['product', 'productVariant', 'yarnColor'])
-            ->latest()
-            ->get();
+        $cartItems = $cart
+            ? $cart->items()->with(['product', 'productVariant', 'yarnColor'])->latest()->get()
+            : collect();
 
         return view('user.cart', compact('cartItems'));
     }
 
     public function add(Request $request, $slug)
     {
+        if (! Auth::check()) {
+            return back()
+                ->withErrors(['auth' => 'Please log in to add items to your cart.'])
+                ->with('auth_form', 'login');
+        }
+
         $request->validate([
             'yarn_color_id' => 'required|integer|exists:yarn_colors,id',
             'product_variant_id' => 'nullable|integer|exists:product_variants,id',
@@ -48,6 +48,12 @@ class CartController extends Controller
         ]);
 
         $cart = $this->getCart();
+        if (! $cart) {
+            return back()
+                ->withErrors(['auth' => 'Please log in to add items to your cart.'])
+                ->with('auth_form', 'login');
+        }
+
         $quantity = (int) $request->input('quantity', 1);
 
         $product = Product::with(['variants' => function ($query) {
@@ -103,11 +109,21 @@ class CartController extends Controller
 
     public function update(Request $request, $id)
     {
+        if (! Auth::check()) {
+            return back()
+                ->withErrors(['auth' => 'Please log in to update your cart.'])
+                ->with('auth_form', 'login');
+        }
+
         $request->validate([
             'quantity' => 'required|integer|min:1|max:99',
         ]);
 
-        $item = CartItem::findOrFail($id);
+        $item = CartItem::where('id', $id)
+            ->whereHas('cart', function ($query) {
+                $query->where('user_id', Auth::id());
+            })
+            ->firstOrFail();
 
         $item->update([
             'quantity' => $request->quantity
@@ -118,7 +134,18 @@ class CartController extends Controller
 
     public function remove($id)
     {
-        CartItem::findOrFail($id)->delete();
+        if (! Auth::check()) {
+            return back()
+                ->withErrors(['auth' => 'Please log in to update your cart.'])
+                ->with('auth_form', 'login');
+        }
+
+        CartItem::where('id', $id)
+            ->whereHas('cart', function ($query) {
+                $query->where('user_id', Auth::id());
+            })
+            ->firstOrFail()
+            ->delete();
 
         return back()->with('success', 'Item removed');
     }

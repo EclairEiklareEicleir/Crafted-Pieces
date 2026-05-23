@@ -43,7 +43,7 @@
                 <p><strong>Preferred Size:</strong> {{ $request->preferred_size }}</p>
                 <p><strong>Payment Method:</strong> {{ $request->payment_method ?? '—' }}</p>
 
-                <div class="flex flex-wrap items-center gap-3">
+                <div id="payment-details" class="flex flex-wrap items-center gap-3">
                     <strong>Payment Status:</strong>
                     <x-status-badge :status="$request->payment_status ?? 'unpaid'" context="payment" />
                 </div>
@@ -187,7 +187,7 @@
     </div>
 
     {{-- RIGHT CHAT --}}
-    <div class="rounded-4xl border border-brand-border bg-white p-6 shadow-sm lg:flex lg:min-h-[44rem] lg:flex-col">
+    <div class="rounded-4xl border border-brand-border bg-white p-6 shadow-sm lg:flex lg:min-h-176 lg:flex-col">
 
         <h2 class="font-display text-2xl font-semibold text-brand-primary">
             Conversation

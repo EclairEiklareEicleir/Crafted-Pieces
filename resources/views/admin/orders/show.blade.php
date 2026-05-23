@@ -27,7 +27,7 @@
             Payment: {{ $order->payment_method }}
         </p>
 
-        <div class="mt-2 flex flex-wrap items-center gap-3 text-sm text-brand-ink/70">
+        <div id="payment-details" class="mt-2 flex flex-wrap items-center gap-3 text-sm text-brand-ink/70">
             <span>Payment Status:</span>
             <x-status-badge :status="$order->payment_status ?? 'unpaid'" context="payment" />
         </div>

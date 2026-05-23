@@ -5,8 +5,7 @@
             $user = auth()->user();
             $isOwner = $user?->role === 'owner';
 
-            // NOTIFICATIONS (ONLY FOR LOGGED IN USERS)
-            $unreadNotifications = auth()->check()
+            $recentNotifications = auth()->check()
                 ? \App\Models\Notification::where('user_id', auth()->id())
                     ->latest()
                     ->take(5)
@@ -15,7 +14,7 @@
 
             $unreadCount = auth()->check()
                 ? \App\Models\Notification::where('user_id', auth()->id())
-                    ->where('is_read', false)
+                    ->unread()
                     ->count()
                 : 0;
         @endphp
@@ -62,12 +61,8 @@
                             </a>
 
                             @auth
-<<<<<<< HEAD
                                 <a href="{{ route('custom-order') }}"
                                    class="brand-dropdown-link whitespace-nowrap {{ request()->routeIs('custom-order') ? 'bg-brand-light text-brand-primary' : '' }}">
-=======
-                                <a href="{{ route('custom-order') }}" class="brand-dropdown-link whitespace-nowrap {{ request()->routeIs('custom-order') ? 'bg-brand-light text-brand-primary' : '' }}">
->>>>>>> origin/feature/product-variants-yarn-ui
                                     Custom Order
                                 </a>
                             @endauth
@@ -243,8 +238,8 @@
                             </p>
 
                             <div class="mt-2 grid gap-2">
-                                @forelse ($unreadNotifications as $notif)
-                                    <a href="{{ $notif->link ?? '#' }}"
+                                @forelse ($recentNotifications as $notif)
+                                    <a href="{{ route('notifications.show', $notif) }}"
                                        class="block rounded-xl border border-brand-border bg-white p-2 hover:bg-brand-light">
 
                                         <p class="text-sm font-semibold text-brand-primary">
@@ -261,6 +256,11 @@
                                     </p>
                                 @endforelse
                             </div>
+
+                            <a href="{{ route('notifications.index') }}"
+                               class="mt-3 block rounded-xl border border-brand-border px-3 py-2 text-center text-sm font-medium text-brand-primary transition hover:bg-brand-light">
+                                View all notifications
+                            </a>
                         </div>
                     </details>
                 @endauth

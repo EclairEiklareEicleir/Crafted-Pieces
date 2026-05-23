@@ -25,17 +25,17 @@ class AppServiceProvider extends ServiceProvider
     {
         View::composer('components.navbar', function ($view) {
 
+            /** @var Cart|null $cart */
             $cart = Auth::check()
                 ? Cart::where('user_id', Auth::id())->first()
-                : Cart::where('session_id', session()->getId())->first();
+                : null;
 
             $cartCount = $cart ? $cart->items()->sum('quantity') : 0;
-
             $unreadCount = 0;
 
             if (Auth::check()) {
-                $unreadCount = \App\Models\Notification::where('user_id', Auth::id())
-                    ->where('is_read', false)
+                $unreadCount = Notification::where('user_id', Auth::id())
+                    ->unread()
                     ->count();
             }
 

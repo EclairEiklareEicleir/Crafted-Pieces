@@ -10,9 +10,18 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\CustomOrderQuotationMail;
 use Illuminate\Support\Facades\Log;
 use App\Models\Notification;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class AdminCustomOrderController extends Controller
 {
+    private const ACTIVE_STATUSES = [
+        CustomOrderRequest::STATUS_PENDING,
+        CustomOrderRequest::STATUS_QUOTED,
+        CustomOrderRequest::STATUS_AWAITING_PAYMENT,
+        CustomOrderRequest::STATUS_PAID,
+        CustomOrderRequest::STATUS_IN_PROGRESS,
+    ];
+
     /*
     |--------------------------------------------------------------------------
     | LIST ALL CUSTOM REQUESTS
@@ -20,7 +29,9 @@ class AdminCustomOrderController extends Controller
     */
     public function index()
     {
-        $requests = CustomOrderRequest::latest()->get();
+        $requests = CustomOrderRequest::whereIn('status', self::ACTIVE_STATUSES)
+            ->latest()
+            ->get();
 
         return view('admin.custom.index', compact('requests'));
     }
@@ -56,8 +67,7 @@ class AdminCustomOrderController extends Controller
             'message' => $httpRequest->message,
         ]);
 
-        Notification::create([
-            'user_id' => $customOrder->user_id,
+        Notification::notifyUser($customOrder->user, [
             'title' => 'New Admin Reply',
             'message' => 'Admin replied to your custom order request.',
             'link' => route('custom-order.show', $customOrder),
@@ -87,8 +97,7 @@ class AdminCustomOrderController extends Controller
             'status' => CustomOrderRequest::STATUS_QUOTED,
         ]);
 
-        Notification::create([
-            'user_id' => $customOrder->user_id,
+        Notification::notifyUser($customOrder->user, [
             'title' => 'Quotation Received',
             'message' => 'Your custom order has been quoted and awaiting payment.',
             'link' => route('custom-order.show', $customOrder),
@@ -194,8 +203,7 @@ class AdminCustomOrderController extends Controller
             'status' => CustomOrderRequest::STATUS_REJECTED
         ]);
 
-        Notification::create([
-            'user_id' => $customOrder->user_id,
+        Notification::notifyUser($customOrder->user, [
             'title' => 'Request Rejected',
             'message' => 'Admin rejected your custom order request.',
             'link' => route('custom-order.show', $customOrder),
@@ -211,5 +219,32 @@ class AdminCustomOrderController extends Controller
             'success',
             'Order rejected successfully.'
         );
+    }
+
+    public function downloadReceipt(CustomOrderRequest $customOrder)
+    {
+        if (! extension_loaded('gd')) {
+            Log::error('Admin custom receipt PDF generation failed because the PHP GD extension is missing.', [
+                'custom_order_id' => $customOrder->id,
+                'php_binary' => PHP_BINARY,
+            ]);
+
+            abort(500, 'PDF receipts require the PHP GD extension. Enable extension=gd in C:\\xampp\\php\\php.ini and restart Apache or php artisan serve.');
+        }
+
+        $pricing = [
+            'base_price' => $customOrder->final_price ?? $customOrder->estimated_price,
+            'platform_fee' => 0,
+            'delivery_fee' => 0,
+            'vat' => 0,
+            'total' => $customOrder->final_price ?? $customOrder->estimated_price,
+        ];
+
+        $pdf = Pdf::loadView('user.receipt.customreceipt-pdf', [
+            'order' => $customOrder,
+            'pricing' => $pricing,
+        ]);
+
+        return $pdf->download('custom-receipt-' . $customOrder->id . '.pdf');
     }
 }
