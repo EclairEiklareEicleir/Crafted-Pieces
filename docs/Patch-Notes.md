@@ -167,3 +167,11 @@
 - Added Password Update in Accounts
 - Modified Reviews: Account holders can now leave reviews and Guest can view reviews
 - Added ReviewSeeder to fill in reviews
+
+
+## 24/05/26: Receipt Update, Admin Order Modification
+- Modified receipts to indicated "Order Status:Status" instead of just "Status" 
+- Updated Order UI
+- Added Order Export
+- Modified pagination setting
+- Added Order type

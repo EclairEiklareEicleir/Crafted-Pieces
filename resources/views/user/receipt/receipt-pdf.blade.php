@@ -60,7 +60,7 @@
 <div class="box">
     <p><strong>Order ID:</strong> #{{ $order->id }}</p>
     <p><strong>Date:</strong> {{ $order->created_at->format('M d, Y - h:i A') }}</p>
-    <p><strong>Status:</strong> {{ ucfirst($order->status) }}</p>
+    <p><strong>Order Status:</strong> Pending</p>
     <p><strong>Customer:</strong> {{ $order->full_name }}</p>
     <p><strong>Email:</strong> {{ $order->email }}</p>
 </div>

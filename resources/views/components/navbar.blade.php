@@ -46,9 +46,11 @@
                                 About
                             </a>
 
-                            <a href="{{ route('custom-order') }}" class="brand-dropdown-link whitespace-nowrap {{ request()->routeIs('custom-order') ? 'bg-brand-light text-brand-primary' : '' }}">
-                                Custom Order
-                            </a>
+                            @auth
+                                <a href="{{ route('custom-order') }}" class="brand-dropdown-link whitespace-nowrap {{ request()->routeIs('custom-order') ? 'bg-brand-light text-brand-primary' : '' }}">
+                                    Custom Order
+                                </a>
+                            @endauth
 
                             @auth
                                 <div class="grid gap-1 rounded-2xl border border-brand-border p-2">
@@ -129,10 +131,12 @@
                         About
                     </a>
 
-                    <a href="{{ route('custom-order') }}"
-                       class="whitespace-nowrap {{ request()->routeIs('custom-order') ? 'text-brand-primary' : 'text-brand-ink/75 hover:text-brand-primary' }}">
-                        Custom Order
-                    </a>
+                    @auth
+                        <a href="{{ route('custom-order') }}"
+                           class="whitespace-nowrap {{ request()->routeIs('custom-order') ? 'text-brand-primary' : 'text-brand-ink/75 hover:text-brand-primary' }}">
+                            Custom Order
+                        </a>
+                    @endauth
 
                     @auth
                         <div class="relative group">
@@ -223,19 +227,9 @@
                                     </a>
                                 @endif
 
-                                <a href="{{ route('orders') }}"
-                                   class="brand-dropdown-link {{ request()->routeIs('orders') ? 'bg-brand-light text-brand-primary' : '' }}">
-                                    Orders
-                                </a>
-
-                                <a href="{{ route('custom-order.index') }}"
-                                   class="brand-dropdown-link whitespace-nowrap {{ request()->routeIs('custom-order.index') ? 'bg-brand-light text-brand-primary' : '' }}">
-                                    Custom Orders
-                                </a>
-
                                 @if (Route::has('account'))
                                     <a href="{{ route('account') }}"
-                                       class="brand-dropdown-link {{ request()->routeIs('account') ? 'bg-brand-light text-brand-primary' : '' }}">
+                                    class="brand-dropdown-link {{ request()->routeIs('account') ? 'bg-brand-light text-brand-primary' : '' }}">
                                         Account
                                     </a>
                                 @endif
@@ -247,6 +241,7 @@
                                     </button>
                                 </form>
                             </div>
+
                         </div>
                     </details>
                 @endauth

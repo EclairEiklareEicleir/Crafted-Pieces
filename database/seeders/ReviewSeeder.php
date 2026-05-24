@@ -76,7 +76,7 @@ class ReviewSeeder extends Seeder
             ],
         ];
 
-        $userIds = [1, 2, 6];
+        $userIds = [2, 3, 4];
 
         foreach ($reviews as $review) {
             Review::create([

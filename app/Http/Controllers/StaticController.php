@@ -9,7 +9,6 @@ class StaticController extends Controller
 {
     public function about()
     {
-        // Get active FAQs ordered by order field, fallback to empty array
         $faq = Faq::where('active', true)
             ->orderBy('order', 'asc')
             ->get()
