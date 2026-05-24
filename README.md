@@ -1,59 +1,86 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Contribution Report
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## Team Members and Roles
 
-## About Laravel
+| Member | Role |
+|---|---|
+| Charles Jefferson A. Betonio | Frontend Developer, UI/UX Designer, Quality Assurance (QA) Tester |
+| Harry B. Lawang | Leader, Full-Stack Developer, Backend & System Architect |
+| Alrazel R. Llave | Frontend Developer, UI Implementation Lead, Secondary Full-Stack Developer |
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+# 🧾 Peer Evaluation — Harry B. Lawang (Self Evaluation)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+| Member | Rating | Justification |
+|---|---|---|
+| Alrazel R. Llave | 100/100 | After the initial Laravel project structure was set up, he immediately contributed across frontend and system-wide development, helping establish the foundation of the application such as major user and admin views. He also provided backend support tasks, assisted in UI structuring, participated in feature integration, and contributed to overall system refinement throughout development. |
+| Charles Jefferson A. Betonio | 100/100 | He contributed significantly as QA and Tester, actively testing system features, identifying bugs, and ensuring overall application stability. In addition to testing responsibilities, he also assisted in frontend UI/UX improvements and implemented admin content systems such as the FAQ and About modules. He was consistently involved in validating features and communicating issues, improvements, and requirements throughout development via coordination and feedback. |
+| Harry B. Lawang | 100/100 | I led system architecture, backend development, database design, and overall application structure. |
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+# 🧾 Peer Evaluation — Charles Jefferson A. Betonio (Self Evaluation)
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+| Member | Rating | Justification |
+|---|---|---|
+| Alrazel R. Llave | (TO BE FILLED) | (TO BE FILLED) |
+| Harry B. Lawang | (TO BE FILLED) | (TO BE FILLED) |
+| Charles Jefferson A. Betonio | (TO BE FILLED) | (TO BE FILLED) |
 
-## Laravel Sponsors
+---
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+# 🧾 Peer Evaluation — Alrazel R. Llave (Self Evaluation)
 
-### Premium Partners
+| Member | Rating | Justification |
+|---|---|---|
+| Charles Jefferson A. Betonio | (TO BE FILLED) | (TO BE FILLED) |
+| Harry B. Lawang | (TO BE FILLED) | (TO BE FILLED) |
+| Alrazel R. Llave | (TO BE FILLED) | (TO BE FILLED) |
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+---
 
-## Contributing
+# 📌 Contribution Breakdown
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+| Member | Contribution Area | Description |
+|---|---|---|
+| Alrazel R. Llave | Frontend Development / System Integration / Feature Implementation | Acted as the primary frontend implementation developer responsible for UI structuring and major interface development across the system. Implemented system-wide features including search functionality and PayMongo payment integration, while also assisting in backend-controller connections and frontend-to-backend alignment. |
+| Charles Jefferson A. Betonio | Frontend Development / UI-UX Design / QA Testing / Admin Content Systems | Developed frontend UI improvements and implemented admin-managed content systems including FAQ and About Section modules. Contributed to authentication UI improvements, navigation refinement, and overall interface consistency. Actively performed QA testing by identifying bugs, validating features, and ensuring system stability through continuous feedback and coordination. |
+| Harry B. Lawang | Backend Development / System Architecture / Core Engine / System Debugging | Developed core backend systems including authentication, cart, checkout, orders, custom orders, notifications, and admin dashboard systems. Designed the database architecture, models, migrations, middleware, and service layer logic. Also handled system-wide debugging and resolved critical issues during development, including fixing broken payment-related functionality when encountered. |
 
-## Code of Conduct
+---
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+# 🧠🎨🧱 Major Contributions
+## Harry B. Lawang
+| Area | Contributions |
+|---|---|
+| Backend Systems | Authentication system (role-based access control), cart system (CRUD, validation, session/user handling), checkout system (order creation flow), order management system (standard and custom orders), notification system, and admin dashboard system. |
+| Architecture & Services | Designed Laravel MVC architecture, implemented middleware role protection, structured routing separation (admin vs storefront), designed database schema and relationships, and developed service layer logic for pricing and payment handling. |
+| Models & Database | Developed and managed core models including Cart, CartItem, CustomOrderRequest, CustomOrderMessage, Notification, Review, Chatbot, and Settings. Implemented full migrations and seeders system. |
 
-## Security Vulnerabilities
+## Charles Jefferson A. Betonio
+| Area | Contributions |
+|---|---|
+| Admin Content Systems | Developed admin FAQ CRUD system (create, read, update, delete, display), implemented admin About Section management system, and supported static page content management. |
+| UI/UX Improvements | Improved authentication modal (login/register UX), refined navbar and footer layout, enhanced checkout UI, improved form validation feedback, and maintained overall UI consistency across the system. |
+| Models & Database | Managed Frequently Asked Questions (FAQ) and About content-related data structures. |
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Alrazel R. Llave 
+| Area | Contributions |
+|---|---|
+| System & Frontend Support | Assisted in frontend Blade structuring and layout organization, supported UI implementation across multiple modules, performed debugging and UI adjustments during development, and contributed to overall system-wide frontend stability. |
+| Feature Implementation | Implemented search system and integrated PayMongo payment system, while also supporting backend-controller connections and frontend-to-backend alignment. |
+| Development Assistance | Participated in feature-level testing and validation, assisted in refining admin and storefront UI behavior, and contributed to structural improvements during iterative development. |
+| Models & Database | Worked with core models including User, Product, Category, ProductVariant, YarnColor, Order, and OrderItem. |
 
-## License
+---
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+# 🧾 Overall Project Summary
+
+The system is a full-stack Laravel-based e-commerce platform featuring custom orders, authentication, cart and checkout flows, payment integration, and a complete admin management system.
+
+- **Harry B. Lawang** led backend architecture, system design, database modeling, service layer implementation, and core application logic across all major system modules including authentication, orders, cart, checkout, and overall system integration. He also handled system debugging and resolved critical issues during development, including payment-related fixes.
+- **Charles Jefferson A. Betonio** focused on frontend UI/UX design improvements, implemented and maintained admin content systems (FAQ and About modules), and served as the Quality Assurance (QA) Tester responsible for testing features, identifying bugs, and validating system stability through continuous feedback and coordination.
+- **Alrazel R. Llave** contributed as the primary frontend implementation developer responsible for UI structuring and major interface development across the system. He also contributed system-wide integration work, including search functionality and PayMongo payment system implementation, while assisting in backend-controller connections and frontend-to-backend alignment.
+
+The project reflects a collaborative full-stack development effort with clearly distributed responsibilities across frontend, backend, and system integration layers.
