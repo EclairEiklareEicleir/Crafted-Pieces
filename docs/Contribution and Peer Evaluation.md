@@ -50,73 +50,22 @@
 
 ---
 
-# 🧠 Major Contributions — Harry B. Lawang
+# 🧠🎨🧱 Major Contributions
 
-## Backend Systems
-- Authentication system (role-based access control)
-- Cart system (CRUD + validation + session/user handling)
-- Checkout system (order creation flow)
-- Order management system (standard and custom orders)
-- Notification system
-- Admin dashboard system
+| Member | Area | Contributions |
+|---|---|---|
+| Harry B. Lawang | Backend Systems | Authentication system (role-based access control), cart system (CRUD, validation, session/user handling), checkout system (order creation flow), order management system (standard and custom orders), notification system, and admin dashboard system. |
+|  | Architecture & Services | Designed Laravel MVC architecture, implemented middleware role protection, structured routing separation (admin vs storefront), designed database schema and relationships, and developed service layer logic for pricing and payment handling. |
+|  | Models & Database | Developed and managed core models including Cart, CartItem, CustomOrderRequest, CustomOrderMessage, Notification, Review, Chatbot, and Settings. Implemented full migrations and seeders system. |
 
-## Architecture & Services
-- Laravel MVC architecture design
-- Middleware role protection
-- Routing structure separation (admin vs storefront)
-- Database schema design and relationships
-- Service layer implementation (pricing, payment logic)
+| Charles Jefferson A. Betonio | Admin Content Systems | Developed admin FAQ CRUD system (create, read, update, delete, display), implemented admin About Section management system, and supported static page content management. |
+|  | UI/UX Improvements | Improved authentication modal (login/register UX), refined navbar and footer layout, enhanced checkout UI, improved form validation feedback, and maintained overall UI consistency across the system. |
+|  | Models & Database | Managed Frequently Asked Questions (FAQ) and About content-related data structures. |
 
-## Models & Database
-- Cart, CartItem
-- CustomOrderRequest, CustomOrderMessage
-- Notification, Review, Chatbot, Settings
-- Full migrations and seeders system
-
----
-
-# 🎨 Major Contributions — Charles Jefferson A. Betonio
-
-## Admin Content Systems
-- Admin FAQ CRUD system (create, edit, delete, display)
-- Admin About Section management system
-- Static page content management support
-
-## UI/UX Improvements
-- Authentication modal improvements (login/register UX)
-- Navbar and footer layout refinement
-- Checkout UI improvements
-- Form validation feedback enhancements
-- General UI consistency improvements
-
-## Models & Database
-- Frequently Asked Questions (FAQ)
-- About
-
----
-
-# 🧱 Major Contributions — Alrazel R. Llave
-
-## System & Frontend Support
-- Assisted in frontend Blade structuring and layout organization
-- Supported UI implementation across multiple modules
-- Assisted debugging and UI adjustments during development
-- Created major search system
-- Integrated payment system (PayMongo)
-
-## Integration Support
-- Helped connect frontend views with backend controllers
-- Assisted in testing features across different system modules
-- Supported UI consistency improvements during system expansion
-
-## Development Assistance
-- Participated in feature-level testing and validation
-- Assisted in refining admin-side and storefront-side UI behavior
-- Contributed to structural improvements during iterative development
-
-## Models & Database
-- User, Product, Category, Variants, YarnColor
-- Order, OrderItem
+| Alrazel R. Llave | System & Frontend Support | Assisted in frontend Blade structuring and layout organization, supported UI implementation across multiple modules, performed debugging and UI adjustments during development, and contributed to overall system-wide frontend stability. |
+|  | Feature Implementation | Implemented search system and integrated PayMongo payment system, while also supporting backend-controller connections and frontend-to-backend alignment. |
+|  | Development Assistance | Participated in feature-level testing and validation, assisted in refining admin and storefront UI behavior, and contributed to structural improvements during iterative development. |
+|  | Models & Database | Worked with core models including User, Product, Category, ProductVariant, YarnColor, Order, and OrderItem. |
 
 ---
 
