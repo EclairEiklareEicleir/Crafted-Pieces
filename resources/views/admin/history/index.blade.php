@@ -6,6 +6,16 @@
     $statusLabel = fn ($status) => ucwords(str_replace('_', ' ', $status));
     $statusOptions = ['delivered', 'received', 'completed', 'cancelled', 'rejected', 'refunded', 'failed'];
     $paymentOptions = ['paid', 'unpaid', 'pending', 'awaiting_payment', 'failed', 'refunded', 'expired', 'cancelled'];
+
+    // FIXED: paginator-safe + supports array/object
+    $totalRevenue = collect($history->items() ?? $history)->sum(function ($item) {
+        if (is_array($item)) {
+            return (float) ($item['total_amount'] ?? 0);
+        }
+
+        return (float) ($item->total_amount ?? 0);
+    });
+
 @endphp
 
 <div class="rounded-4xl border border-brand-border bg-white p-6 shadow-sm">
@@ -119,7 +129,10 @@
                     <th class="py-3 pr-4">Type</th>
                     <th class="py-3 pr-4">Order Status</th>
                     <th class="py-3 pr-4">Payment Status</th>
+
+                    <!-- MUST be directly before Actions -->
                     <th class="py-3 pr-4">Total</th>
+
                     <th class="py-3 pr-4">Date Ordered</th>
                     <th class="py-3 pr-4">Last Updated</th>
                     <th class="py-3 pr-4 text-right">Actions</th>
@@ -216,6 +229,25 @@
                     </tr>
                 @endforelse
             </tbody>
+
+            <!-- FIXED FOOTER ALIGNMENT -->
+            <tfoot class="border-t border-brand-border bg-brand-light/20 font-semibold text-brand-primary">
+                <tr>
+                    <!-- LEFT SIDE LABEL -->
+                    <td colspan="6" class="py-4 pl-3 pr-4 text-left">
+                        Total Revenue
+                    </td>
+
+                    <!-- UNDER TOTAL COLUMN -->
+                    <td class="py-4 pr-4 text-left">
+                        PHP {{ number_format($totalRevenue, 2) }}
+                    </td>
+
+                    <!-- REMAINING COLUMNS -->
+                    <td colspan="3"></td>
+                </tr>
+            </tfoot>
+
         </table>
     </div>
 

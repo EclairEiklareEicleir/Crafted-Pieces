@@ -110,7 +110,7 @@
 - Added custom commission infrastructure: commission requests, commission messaging/chat system, quotation handling, admin notes, payment workflow, commission status lifecycle
 - Added controller system and UI for checkout/payment processing, order tracking, custom commission workflow, admin commission handling, admin order management, and admin dashboard analytics
 
-## 15/05/26: Major Remake Part 5:
+## 15/05/26: Major Remake Part 6:
 - Added customer ↔ owner messaging/chat system for commission discussions
 - Added centralized commission statuses: pending, quoted, awaiting_confirmation, awaiting_payment, paid, in_progress, completed, rejected
 - Added universal payment processing system for regular orders and custom commissions
@@ -144,9 +144,7 @@
 - Updated routing system to support product and category management
 - Remade image logic: now connects to the storage folder and utilizes it for the product images
 - Updated product and product-card views to handle new image logic
-
 - Remade Footer
-
 - Introduced centralized PricingService to unify all checkout, order, and receipt calculations
 - Refactored checkout and payment flows to remove duplicated pricing logic and rely on service layer
 - Unified order view and receipt output to ensure 1:1 consistent totals across UI and PDF
@@ -157,18 +155,59 @@
 - Added SettingSeeder for default pricing configuration bootstrap
 - Updated composer.json / lock due to dependency alignment for PDF + service changes
 
+## 18/05/26: Major Shop and Admin UI Improvements
+- Updated overall shop UI and storefront presentation
+- Improved custom order chat message interface and overall messaging experience
 
-- Ui Update
+## 21/05/26: Navbar Refinements, UI Improvements, and Account Enhancements
+- Refactored navbar layout by switching account and cart button positions
+- Converted “My Orders” into a grouped dropdown containing Orders and Custom Orders
+- Polished admin category management UI
+- Added global alert UI component for system-wide notifications
+- Added customized HTTP error pages for `403`, `404`, and `500`
+- Improved profile dropdown menu organization and ordering
+- Updated admin login redirect behavior to default to the dashboard page
+- Updated footer navigation links
+- Added password visibility toggle for Login and Register forms
+- Added Privacy Policy and Terms of Service informational modals
+- Removed bank transfer option from customer-side payment dropdown
+- Removed contact card section from public About page
+- Updated admin About section logic and content handling
+- Added full FAQ CRUD support for admin management
+- Added password update functionality for user accounts
+- Improved custom order messaging and chat UI
+- Added global loading overlay and loading styles
+- Updated review system: authenticated users can now submit reviews while guests can publicly view them
+- Added `ReviewSeeder` for generating review test data
 
-## 21/05/26: Minor Navbar Modification
-- Modified Navbar: Switched account and cart button, converted My Orders to a group dropdown(Custom Orders and Orders)
+## 22/05/26: Payment System Refactor — PayMongo Integration
+- Refactored payment processing system for Orders and Custom Orders
+- Integrated PayMongo as the primary payment gateway for transaction handling
 
-- Added Global Alert UI
-- Added Password Update in Accounts
-- Modified Reviews: Account holders can now leave reviews and Guest can view reviews
-- Added ReviewSeeder to fill in reviews
+## 23/05/26: Mailing System, Notifications, and Admin Utilities
+- Fixed custom order payment processing issues
+- Added chatbot system integration
+- Added admin-side chatbot FAQ management
+- Added admin user management and order history tracking
+- Fixed guest checkout workflow issues
+- Improved review section UI and overall review presentation layout
+- Fixed product search button functionality
+- Updated custom order action UI and interaction flow
 
-## 22/05/26: Email SMTP, Notifications, Minor Fix
-- Added Three Mailing Services: For Quotation, Ordering and Admin Final Pricing
-- Added Notifications
-- Fixed Custom Order not updating payment status
+## 24/05/26: Order Management, Receipt Refinement, Admin Workflow Expansion and Minor UI Refinement
+- Updated receipt layout to properly display labeled order statuses
+- Added reference image upload support for payments and orders
+- Refactored product variant handling by attaching variants directly to products
+- Added product export and stock export functionality including product variants
+- Updated order export calculations to properly reflect total generated sales
+- Added admin-side default / templated messaging support
+- Unified Orders and Custom Orders under a combined order management structure
+- Added order type handling for `Custom`, `Walk-in`, and `Online` orders
+- Improved custom order status handling and workflow transitions
+- Updated order management UI and pagination behavior
+- Improved admin-side validation UI and validation feedback styling
+- Refined review rating selection behavior to provide visible feedback for selected star ratings
+
+## 24/05/26: Minor UI Modification
+- Minor fix in Admin Order UI
+- Adding total revenue to bottom of Order History
