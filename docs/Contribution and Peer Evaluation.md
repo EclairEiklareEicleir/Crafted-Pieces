@@ -4,39 +4,39 @@
 
 | Member | Role |
 |---|---|
-| Charles Jefferson A. Betonio | Frontend Developer, UI/UX Designer |
+| Charles Jefferson A. Betonio | Frontend Developer, UI/UX Designer, Quality Assurance (QA) Tester |
 | Harry B. Lawang | Leader, Full-Stack Developer, Backend & System Architect |
-| Alrazel R. Llave | Frontend Developer, UI/UX Designer, Secondary Developer |
+| Alrazel R. Llave | Frontend Developer, UI Implementation Lead, Secondary Full-Stack Developer |
 
 ---
 
 # 🧾 Peer Evaluation — Harry B. Lawang (Self Evaluation)
 
-| Member | Rating | Why? |
+| Member | Rating | Justification |
 |---|---|---|
-| Alrazel R. Llave | 100/100 | Contributed to frontend structuring, UI implementation support, testing, and assisted during multiple phases of system development. |
-| Charles Jefferson A. Betonio | 100/100 | Contributed significantly to frontend UI/UX development and admin content systems including FAQ and About modules. |
-| Harry B. Lawang | 100/100 | Led full backend architecture, system design, database modeling, payment integration, and core application logic across all modules. |
+| Alrazel R. Llave | 100/100 | After I set up the initial Laravel project structure, he immediately contributed across frontend and system-wide development, helping establish the foundation of the application such as major user and admin views. He also provided backend support tasks, assisted in UI structuring, participated in feature integration, and contributed to overall system refinement throughout development. |
+| Charles Jefferson A. Betonio | 100/100 | He contributed significantly as QA and Tester, actively testing system features, identifying bugs, and ensuring overall application stability. In addition to testing responsibilities, he also assisted in frontend UI/UX improvements and implemented admin content systems such as the FAQ and About modules. He was consistently involved in validating features and communicating issues, improvements, and requirements throughout development via coordination and feedback. |
+| Harry B. Lawang | 100/100 | I mostly led system architecture, backend development, database design, and overall application structure. |
 
 ---
 
 # 🧾 Peer Evaluation — Charles Jefferson A. Betonio (Self Evaluation)
 
-| Member | Rating | Why? |
+| Member | Rating | Justification |
 |---|---|---|
-| Alrazel R. Llave | 100/100 | Assisted in frontend structuring, UI development support, and testing during project development phases. |
-| Charles Jefferson A. Betonio | 100/100 | Completed frontend development tasks, UI/UX improvements, and implemented admin content systems (FAQ, About). |
-| Harry B. Lawang | 100/100 | Provided system architecture leadership and implemented core backend systems and full application logic. |
+| Alrazel R. Llave | (ANSWER HERE) | (ANSWER HERE) |
+| Harry B. Lawang | (ANSWER HERE) | (ANSWER HERE) |
+| Charles Jefferson A. Betonio | (ANSWER HERE) | (ANSWER HERE) |
 
 ---
 
 # 🧾 Peer Evaluation — Alrazel R. Llave (Self Evaluation)
 
-| Member | Rating | Why? |
+| Member | Rating | Justification |
 |---|---|---|
-| Alrazel R. Llave | 100/100 | Contributed to frontend structuring, UI support, testing, and system integration assistance throughout development phases. |
-| Charles Jefferson A. Betonio | 100/100 | Contributed to frontend UI/UX improvements and admin content system development (FAQ, About). |
-| Harry B. Lawang | 100/100 | Led backend systems, database architecture, payment integration, and full system design of the Laravel application. |
+| Charles Jefferson A. Betonio | (ANSWER HERE) | (ANSWER HERE) |
+| Harry B. Lawang | (ANSWER HERE) | (ANSWER HERE) |
+| Alrazel R. Llave | (ANSWER HERE) | (ANSWER HERE) |
 
 ---
 
@@ -44,66 +44,88 @@
 
 | Member | Contribution Area | Description |
 |---|---|---|
-| Alrazel R. Llave | Frontend Development / System Support | Assisted in frontend implementation, UI structuring, testing, debugging, and supported system-wide feature integration. Contributed to early layout structuring and ongoing UI improvements across multiple modules. |
-| Charles Jefferson A. Betonio | Frontend Development / UI-UX Design / Admin Content Systems | Developed frontend interfaces, improved user experience, and implemented admin content systems such as FAQ and About management. Contributed to UI consistency, navigation improvements, and overall visual design of the application. |
-| Harry B. Lawang | Backend Development / System Architecture / Full-Stack Integration | Developed core Laravel backend systems including authentication, cart, checkout, order management, custom orders, payment integration, admin dashboard, database design, migrations, seeders, middleware, and service layer architecture. Managed full system integration and project structure. |
+| Alrazel R. Llave | Full-Stack Support / UI Structuring / System Assistance | Assisted in frontend structuring, backend-controller support, debugging, UI adjustments, and system integration across multiple modules. Contributed significantly to admin-side features and system-wide implementation support. |
+| Charles Jefferson A. Betonio | Frontend Development / UI-UX Design / Admin Content Systems | Developed frontend UI improvements and implemented admin-managed content systems including FAQ and About Section modules. Contributed to authentication UI improvements, navigation refinement, and overall interface consistency. |
+| Harry B. Lawang | Backend Development / System Architecture / Core Engine | Developed core backend systems including authentication, cart, checkout, orders, custom orders, payment integration (PayMongo), notifications, search, and admin dashboard systems. Designed database architecture, models, migrations, middleware, and service layer logic. |
 
 ---
 
-# 🧠 Major Laravel Components Developed by Harry B. Lawang
-
-## Views
-- User-facing pages (Home, Shop, Product, Cart, Checkout, Orders, Account)
-- Admin dashboard pages
-- Error pages (403, 404, 500)
-- Email templates
-- Receipt and invoice templates
-- Layout systems (storefront and admin)
-
-## Components
-- Navbar (role-based dynamic rendering)
-- Footer system
-- Product cards
-- Cart items
-- Authentication modal
-- Chatbot component
-- Notification UI integration
+# 🧠 Major Contributions — Harry B. Lawang
 
 ## Backend Systems
 - Authentication system (role-based access control)
-- Cart system
-- Checkout system
-- Order management system (standard + custom orders)
-- Custom order system
-- Payment integration system (PayMongo)
+- Cart system (CRUD + validation + session/user handling)
+- Checkout system (order creation flow)
+- Order management system (standard and custom orders)
 - Notification system
 - Admin dashboard system
-- User management system
-- Chatbot system
-- Search system
 
-## Database and Architecture
-- Full Laravel MVC architecture design
-- Models and relationships:
-  - User, Product, Category
-  - Cart, CartItem
-  - Order, OrderItem
-  - CustomOrderRequest, CustomOrderMessage
-  - Notification, Review, Settings
-- Database migrations and schema design
-- Seeder system for test/demo data
-- Middleware (role-based access control)
-- Service layer implementation (pricing, payments)
-- Routing separation (admin vs storefront)
+## Architecture & Services
+- Laravel MVC architecture design
+- Middleware role protection
+- Routing structure separation (admin vs storefront)
+- Database schema design and relationships
+- Service layer implementation (pricing, payment logic)
+
+## Models & Database
+- Cart, CartItem
+- CustomOrderRequest, CustomOrderMessage
+- Notification, Review, Chatbot, Settings
+- Full migrations and seeders system
 
 ---
 
-# 🧾 Overall Project Remarks
+# 🎨 Major Contributions — Charles Jefferson A. Betonio
 
-The system was developed as a full-stack Laravel application with clearly defined responsibilities across all members.
+## Admin Content Systems
+- Admin FAQ CRUD system (create, edit, delete, display)
+- Admin About Section management system
+- Static page content management support
 
-- Harry B. Lawang handled backend architecture, system design, database modeling, payment systems, and core application logic.
-- Charles Jefferson A. Betonio focused on frontend UI/UX development and admin content systems.
-- Alrazel R. Llave contributed to frontend structuring, UI support, system integration assistance, and development collaboration during multiple phases.
+## UI/UX Improvements
+- Authentication modal improvements (login/register UX)
+- Navbar and footer layout refinement
+- Checkout UI improvements
+- Form validation feedback enhancements
+- General UI consistency improvements
 
-The final output is a complete e-commerce and custom order platform featuring authentication, product management, cart and checkout systems, payment integration, admin dashboards, and commission workflows.
+## Models & Database
+- Frequently Asked Questions (FAQ)
+- About
+
+---
+
+# 🧱 Major Contributions — Alrazel R. Llave
+
+## System & Frontend Support
+- Assisted in frontend Blade structuring and layout organization
+- Supported UI implementation across multiple modules
+- Assisted debugging and UI adjustments during development
+- Created major search system
+- Integrated payment system (PayMongo)
+
+## Integration Support
+- Helped connect frontend views with backend controllers
+- Assisted in testing features across different system modules
+- Supported UI consistency improvements during system expansion
+
+## Development Assistance
+- Participated in feature-level testing and validation
+- Assisted in refining admin-side and storefront-side UI behavior
+- Contributed to structural improvements during iterative development
+
+## Models & Database
+- User, Product, Category, Variants, YarnColor
+- Order, OrderItem
+
+---
+
+# 🧾 Overall Project Summary
+
+The system is a full-stack Laravel-based e-commerce platform with custom order functionality, authentication, cart and checkout flows, payment integration, and a complete admin management system.
+
+- Harry B. Lawang led the backend architecture, system design, database modeling, service layer implementation, and core application logic across all major system modules including authentication, orders, cart, checkout, and overall system integration. Also handled debugging and resolution of critical system issues when they occurred during development.
+- Charles Jefferson A. Betonio focused on frontend UI/UX design improvements, implemented and maintained admin content systems (FAQ and About modules), and served as the Quality Assurance (QA) Tester responsible for testing features, identifying bugs, and validating system stability through continuous feedback and coordination.
+- Alrazel R. Llave contributed as the primary frontend implementation developer, responsible for UI structuring and major interface development across the system. Additionally, implemented system-wide integrations including search functionality and payment system integration, while also assisting in backend-controller connections and frontend-to-backend alignment.
+
+The project reflects collaborative full-stack development with clearly distributed responsibilities across frontend, backend, and system integration layers.
