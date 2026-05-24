@@ -4,39 +4,39 @@
 
 | Member | Role |
 |---|---|
-| Harry B. Lawang | Leader, Main Developer, Backend Developer |
 | Charles Jefferson A. Betonio | Frontend Developer, UI/UX Designer |
+| Harry B. Lawang | Leader, Main Developer, Backend Developer |
 | Alrazel R. Llave | Frontend Developer, UI/UX Designer, Secondary Developer |
 
 ---
 
-# Leader Evaluation
+# Leader Evaluation — Harry B. Lawang (Self Evaluation)
 
-| Member | Rating | Reason |
+| Member | Rating | Why? |
 |---|---|---|
-| Harry B. Lawang | 100/100 | Led the team, handled backend architecture, and coordinated development workflow. |
-| Charles Jefferson A. Betonio | 100/100 | Contributed significantly to frontend development and UI/UX improvements. |
-| Alrazel R. Llave | 100/100 | Assisted in frontend implementation and contributed to overall project development. |
+| Alrazel R. Llave | 100/100 | Contributed to frontend implementation, UI improvements, testing, and assisted in development tasks throughout the project. |
+| Charles Jefferson A. Betonio | 100/100 | Successfully handled frontend development and contributed significantly to the project’s UI/UX design and user experience improvements. |
+| Harry B. Lawang | 100/100 | Managed the overall project workflow, implemented backend systems, handled Laravel architecture, and ensured coordination between all project components. |
 
 ---
 
-# Peer Evaluation — Charles Jefferson A. Betonio
+# Member Evaluation — Charles Jefferson A. Betonio (Self Evaluation)
 
-| Member | Rating | Reason |
+| Member | Rating | Why? |
 |---|---|---|
-| Harry B. Lawang | 100/100 | Provided strong leadership and backend support throughout the project. |
-| Charles Jefferson A. Betonio | 100/100 | Completed assigned frontend and UI/UX tasks responsibly. |
-| Alrazel R. Llave | 100/100 | Worked cooperatively and contributed to frontend tasks effectively. |
+| Alrazel R. Llave | 100/100 | Collaborated effectively on frontend tasks and contributed to UI improvements and testing. |
+| Charles Jefferson A. Betonio | 100/100 | Completed assigned frontend and UI/UX responsibilities and actively contributed to the visual design of the project. |
+| Harry B. Lawang | 100/100 | Provided strong leadership, backend implementation, and technical guidance throughout development. |
 
 ---
 
-# Peer Evaluation — Alrazel R. Llave
+# Member Evaluation — Alrazel R. Llave (Self Evaluation)
 
-| Member | Rating | Reason |
+| Member | Rating | Why? |
 |---|---|---|
-| Harry B. Lawang | 100/100 | Managed the project efficiently and implemented major backend systems. |
-| Charles Jefferson A. Betonio | 100/100 | Designed and improved the user interface and frontend experience. |
-| Alrazel R. Llave | 100/100 | Assisted in development tasks and collaborated actively with the team. |
+| Alrazel R. Llave | 100/100 | Assisted in frontend development, testing, and collaborated actively during the project implementation. |
+| Charles Jefferson A. Betonio | 100/100 | Contributed greatly to frontend design and UI/UX enhancements that improved the application’s interface. |
+| Harry B. Lawang | 100/100 | Led the team effectively, implemented core backend systems, and managed the technical structure of the Laravel project. |
 
 ---
 
@@ -44,12 +44,53 @@
 
 | Member | Contribution Area | Description |
 |---|---|---|
-| Harry B. Lawang | Backend Development | Developed backend logic, database integration, Laravel system architecture, and project coordination. |
-| Charles Jefferson A. Betonio | Frontend Development / UI-UX | Designed user interface layouts, improved user experience, and implemented frontend pages/components. |
-| Alrazel R. Llave | Frontend Development / Support Development | Assisted in frontend implementation, UI improvements, testing, and secondary development tasks. |
+| Alrazel R. Llave | Frontend Development / Support Development | Assisted in frontend implementation, UI enhancements, testing, debugging, and secondary development tasks. |
+| Charles Jefferson A. Betonio | Frontend Development / UI-UX Design | Developed frontend interfaces, improved user experience, designed layouts, and contributed to the visual consistency of the application. |
+| Harry B. Lawang | Backend Development / System Architecture / Project Management | Developed the majority of Laravel backend systems including controllers, models, migrations, middleware, commands, mail systems, seeders, and major Blade views. Managed project coordination, system architecture, database structure, business logic, and overall application integration. |
+
+---
+
+# Major Laravel Components Developed by Harry B. Lawang
+
+## Views
+- User Pages
+- Admin Pages
+- Error Pages
+- Email Templates
+- Receipt Templates
+- Layout Systems
+
+## Components
+- Navbar
+- Footer
+- Product Cards
+- Cart Items
+- Authentication Modal
+- Chatbot Component
+
+## Backend Systems
+- Authentication System
+- Cart System
+- Checkout System
+- Order Management System
+- Custom Order System
+- Notification System
+- Chatbot System
+- User Management System
+- Admin Dashboard System
+
+## Database and Architecture
+- Database Models
+- Migrations
+- Seeders
+- Middleware
+- Artisan Commands
+- Mail Integration
+- Laravel MVC Structure
+- Routing and Backend Logic
 
 ---
 
 # Overall Remarks
 
-All members actively participated in the development process and fulfilled their assigned responsibilities successfully.
+All members actively contributed to the development of the Laravel project and fulfilled their assigned responsibilities successfully. The team maintained collaboration throughout frontend, backend, UI/UX, and system integration processes.
