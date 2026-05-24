@@ -44,9 +44,9 @@
 
 | Member | Contribution Area | Description |
 |---|---|---|
-| Alrazel R. Llave | Full-Stack Support / UI Structuring / System Assistance | Assisted in frontend structuring, backend-controller support, debugging, UI adjustments, and system integration across multiple modules. Contributed significantly to admin-side features and system-wide implementation support. |
-| Charles Jefferson A. Betonio | Frontend Development / UI-UX Design / Admin Content Systems | Developed frontend UI improvements and implemented admin-managed content systems including FAQ and About Section modules. Contributed to authentication UI improvements, navigation refinement, and overall interface consistency. |
-| Harry B. Lawang | Backend Development / System Architecture / Core Engine | Developed core backend systems including authentication, cart, checkout, orders, custom orders, payment integration (PayMongo), notifications, search, and admin dashboard systems. Designed database architecture, models, migrations, middleware, and service layer logic. |
+| Alrazel R. Llave | Frontend Development / System Integration / Feature Implementation | Acted as the primary frontend implementation developer responsible for UI structuring and major interface development across the system. Implemented system-wide features including search functionality and PayMongo payment integration, while also assisting in backend-controller connections and frontend-to-backend alignment. |
+| Charles Jefferson A. Betonio | Frontend Development / UI-UX Design / Quality Assurance (QA) Tester / Admin Content Systems | Developed frontend UI improvements and implemented admin-managed content systems including FAQ and About Section modules. Contributed to authentication UI improvements, navigation refinement, and overall interface consistency. Actively performed QA testing by identifying bugs, validating features, and ensuring system stability through continuous feedback and coordination. |
+| Harry B. Lawang | Backend Development / System Architecture / Core Engine / System Debugging | Developed core backend systems including authentication, cart, checkout, orders, custom orders, notifications, and admin dashboard systems. Designed the database architecture, models, migrations, middleware, and service layer logic. Also handled system-wide debugging and resolved critical issues during development, including fixing broken payment-related functionality when encountered. |
 
 ---
 
