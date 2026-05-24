@@ -4,6 +4,10 @@
 
 <section class="mx-auto max-w-md px-4 py-20">
 
+    <div class="mb-6 flex items-center justify-between gap-3">
+        <x-back-button href="{{ route('shop') }}" label="Back to Shop" />
+    </div>
+
     <h1 class="text-3xl font-semibold text-brand-primary">
         Track Your Order
     </h1>

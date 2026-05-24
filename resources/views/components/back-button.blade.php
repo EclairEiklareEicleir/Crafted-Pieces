@@ -5,7 +5,19 @@
 ])
 
 @php
-    $target = $href ?: url()->previous();
+    $target = $href;
+
+    if (! $target) {
+        $previous = url()->previous();
+        $previousHost = parse_url($previous, PHP_URL_HOST);
+        $previousPath = parse_url($previous, PHP_URL_PATH) ?: '';
+        $appHost = parse_url(config('app.url') ?: url('/'), PHP_URL_HOST) ?: request()->getHost();
+
+        $target = $previousHost && strcasecmp($previousHost, $appHost) === 0 && ! str_starts_with($previousPath, '/admin')
+            ? $previous
+            : route('home');
+    }
+
     $classes = $variant === 'primary'
         ? 'brand-btn-primary'
         : 'brand-btn-secondary';

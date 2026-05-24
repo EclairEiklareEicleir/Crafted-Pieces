@@ -32,6 +32,10 @@
 
     <div class="relative mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8 lg:py-20">
 
+        <div class="mb-6 flex items-center justify-between gap-3">
+            <x-back-button href="{{ route('custom-order.index') }}" label="Back to Custom Orders" />
+        </div>
+
         <div class="max-w-3xl">
 
             <span class="brand-pill bg-white/80 ring-1 ring-brand-border backdrop-blur">

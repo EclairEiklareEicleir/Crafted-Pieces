@@ -8,6 +8,10 @@
     $heroImage = $selectedVariant?->floating_image_url ?? $product->floating_image_url;
 @endphp
 <section class="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8" data-product-default-image="{{ $product->floating_image_url }}">
+    <div class="mb-6 flex items-center justify-between gap-3">
+        <x-back-button href="{{ route('shop') }}" label="Back to Shop" />
+    </div>
+
     <div class="grid gap-10 lg:grid-cols-[0.95fr_1.05fr]">
 
         {{-- PRODUCT IMAGE --}}

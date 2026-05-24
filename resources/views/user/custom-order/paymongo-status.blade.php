@@ -4,6 +4,10 @@
 
 <section class="mx-auto max-w-3xl px-4 py-16">
 
+    <div class="mb-6">
+        <x-back-button href="{{ route('custom-order.show', $order) }}" label="Back to Ticket" variant="primary" />
+    </div>
+
     <div class="rounded-4xl border border-brand-border bg-white p-8 shadow-sm">
 
         <p class="text-xs font-semibold uppercase tracking-[0.2em] text-brand-secondary">
@@ -40,12 +44,6 @@
                     <span class="font-semibold text-brand-primary">{{ $order->paid_at->format('M d, Y h:i A') }}</span>
                 </div>
             @endif
-        </div>
-
-        <div class="mt-8 flex flex-wrap gap-3">
-            <a href="{{ route('custom-order.show', $order) }}" class="brand-btn-primary px-5 py-3">
-                Back to Ticket
-            </a>
         </div>
 
     </div>

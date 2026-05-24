@@ -5,7 +5,7 @@
 <section class="mx-auto max-w-3xl py-14 px-4">
 
     <div class="mb-6 flex items-center justify-between gap-3">
-        <x-back-button href="{{ route('orders.track.form') }}" label="Back to Tracking" />
+        <x-back-button href="{{ route('orders.track.form') }}" label="Back to Track Order" />
 
         <a href="{{ $receiptUrl }}"
               data-no-loading="true"

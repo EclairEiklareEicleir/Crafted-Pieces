@@ -8,6 +8,10 @@
 
 <section class="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
 
+    <div class="mb-6 flex items-center justify-between gap-3">
+        <x-back-button href="{{ route('shop') }}" label="Back to Shop" />
+    </div>
+
     <div class="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
 
         {{-- CART ITEMS --}}

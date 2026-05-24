@@ -17,12 +17,16 @@
         'delivery_fee' => $order->delivery_fee,
         'total' => $order->total_amount,
     ];
+
+    $isLoggedInOwner = auth()->check() && $order->user_id === auth()->id();
+    $backButtonHref = $isLoggedInOwner ? route('orders') : route('orders.track.form');
+    $backButtonLabel = $isLoggedInOwner ? 'Back to My Orders' : 'Back to Track Order';
 @endphp
 
 <section class="mx-auto max-w-4xl px-4 py-14">
 
     <div class="mb-6 flex items-center justify-between gap-3">
-        <x-back-button href="{{ route('orders') }}" label="Back to Orders" />
+        <x-back-button href="{{ $backButtonHref }}" label="{{ $backButtonLabel }}" />
 
         <a href="{{ $order->customOrderRequest ? route('custom-order.receipt', $order->customOrderRequest) : route('orders.receipt.download', $order->id) }}" data-no-loading="true" class="brand-btn-primary px-5 py-3 text-sm">
             Download Receipt
@@ -186,15 +190,11 @@
                 Keep this receipt for your records.
             </p>
 
-            <div class="flex flex-wrap gap-3">
-                <x-back-button href="{{ route('orders') }}" label="Back to Orders" />
-
-                    <a href="{{ $order->customOrderRequest ? route('custom-order.receipt', $order->customOrderRequest) : route('orders.receipt.download', $order->id) }}"
-                         data-no-loading="true"
-                     class="brand-btn-primary px-5 py-3 text-sm">
-                    Download Receipt
-                </a>
-            </div>
+            <a href="{{ $order->customOrderRequest ? route('custom-order.receipt', $order->customOrderRequest) : route('orders.receipt.download', $order->id) }}"
+               data-no-loading="true"
+               class="brand-btn-primary px-5 py-3 text-sm">
+                Download Receipt
+            </a>
 
         </div>
 

@@ -4,6 +4,10 @@
 
 <section class="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
 
+    <div class="mb-6 flex items-center justify-between gap-3">
+        <x-back-button href="{{ route('cart') }}" label="Back to Cart" />
+    </div>
+
     @if (session('checkout_success'))
         <div class="mb-8 rounded-3xl border border-green-200 bg-green-50 p-6 text-green-800">
 

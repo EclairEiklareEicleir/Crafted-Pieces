@@ -60,7 +60,7 @@
     <div class="relative mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:px-8 lg:py-20">
 
         <div class="mb-6">
-            <x-back-button href="{{ route('custom-order.index') }}" label="Back to Orders" />
+            <x-back-button href="{{ route('custom-order.index') }}" label="Back to Custom Orders" />
         </div>
 
         <div class="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">

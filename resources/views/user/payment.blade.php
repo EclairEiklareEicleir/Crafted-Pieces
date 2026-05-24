@@ -2,7 +2,21 @@
 
 @section('content')
 
+@php
+    $backButtonHref = $type === 'custom-order'
+        ? route('custom-order.show', $item)
+        : route('orders.show', $item);
+
+    $backButtonLabel = $type === 'custom-order'
+        ? 'Back to Ticket'
+        : 'Back to Order';
+@endphp
+
 <section class="mx-auto max-w-3xl px-4 py-16">
+
+    <div class="mb-6 flex items-center justify-between gap-3">
+        <x-back-button href="{{ $backButtonHref }}" label="{{ $backButtonLabel }}" />
+    </div>
 
     <h1 class="text-3xl font-semibold text-brand-primary">
         Payment Summary

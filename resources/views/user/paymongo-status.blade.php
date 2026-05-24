@@ -2,7 +2,19 @@
 
 @section('content')
 
+@php
+    $isLoggedInOwner = auth()->check() && $order->user_id === auth()->id();
+    $backButtonHref = $isLoggedInOwner ? route('orders') : route('orders.track.form');
+    $backButtonLabel = $isLoggedInOwner ? 'Back to My Orders' : 'Back to Track Order';
+    $actionHref = $isLoggedInOwner ? route('orders.show', $order) : route('orders.track.form');
+    $actionLabel = $isLoggedInOwner ? 'View Order' : 'Track Order';
+@endphp
+
 <section class="mx-auto max-w-3xl px-4 py-16">
+
+    <div class="mb-6 flex items-center justify-between gap-3">
+        <x-back-button href="{{ $backButtonHref }}" label="{{ $backButtonLabel }}" />
+    </div>
 
     <div class="rounded-[2rem] border border-brand-border bg-white p-8 shadow-sm">
 
@@ -48,12 +60,12 @@
         </div>
 
         <div class="mt-8 flex flex-wrap gap-3">
-            <a href="{{ route('checkout') }}" class="brand-btn-primary px-5 py-3">
-                Back to Checkout
+            <a href="{{ $actionHref }}" class="brand-btn-primary px-5 py-3">
+                {{ $actionLabel }}
             </a>
 
-            <a href="{{ route('orders.show', $order) }}" class="rounded-full border border-brand-border px-5 py-3 text-brand-primary">
-                View Order
+            <a href="{{ route('shop') }}" class="brand-btn-secondary px-5 py-3">
+                Back to Shop
             </a>
         </div>
 
