@@ -57,9 +57,11 @@
 | Harry B. Lawang | Backend Systems | Authentication system (role-based access control), cart system (CRUD, validation, session/user handling), checkout system (order creation flow), order management system (standard and custom orders), notification system, and admin dashboard system. |
 |  | Architecture & Services | Designed Laravel MVC architecture, implemented middleware role protection, structured routing separation (admin vs storefront), designed database schema and relationships, and developed service layer logic for pricing and payment handling. |
 |  | Models & Database | Developed and managed core models including Cart, CartItem, CustomOrderRequest, CustomOrderMessage, Notification, Review, Chatbot, and Settings. Implemented full migrations and seeders system. |
+---
 | Charles Jefferson A. Betonio | Admin Content Systems | Developed admin FAQ CRUD system (create, read, update, delete, display), implemented admin About Section management system, and supported static page content management. |
 |  | UI/UX Improvements | Improved authentication modal (login/register UX), refined navbar and footer layout, enhanced checkout UI, improved form validation feedback, and maintained overall UI consistency across the system. |
 |  | Models & Database | Managed Frequently Asked Questions (FAQ) and About content-related data structures. |
+---
 | Alrazel R. Llave | System & Frontend Support | Assisted in frontend Blade structuring and layout organization, supported UI implementation across multiple modules, performed debugging and UI adjustments during development, and contributed to overall system-wide frontend stability. |
 |  | Feature Implementation | Implemented search system and integrated PayMongo payment system, while also supporting backend-controller connections and frontend-to-backend alignment. |
 | | Development Assistance | Participated in feature-level testing and validation, assisted in refining admin and storefront UI behavior, and contributed to structural improvements during iterative development. |
