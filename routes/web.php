@@ -26,7 +26,6 @@ use App\Http\Controllers\AdminAboutSectionController;
 use App\Http\Controllers\AdminFaqController;
 use App\Http\Controllers\AdminOrderHistoryController;
 use App\Http\Controllers\AdminUserController;
-use App\Http\Controllers\AdminYarnColorController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ChatbotController;
 use App\Http\Controllers\AdminChatbotFaqController;
@@ -70,6 +69,12 @@ Route::middleware(['customer.login'])->group(function () {
     // MESSAGE
     Route::post('/custom-order/{customOrder}/message', [CustomOrderController::class, 'message'])
         ->name('custom-order.message');
+
+    Route::post('/custom-order/{customOrder}/quote/accept', [CustomOrderController::class, 'acceptQuote'])
+        ->name('custom-order.quote.accept');
+
+    Route::post('/custom-order/{customOrder}/quote/decline', [CustomOrderController::class, 'declineQuote'])
+        ->name('custom-order.quote.decline');
 
     Route::post('/custom-order/{customOrder}/paymongo/checkout', [CustomOrderPayMongoController::class, 'checkout'])
         ->name('custom-order.paymongo.checkout');
@@ -226,6 +231,9 @@ Route::middleware(['auth', 'role:owner'])->group(function () {
     Route::post('/admin/orders/{order}/status', [AdminOrderController::class, 'updateStatus'])
         ->name('admin.orders.status');
 
+    Route::patch('/admin/orders/{order}/payment-status', [AdminOrderController::class, 'updatePaymentStatus'])
+        ->name('admin.orders.payment-status');
+
     Route::delete('/admin/orders/{order}', [AdminOrderController::class, 'destroy'])
         ->name('admin.orders.destroy');
 
@@ -234,6 +242,17 @@ Route::middleware(['auth', 'role:owner'])->group(function () {
 
     Route::post('/admin/orders/manual', [AdminOrderController::class, 'store'])
         ->name('admin.orders.store');
+
+    Route::get('/admin/history/export', [AdminOrderHistoryController::class, 'export'])
+        ->name('admin.history.export');
+
+    Route::delete('/admin/history/bulk-destroy', [AdminOrderHistoryController::class, 'bulkDestroy'])
+        ->name('admin.history.bulk-destroy');
+
+    Route::delete('/admin/history/{recordType}/{recordId}', [AdminOrderHistoryController::class, 'destroy'])
+        ->where('recordType', 'order|custom')
+        ->whereNumber('recordId')
+        ->name('admin.history.destroy');
 
     /*
     |--------------------------------------------------------------------------
@@ -258,14 +277,8 @@ Route::middleware(['auth', 'role:owner'])->group(function () {
     Route::delete('/admin/products/{product}', [AdminProductController::class, 'destroy'])
         ->name('admin.products.destroy');
 
-    Route::post('/admin/yarn-colors', [AdminYarnColorController::class, 'store'])
-        ->name('admin.yarn-colors.store');
-
-    Route::put('/admin/yarn-colors/{yarnColor}', [AdminYarnColorController::class, 'update'])
-        ->name('admin.yarn-colors.update');
-
-    Route::delete('/admin/yarn-colors/{yarnColor}', [AdminYarnColorController::class, 'destroy'])
-        ->name('admin.yarn-colors.destroy');
+    Route::get('/admin/products/export', [AdminProductController::class, 'export'])
+        ->name('admin.products.export');
 
     /*
     |--------------------------------------------------------------------------
@@ -294,6 +307,12 @@ Route::middleware(['auth', 'role:owner'])->group(function () {
 
     Route::get('/admin/users', [AdminUserController::class, 'index'])
         ->name('admin.users.index');
+
+    Route::get('/admin/users/create', [AdminUserController::class, 'create'])
+        ->name('admin.users.create');
+
+    Route::post('/admin/users', [AdminUserController::class, 'store'])
+        ->name('admin.users.store');
 
     Route::get('/admin/users/{user}', [AdminUserController::class, 'show'])
         ->name('admin.users.show');

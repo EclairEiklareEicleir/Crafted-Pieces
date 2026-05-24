@@ -24,8 +24,11 @@
 
 {{-- SUCCESS MESSAGE --}}
 @if (session('success'))
-    <div class="mb-4 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
-        {{ session('success') }}
+    <div class="mb-4 flex items-start justify-between gap-4 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700 transition duration-300"
+         data-flash-alert
+         data-flash-delay="4200">
+        <div>{{ session('success') }}</div>
+        <button type="button" data-flash-dismiss aria-label="Dismiss notification" class="text-lg leading-none text-green-700 hover:text-green-900">&times;</button>
     </div>
 @endif
 
@@ -92,7 +95,11 @@
                             {{-- DELETE --}}
                             <form method="POST"
                                   action="{{ route('admin.chatbot.destroy', $faq) }}"
-                                  onsubmit="return confirm('Delete this FAQ?')">
+                                  data-confirm-title="Delete Chatbot FAQ?"
+                                  data-confirm-message="Are you sure you want to delete this chatbot FAQ?"
+                                  data-confirm-final-title="Final Confirmation"
+                                  data-confirm-final-message="This chatbot response will be removed. Are you absolutely sure?"
+                                  data-confirm-final-action="Yes, Delete">
 
                                 @csrf
                                 @method('DELETE')

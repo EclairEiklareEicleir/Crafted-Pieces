@@ -27,6 +27,8 @@
                 $isMine = (int) $message->user_id === (int) $viewerId;
                 $isCustomer = $customerId !== null && (int) $message->user_id === (int) $customerId;
                 $senderRole = $message->user->role ?? null;
+                $isQuoteMessage = ($message->message_type ?? null) === 'quote';
+                $quotedPrice = data_get($message->meta, 'quoted_price');
 
                 $senderLabel = $isMine
                     ? $viewerLabel
@@ -58,6 +60,38 @@
                     <p class="brand-chat-message {{ $isMine ? 'text-white/95' : 'text-brand-ink/80' }}">
                         {{ $message->message }}
                     </p>
+
+                    @if ($isQuoteMessage && (int) $viewerId === (int) $customerId && $quotedPrice !== null)
+                        <div class="mt-4 rounded-3xl border border-white/20 bg-white/10 p-4 text-white">
+                            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-white/75">
+                                Quoted Price
+                            </p>
+
+                            <p class="mt-2 text-2xl font-semibold">
+                                PHP {{ number_format((float) $quotedPrice, 2) }}
+                            </p>
+
+                            <p class="mt-2 text-sm text-white/80">
+                                The seller has quoted a price for your custom order.
+                            </p>
+
+                            <div class="mt-4 flex flex-wrap gap-3">
+                                <form method="POST" action="{{ route('custom-order.quote.accept', $message->custom_order_request_id) }}">
+                                    @csrf
+                                    <button type="submit" class="rounded-full bg-white px-4 py-2 text-xs font-semibold text-brand-primary">
+                                        Accept Quoted Price
+                                    </button>
+                                </form>
+
+                                <form method="POST" action="{{ route('custom-order.quote.decline', $message->custom_order_request_id) }}">
+                                    @csrf
+                                    <button type="submit" class="rounded-full border border-white/40 px-4 py-2 text-xs font-semibold text-white">
+                                        Decline Quoted Price
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    @endif
                 </article>
 
                 @if ($isMine)

@@ -57,9 +57,12 @@
                     </span>
                 </div>
 
-                @if ($item->yarnColor?->name || $item->variant_name)
+                @if ($item->productVariant?->name || $item->variant_name)
                     <div class="mt-1 text-xs text-brand-ink/55">
-                        Yarn color: {{ $item->yarnColor?->name ?? $item->variant_name }}
+                        Variant: {{ $item->productVariant?->name ?? $item->variant_name }}
+                        @if ($item->productVariant?->sku)
+                            <span class="ml-2">SKU: {{ $item->productVariant?->sku }}</span>
+                        @endif
                     </div>
                 @endif
             @endforeach

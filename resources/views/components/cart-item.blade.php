@@ -3,8 +3,10 @@
 @php
     $product = $item->product;
     $variant = $item->productVariant;
-    $selectedColorName = $item->yarnColor?->name ?? $item->variant_name;
-    $selectedColorHex = $item->yarnColor?->hex_color ?? $item->variant_hex_color;
+    $selectedVariantName = $variant?->name ?? $item->variant_name;
+    $selectedVariantColor = $variant?->yarn_color ?? $item->yarnColor?->name ?? $item->variant_name;
+    $selectedVariantHex = $variant?->hex_color ?? $item->yarnColor?->hex_color ?? $item->variant_hex_color;
+    $selectedVariantSku = $variant?->sku;
     $imageUrl = $variant?->floating_image_url
         ?: \App\Support\ProductImage::floatingUrl($item->variant_image_path)
         ?: $product?->floating_image_url;
@@ -25,13 +27,25 @@
                 {{ $product?->name ?? 'Deleted Product' }}
             </p>
 
-            @if ($selectedColorName)
+            @if ($selectedVariantName)
+                <p class="mt-1 text-sm text-brand-ink/70">
+                    Variant: {{ $selectedVariantName }}
+                </p>
+            @endif
+
+            @if ($selectedVariantColor)
                 <p class="mt-1 inline-flex items-center gap-2 rounded-full border border-brand-border bg-brand-light/40 px-3 py-1 text-xs font-semibold text-brand-primary">
-                    Yarn color: {{ $selectedColorName }}
-                    @if ($selectedColorHex)
-                        <span class="h-3 w-3 rounded-full border border-brand-border" style="background-color: {{ $selectedColorHex }}"></span>
-                        <span class="text-[10px] font-medium text-brand-ink/55">{{ $selectedColorHex }}</span>
+                    Color: {{ $selectedVariantColor }}
+                    @if ($selectedVariantHex)
+                        <span class="h-3 w-3 rounded-full border border-brand-border" style="background-color: {{ $selectedVariantHex }}"></span>
+                        <span class="text-[10px] font-medium text-brand-ink/55">{{ $selectedVariantHex }}</span>
                     @endif
+                </p>
+            @endif
+
+            @if ($selectedVariantSku)
+                <p class="mt-1 text-xs text-brand-ink/55">
+                    SKU: {{ $selectedVariantSku }}
                 </p>
             @endif
 

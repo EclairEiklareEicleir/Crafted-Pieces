@@ -14,19 +14,25 @@
 <section class="mx-auto max-w-3xl px-4 py-16">
 
     <div class="mb-6">
-        <x-back-button href="{{ route('orders.index') }}" label="Back to Orders" />
-    </div>
+                    <p class="text-sm text-[#6f5a51]">
+                        Qty: {{ $item->quantity }}
+                    </p>
 
-    <div class="rounded-4xl border border-brand-border bg-white p-8 shadow-sm">
+                    @if ($item->productVariant?->name || $item->variant_name)
+                        <p class="text-xs text-[#8d5848]">
+                            Variant: {{ $item->productVariant?->name ?? $item->variant_name }}
+                        </p>
+                    @endif
 
-        <div class="text-center">
+                    @if ($item->productVariant?->sku)
+                        <p class="text-xs text-[#8d5848]">
+                            SKU: {{ $item->productVariant?->sku }}
+                        </p>
+                    @endif
 
-            <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-brand-border bg-brand-light/50 text-brand-primary shadow-sm">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-7 w-7">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 7.5h15l-1.4 11.2a2 2 0 0 1-2 1.8H7.9a2 2 0 0 1-2-1.8L4.5 7.5Z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 11a3 3 0 1 1 6 0" />
-                </svg>
-            </div>
+                    <p class="text-xs text-[#8d5848]">
+                        PHP {{ number_format($item->price, 2) }} each
+                    </p>
 
             <h1 class="mt-4 font-display text-3xl font-semibold text-brand-primary">
                 Order Receipt
@@ -85,9 +91,15 @@
                                 {{ $product->name ?? 'Deleted Product' }}
                             </p>
 
-                            @if ($item->yarnColor?->name || $item->variant_name)
+                            @if ($item->productVariant?->name || $item->variant_name)
                                 <p class="text-xs text-brand-ink/55">
-                                    Yarn color: {{ $item->yarnColor?->name ?? $item->variant_name }}
+                                    Variant: {{ $item->productVariant?->name ?? $item->variant_name }}
+                                </p>
+                            @endif
+
+                            @if ($item->productVariant?->sku)
+                                <p class="text-xs text-brand-ink/55">
+                                    SKU: {{ $item->productVariant?->sku }}
                                 </p>
                             @endif
 

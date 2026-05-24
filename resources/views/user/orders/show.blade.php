@@ -24,7 +24,7 @@
     <div class="mb-6 flex items-center justify-between gap-3">
         <x-back-button href="{{ route('orders') }}" label="Back to Orders" />
 
-        <a href="{{ route('orders.receipt.download', $order->id) }}" data-no-loading="true" class="brand-btn-primary px-5 py-3 text-sm">
+        <a href="{{ $order->customOrderRequest ? route('custom-order.receipt', $order->customOrderRequest) : route('orders.receipt.download', $order->id) }}" data-no-loading="true" class="brand-btn-primary px-5 py-3 text-sm">
             Download Receipt
         </a>
     </div>
@@ -53,8 +53,18 @@
 
             <p><strong>Name:</strong> {{ $order->full_name }}</p>
             <p><strong>Email:</strong> {{ $order->email }}</p>
+            <p><strong>Type:</strong> {{ $order->order_type_label }}</p>
             <p><strong>Shipping:</strong> {{ $order->shipping_address }}</p>
             <p><strong>Payment:</strong> {{ $order->payment_method }}</p>
+
+            @if ($order->customOrderRequest)
+                <p class="mt-2 text-brand-secondary">
+                    Linked custom order #{{ $order->customOrderRequest->id }}
+                    <a href="{{ route('custom-order.show', $order->customOrderRequest) }}" class="font-semibold underline">
+                        open thread
+                    </a>
+                </p>
+            @endif
 
         </div>
 
@@ -86,15 +96,21 @@
                                 {{ $product->name ?? 'Deleted Product' }}
                             </p>
 
+                            @if ($item->productVariant?->name || $item->variant_name)
+                                <p class="text-xs text-[#8d5848]">
+                                    Variant: {{ $item->productVariant?->name ?? $item->variant_name }}
+                                </p>
+                            @endif
+
+                            @if ($item->productVariant?->sku)
+                                <p class="text-xs text-[#8d5848]">
+                                    SKU: {{ $item->productVariant?->sku }}
+                                </p>
+                            @endif
+
                             <p class="text-sm text-[#6f5a51]">
                                 Qty: {{ $item->quantity }}
                             </p>
-
-                            @if ($item->yarnColor?->name || $item->variant_name)
-                                <p class="text-xs text-[#8d5848]">
-                                    Yarn color: {{ $item->yarnColor?->name ?? $item->variant_name }}
-                                </p>
-                            @endif
 
                             <p class="text-xs text-[#8d5848]">
                                 PHP {{ number_format($item->price, 2) }} each
@@ -111,6 +127,15 @@
                 </div>
 
             @endforeach
+
+            @if ($order->items->isEmpty())
+                <div class="py-3 text-sm text-brand-ink/60">
+                    No product line items are attached to this order.
+                    @if ($order->customOrderRequest)
+                        Use the linked custom order thread for status updates and notes.
+                    @endif
+                </div>
+            @endif
 
         </div>
 
@@ -164,9 +189,9 @@
             <div class="flex flex-wrap gap-3">
                 <x-back-button href="{{ route('orders') }}" label="Back to Orders" />
 
-                <a href="{{ route('orders.receipt.download', $order->id) }}"
+                    <a href="{{ $order->customOrderRequest ? route('custom-order.receipt', $order->customOrderRequest) : route('orders.receipt.download', $order->id) }}"
                          data-no-loading="true"
-                   class="brand-btn-primary px-5 py-3 text-sm">
+                     class="brand-btn-primary px-5 py-3 text-sm">
                     Download Receipt
                 </a>
             </div>

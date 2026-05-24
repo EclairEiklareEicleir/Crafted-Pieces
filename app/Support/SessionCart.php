@@ -7,26 +7,28 @@ use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\YarnColor;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Session;
 
 class SessionCart
 {
     public const KEY = 'cart';
 
-    public static function add(Product $product, ?ProductVariant $variant, YarnColor $yarnColor, int $quantity): void
+    public static function add(Product $product, ?ProductVariant $variant, $yarnColor, int $quantity): void
     {
         $cart = self::raw();
-        $key = self::itemKey($product->id, $yarnColor->id);
+        $legacyYarnColorId = $yarnColor instanceof YarnColor ? $yarnColor->id : null;
+        $key = self::itemKey($product->id, $variant?->id, $legacyYarnColorId);
         $now = now()->toDateTimeString();
         $existing = $cart[$key] ?? [];
 
         $cart[$key] = [
             'product_id' => $product->id,
             'product_variant_id' => $variant?->id,
-            'yarn_color_id' => $yarnColor->id,
+            'yarn_color_id' => $legacyYarnColorId,
             'quantity' => ((int) ($existing['quantity'] ?? 0)) + $quantity,
-            'price' => (float) $product->price,
-            'variant_name' => $yarnColor->name,
-            'variant_hex_color' => $yarnColor->hex_color,
+            'price' => (float) ($variant?->price ?? $product->price),
+            'variant_name' => $variant?->name ?? $variant?->yarn_color ?? ($yarnColor instanceof YarnColor ? $yarnColor->name : null),
+            'variant_hex_color' => $variant?->hex_color ?? ($yarnColor instanceof YarnColor ? $yarnColor->hex_color : null),
             'variant_image_path' => $variant?->image_path ?? $product->image,
             'created_at' => $existing['created_at'] ?? $now,
             'updated_at' => $now,
@@ -67,7 +69,7 @@ class SessionCart
 
     public static function clear(): void
     {
-        session()->forget(self::KEY);
+        Session::forget(self::KEY);
     }
 
     public static function count(): int
@@ -75,9 +77,10 @@ class SessionCart
         return collect(self::raw())->sum(fn ($item) => (int) ($item['quantity'] ?? 0));
     }
 
-    public static function quantityFor(Product $product, YarnColor $yarnColor): int
+    public static function quantityFor(Product $product, ?ProductVariant $variant = null, $yarnColor = null): int
     {
-        $item = self::raw()[self::itemKey($product->id, $yarnColor->id)] ?? null;
+        $legacyYarnColorId = $yarnColor instanceof YarnColor ? $yarnColor->id : null;
+        $item = self::raw()[self::itemKey($product->id, $variant?->id, $legacyYarnColorId)] ?? null;
 
         return (int) ($item['quantity'] ?? 0);
     }
@@ -172,8 +175,12 @@ class SessionCart
         return $items;
     }
 
-    public static function itemKey(int $productId, ?int $yarnColorId): string
+    public static function itemKey(int $productId, ?int $productVariantId, ?int $yarnColorId = null): string
     {
+        if ($productVariantId) {
+            return 'p_' . $productId . '_v_' . $productVariantId;
+        }
+
         return 'p_' . $productId . '_y_' . ($yarnColorId ?: 'none');
     }
 
@@ -192,6 +199,6 @@ class SessionCart
             return;
         }
 
-        session()->put(self::KEY, $cart);
+        Session::put(self::KEY, $cart);
     }
 }

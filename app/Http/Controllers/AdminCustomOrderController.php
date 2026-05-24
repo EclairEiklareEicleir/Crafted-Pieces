@@ -22,6 +22,17 @@ class AdminCustomOrderController extends Controller
         CustomOrderRequest::STATUS_IN_PROGRESS,
     ];
 
+    private const RESOLVED_STATUSES = [
+        CustomOrderRequest::STATUS_COMPLETED,
+        CustomOrderRequest::STATUS_REJECTED,
+        'received',
+        'cancelled',
+        'declined',
+        'quote_declined',
+        'refunded',
+        'resolved',
+    ];
+
     /*
     |--------------------------------------------------------------------------
     | LIST ALL CUSTOM REQUESTS
@@ -29,11 +40,18 @@ class AdminCustomOrderController extends Controller
     */
     public function index()
     {
-        $requests = CustomOrderRequest::whereIn('status', self::ACTIVE_STATUSES)
+        $activeRequests = CustomOrderRequest::whereNotIn('status', self::RESOLVED_STATUSES)
             ->latest()
             ->get();
 
-        return view('admin.custom.index', compact('requests'));
+        $resolvedRequests = CustomOrderRequest::whereIn('status', self::RESOLVED_STATUSES)
+            ->latest()
+            ->get();
+
+        return view('admin.custom.index', [
+            'activeRequests' => $activeRequests,
+            'resolvedRequests' => $resolvedRequests,
+        ]);
     }
 
     /*
@@ -92,6 +110,7 @@ class AdminCustomOrderController extends Controller
             'final_price' => $validated['final_price'],
             'admin_notes' => $validated['admin_notes'],
             'quoted_at' => now(),
+            'quote_status' => CustomOrderRequest::QUOTE_STATUS_QUOTED,
 
             // quotation stage
             'status' => CustomOrderRequest::STATUS_QUOTED,
@@ -106,8 +125,13 @@ class AdminCustomOrderController extends Controller
         CustomOrderMessage::create([
             'custom_order_request_id' => $customOrder->id,
             'user_id' => Auth::id(),
-            'message' => 'Quotation sent: PHP ' .
+            'message' => 'The seller has quoted a price for your custom order. Quoted Price: PHP ' .
                 number_format($validated['final_price'], 2),
+            'message_type' => 'quote',
+            'is_system' => true,
+            'meta' => [
+                'quoted_price' => (float) $validated['final_price'],
+            ],
         ]);
 
         return back()->with('success', 'Quotation sent.');
@@ -155,6 +179,7 @@ class AdminCustomOrderController extends Controller
 
             // waiting for customer payment
             'status' => CustomOrderRequest::STATUS_AWAITING_PAYMENT,
+            'quote_status' => CustomOrderRequest::QUOTE_STATUS_ACCEPTED,
 
             // payment deadline (3 days)
             'payment_due_at' => now()->addDays(3),
@@ -163,6 +188,8 @@ class AdminCustomOrderController extends Controller
                 ? CustomOrderRequest::STATUS_PAID
                 : ($customOrder->payment_status ?: 'unpaid'),
         ]);
+
+        $customOrder->syncLinkedOrder();
 
         Mail::to($customOrder->email)
             ->send(new CustomOrderQuotationMail($customOrder));
@@ -178,6 +205,11 @@ class AdminCustomOrderController extends Controller
             'message' =>
                 'Your request has been approved. ' .
                 'Please complete payment within 3 days.',
+            'message_type' => 'system',
+            'is_system' => true,
+            'meta' => [
+                'event' => 'admin_approved',
+            ],
         ]);
 
         Log::info('ORDER MOVED TO PAYMENT STAGE');
@@ -200,8 +232,11 @@ class AdminCustomOrderController extends Controller
         }
 
         $customOrder->update([
-            'status' => CustomOrderRequest::STATUS_REJECTED
+            'status' => CustomOrderRequest::STATUS_REJECTED,
+            'quote_status' => CustomOrderRequest::QUOTE_STATUS_DECLINED,
         ]);
+
+        $customOrder->syncLinkedOrder();
 
         Notification::notifyUser($customOrder->user, [
             'title' => 'Request Rejected',

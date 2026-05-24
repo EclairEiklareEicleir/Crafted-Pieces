@@ -125,7 +125,7 @@
                 </tr>
                 <tr>
                     <td><strong>Payment Method:</strong> {{ $order->payment_method }}</td>
-                    <td class="right"><span class="badge">{{ ucfirst(str_replace('_', ' ', $order->status)) }}</span></td>
+                    <td class="right"><strong>Order Status:</strong> {{ ucfirst(str_replace('_', ' ', $order->status)) }}</td>
                 </tr>
                 @if ($order->shipping_address)
                     <tr>
@@ -151,8 +151,11 @@
                 <tr>
                     <td>
                         {{ $item->product->name ?? 'Deleted Product' }}
-                        @if ($item->yarnColor?->name || $item->variant_name)
-                            <div class="muted">Yarn color: {{ $item->yarnColor?->name ?? $item->variant_name }}</div>
+                        @if ($item->productVariant?->name || $item->variant_name)
+                            <div class="muted">Variant: {{ $item->productVariant?->name ?? $item->variant_name }}</div>
+                        @endif
+                        @if ($item->productVariant?->sku)
+                            <div class="muted">SKU: {{ $item->productVariant?->sku }}</div>
                         @endif
                     </td>
                     <td class="right">{{ $item->quantity }}</td>

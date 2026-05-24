@@ -2,22 +2,82 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Product;
 use App\Models\Category;
+use App\Models\Product;
 use App\Models\YarnColor;
 use App\Support\ProductImage;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class AdminProductController extends Controller
 {
+    private const IMAGE_MAX_KB = 5120;
+
     public function index()
     {
         return view('admin.products.index', [
             'categories' => Category::latest()->get(),
-            'products' => Product::with(['category', 'defaultVariant', 'yarnColors'])->latest()->get(),
-            'yarnColors' => YarnColor::ordered()->get(),
+            'products' => Product::with(['category', 'defaultVariant', 'variants'])->latest()->get(),
+        ]);
+    }
+
+    public function export(): StreamedResponse
+    {
+        $products = Product::with(['category', 'variants'])->latest()->get();
+        $filename = 'product-export-' . now()->format('Ymd_His') . '.csv';
+
+        return response()->streamDownload(function () use ($products) {
+            $output = fopen('php://output', 'w');
+
+            fputcsv($output, [
+                'Product Name',
+                'Category',
+                'Variant Name',
+                'Yarn Color',
+                'Size',
+                'Material / Yarn Type',
+                'Design / Style',
+                'Set Quantity',
+                'Packaging Option',
+                'Price',
+                'Stock',
+                'Status',
+                'Availability Status',
+                'SKU',
+                'Image Path',
+            ]);
+
+            foreach ($products as $product) {
+                $variants = $product->variants->isNotEmpty() ? $product->variants : collect([null]);
+
+                foreach ($variants as $variant) {
+                    fputcsv($output, [
+                        $product->name,
+                        $product->category?->name,
+                        $variant?->name ?? $product->name,
+                        $variant?->yarn_color ?? '',
+                        $variant?->size ?? '',
+                        $variant?->material ?? '',
+                        $variant?->design_style ?? '',
+                        $variant?->set_quantity ?? '',
+                        $variant?->packaging_option ?? '',
+                        number_format((float) ($variant?->price ?? $product->price), 2, '.', ''),
+                        (int) ($variant?->stock ?? $product->stock ?? 0),
+                        $variant?->status ?? ($product->is_active ? 'active' : 'inactive'),
+                        $variant ? $variant->availability_label : (($product->is_active && (int) $product->stock > 0) ? 'Available' : 'Out of Stock'),
+                        $variant?->sku ?? '',
+                        $variant?->image_path ?? $product->image ?? '',
+                    ]);
+                }
+            }
+
+            fclose($output);
+        }, $filename, [
+            'Content-Type' => 'text/csv',
         ]);
     }
 
@@ -25,54 +85,37 @@ class AdminProductController extends Controller
     {
         return view('admin.products.create', [
             'categories' => Category::all(),
-            'yarnColors' => YarnColor::ordered()->get(),
+            'product' => new Product(),
         ]);
     }
 
     public function store(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'price' => 'required|numeric|min:0',
-            'stock' => 'required|integer|min:0',
-            'category_id' => 'nullable|exists:categories,id',
-            'product_type' => 'required|in:standard,custom',
-            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
-            'yarn_color_ids' => 'nullable|array',
-            'yarn_color_ids.*' => 'integer|exists:yarn_colors,id',
-        ]);
+        $validated = $this->validateProductRequest($request);
+        $slug = $this->uniqueSlug($validated['name']);
 
-        $slug = Str::slug($request->name);
-        $originalSlug = $slug;
-        $counter = 1;
+        DB::transaction(function () use ($request, $validated, $slug) {
+            $imagePath = null;
 
-        while (Product::where('slug', $slug)->exists()) {
-            $slug = $originalSlug . '-' . $counter++;
-        }
+            if ($request->hasFile('image')) {
+                $imagePath = $this->storeFloatingProductImage($request);
+            }
 
-        // =========================
-        // IMAGE UPLOAD
-        // =========================
-        $imagePath = null;
+            $product = Product::create([
+                'name' => $validated['name'],
+                'slug' => $slug,
+                'description' => $validated['description'],
+                'price' => $validated['price'],
+                'stock' => $validated['stock'],
+                'image' => $imagePath,
+                'category_id' => $validated['category_id'],
+                'product_type' => $validated['product_type'],
+                'is_active' => true,
+            ]);
 
-        if ($request->hasFile('image')) {
-            $imagePath = $this->storeFloatingProductImage($request);
-        }
-
-        $product = Product::create([
-            'name' => $request->name,
-            'slug' => $slug,
-            'description' => $request->description,
-            'price' => $request->price,
-            'stock' => $request->stock,
-            'image' => $imagePath, // STORE PATH ONLY
-            'category_id' => $request->category_id,
-            'product_type' => $request->product_type,
-            'is_active' => true,
-        ]);
-
-        $product->yarnColors()->sync($request->input('yarn_color_ids', []));
+            $this->syncVariants($product, $request);
+            $this->syncLegacyYarnColorsFromVariants($product);
+        });
 
         return redirect()->route('admin.products.index')
             ->with('success', 'Product created successfully.');
@@ -81,75 +124,49 @@ class AdminProductController extends Controller
     public function edit(Product $product)
     {
         return view('admin.products.edit', [
-            'product' => $product->load('yarnColors'),
+            'product' => $product->load('variants'),
             'categories' => Category::all(),
-            'yarnColors' => YarnColor::ordered()->get(),
         ]);
     }
 
     public function update(Request $request, Product $product)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'price' => 'required|numeric|min:0',
-            'stock' => 'required|integer|min:0',
-            'category_id' => 'nullable|exists:categories,id',
-            'product_type' => 'required|in:standard,custom',
-            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
-            'yarn_color_ids' => 'nullable|array',
-            'yarn_color_ids.*' => 'integer|exists:yarn_colors,id',
-        ]);
+        $validated = $this->validateProductRequest($request);
+        $slug = $this->uniqueSlug($validated['name'], $product->id);
 
-        $slug = Str::slug($request->name);
-        $originalSlug = $slug;
-        $counter = 1;
+        DB::transaction(function () use ($request, $validated, $product, $slug) {
+            $imagePath = $product->image;
 
-        while (
-            Product::where('slug', $slug)
-                ->where('id', '!=', $product->id)
-                ->exists()
-        ) {
-            $slug = $originalSlug . '-' . $counter++;
-        }
+            if ($request->hasFile('image')) {
+                if ($product->image && Storage::disk('public')->exists($product->image)) {
+                    Storage::disk('public')->delete($product->image);
+                }
 
-        // =========================
-        // IMAGE UPDATE LOGIC
-        // =========================
-        $imagePath = $product->image;
-
-        if ($request->hasFile('image')) {
-
-            // delete old image if exists
-            if ($product->image && Storage::disk('public')->exists($product->image)) {
-                Storage::disk('public')->delete($product->image);
+                $imagePath = $this->storeFloatingProductImage($request);
             }
 
-            // store new image
-            $imagePath = $this->storeFloatingProductImage($request);
-        }
+            $product->update([
+                'name' => $validated['name'],
+                'slug' => $slug,
+                'description' => $validated['description'],
+                'price' => $validated['price'],
+                'stock' => $validated['stock'],
+                'category_id' => $validated['category_id'],
+                'product_type' => $validated['product_type'],
+                'image' => $imagePath,
+                'is_active' => $request->boolean('is_active'),
+            ]);
 
-        $product->update([
-            'name' => $request->name,
-            'slug' => $slug,
-            'description' => $request->description,
-            'price' => $request->price,
-            'stock' => $request->stock,
-            'category_id' => $request->category_id,
-            'product_type' => $request->product_type,
-            'image' => $imagePath,
-            'is_active' => $request->boolean('is_active'),
-        ]);
+            $this->syncVariants($product, $request);
+            $this->syncLegacyYarnColorsFromVariants($product);
+        });
 
-        $product->yarnColors()->sync($request->input('yarn_color_ids', []));
-
-        return redirect()->route('admin.products.index')
+        return redirect()->route('admin.products.edit', $product)
             ->with('success', 'Product updated successfully.');
     }
 
     public function destroy(Product $product)
     {
-        // delete image file too
         if ($product->image && Storage::disk('public')->exists($product->image)) {
             Storage::disk('public')->delete($product->image);
         }
@@ -158,6 +175,223 @@ class AdminProductController extends Controller
 
         return redirect()->route('admin.products.index')
             ->with('success', 'Product deleted successfully.');
+    }
+
+    private function validateProductRequest(Request $request): array
+    {
+        $rules = [
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'price' => 'required|numeric|min:0',
+            'stock' => 'required|integer|min:0',
+            'category_id' => 'nullable|exists:categories,id',
+            'product_type' => 'required|in:standard,custom',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:' . self::IMAGE_MAX_KB,
+            'variants' => 'required|array|min:1',
+            'variants.*.id' => 'nullable|integer|exists:product_variants,id',
+            'variants.*.name' => 'required|string|max:255',
+            'variants.*.yarn_color' => 'required|string|max:255',
+            'variants.*.hex_color' => ['nullable', 'regex:/^#[0-9A-Fa-f]{6}$/'],
+            'variants.*.size' => 'nullable|string|max:255',
+            'variants.*.material' => 'nullable|string|max:255',
+            'variants.*.design_style' => 'nullable|string|max:255',
+            'variants.*.set_quantity' => 'nullable|string|max:255',
+            'variants.*.packaging_option' => 'nullable|string|max:255',
+            'variants.*.price' => 'required|numeric|min:0',
+            'variants.*.stock' => 'required|integer|min:0',
+            'variants.*.status' => 'required|in:active,inactive',
+            'variants.*.sku' => 'nullable|string|max:255',
+            'variants.*.sort_order' => 'nullable|integer|min:0',
+            'variants.*.image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:' . self::IMAGE_MAX_KB,
+        ];
+
+        $messages = [
+            'image.image' => 'The product image must be an image file.',
+            'image.mimes' => 'The product image must be a JPG, JPEG, PNG, or WEBP file.',
+            'image.max' => 'The product image must be 5 MB or smaller.',
+            'variants.required' => 'Add at least one product variant.',
+            'variants.min' => 'Add at least one product variant.',
+            'variants.*.image.image' => 'Each variant image must be an image file.',
+            'variants.*.image.mimes' => 'Each variant image must be a JPG, JPEG, PNG, or WEBP file.',
+            'variants.*.image.max' => 'Each variant image must be 5 MB or smaller.',
+        ];
+
+        foreach ((array) $request->input('variants', []) as $index => $variantData) {
+            if (! is_array($variantData)) {
+                continue;
+            }
+
+            $variantNumber = $index + 1;
+
+            $messages['variants.' . $index . '.image.image'] = 'Variant ' . $variantNumber . ' image must be an image file.';
+            $messages['variants.' . $index . '.image.mimes'] = 'Variant ' . $variantNumber . ' image must be a JPG, JPEG, PNG, or WEBP file.';
+            $messages['variants.' . $index . '.image.max'] = 'Variant ' . $variantNumber . ' image must be 5 MB or smaller.';
+        }
+
+        return Validator::make($request->all(), $rules, $messages)->validate();
+    }
+
+    private function uniqueSlug(string $name, ?int $ignoreId = null): string
+    {
+        $slug = Str::slug($name);
+        $originalSlug = $slug;
+        $counter = 1;
+
+        while (
+            Product::where('slug', $slug)
+                ->when($ignoreId, fn ($query) => $query->where('id', '!=', $ignoreId))
+                ->exists()
+        ) {
+            $slug = $originalSlug . '-' . $counter++;
+        }
+
+        return $slug;
+    }
+
+    private function syncVariants(Product $product, Request $request): void
+    {
+        $existingVariants = $product->variants()->get()->keyBy(fn ($variant) => (string) $variant->id);
+        $submittedIds = [];
+
+        foreach ((array) $request->input('variants', []) as $index => $variantData) {
+            if (! is_array($variantData)) {
+                continue;
+            }
+
+            $variantId = isset($variantData['id']) && $variantData['id'] !== '' ? (string) $variantData['id'] : null;
+            $existingVariant = $variantId ? $existingVariants->get($variantId) : null;
+
+            $imageInputName = 'variants.' . $index . '.image';
+            $imagePath = $existingVariant?->image_path;
+
+            if ($request->hasFile($imageInputName)) {
+                if ($imagePath && Storage::disk('public')->exists($imagePath)) {
+                    Storage::disk('public')->delete($imagePath);
+                }
+
+                $imagePath = $request->file($imageInputName)->store('product-variants', 'public');
+            }
+
+            $payload = [
+                'name' => $variantData['name'],
+                'yarn_color' => $variantData['yarn_color'],
+                'hex_color' => $variantData['hex_color'] ?? null,
+                'size' => $variantData['size'] ?? null,
+                'material' => $variantData['material'] ?? null,
+                'design_style' => $variantData['design_style'] ?? null,
+                'set_quantity' => $variantData['set_quantity'] ?? null,
+                'packaging_option' => $variantData['packaging_option'] ?? null,
+                'image_path' => $imagePath,
+                'price' => $variantData['price'],
+                'stock' => $variantData['stock'],
+                'status' => $variantData['status'],
+                'sort_order' => (int) ($variantData['sort_order'] ?? $index),
+                'is_default' => $index === 0,
+            ];
+
+            $payload['sku'] = $this->resolveVariantSku($product, $variantData, $existingVariant);
+
+            if ($existingVariant) {
+                $existingVariant->update($payload);
+                $submittedIds[] = $existingVariant->id;
+            } else {
+                $createdVariant = $product->variants()->create($payload);
+                $submittedIds[] = $createdVariant->id;
+            }
+        }
+
+        $product->variants()
+            ->whereNotIn('id', $submittedIds)
+            ->update([
+                'status' => 'inactive',
+                'stock' => 0,
+                'is_default' => false,
+            ]);
+
+        $product->syncStockFromVariants();
+    }
+
+    private function syncLegacyYarnColorsFromVariants(Product $product): void
+    {
+        $variants = $product->variants()->get()->filter(fn ($variant) => filled($variant->yarn_color));
+
+        $colorIds = $variants->map(function ($variant) {
+            $color = YarnColor::firstOrCreate(
+                ['slug' => Str::slug($variant->yarn_color)],
+                [
+                    'name' => $variant->yarn_color,
+                    'hex_color' => $variant->hex_color,
+                    'is_active' => true,
+                    'sort_order' => 0,
+                ]
+            );
+
+            if (! $color->hex_color && $variant->hex_color) {
+                $color->update(['hex_color' => $variant->hex_color]);
+            }
+
+            return $color->id;
+        })->unique()->values()->all();
+
+        $product->yarnColors()->sync($colorIds);
+    }
+
+    private function resolveVariantSku(Product $product, array $variantData, ?\App\Models\ProductVariant $existingVariant = null): string
+    {
+        $submittedSku = trim((string) ($variantData['sku'] ?? ''));
+
+        if ($submittedSku !== '') {
+            $skuExists = \App\Models\ProductVariant::where('sku', $submittedSku)
+                ->when($existingVariant, fn ($query) => $query->where('id', '!=', $existingVariant->id))
+                ->exists();
+
+            if (! $skuExists) {
+                return $submittedSku;
+            }
+
+            if ($existingVariant && strcasecmp((string) $existingVariant->sku, $submittedSku) === 0) {
+                return $existingVariant->sku;
+            }
+
+            return $this->generateUniqueVariantSku($product, $variantData, $existingVariant?->id);
+        }
+
+        if ($existingVariant && filled($existingVariant->sku)) {
+            return $existingVariant->sku;
+        }
+
+        return $this->generateUniqueVariantSku($product, $variantData, $existingVariant?->id);
+    }
+
+    private function generateUniqueVariantSku(Product $product, array $variantData, ?int $ignoreVariantId = null): string
+    {
+        $baseParts = collect([
+            $product->slug ?: $product->name,
+            $variantData['name'] ?? $variantData['yarn_color'] ?? 'variant',
+        ])
+            ->filter()
+            ->map(fn ($part) => Str::slug((string) $part, '-'))
+            ->filter()
+            ->all();
+
+        $base = Str::upper(implode('-', $baseParts));
+
+        if ($base === '') {
+            $base = 'SKU';
+        }
+
+        $suffix = 1;
+
+        do {
+            $sku = $base . '-' . str_pad((string) $suffix, 3, '0', STR_PAD_LEFT);
+            $exists = \App\Models\ProductVariant::where('sku', $sku)
+                ->when($ignoreVariantId, fn ($query) => $query->where('id', '!=', $ignoreVariantId))
+                ->exists();
+
+            $suffix++;
+        } while ($exists);
+
+        return $sku;
     }
 
     private function storeFloatingProductImage(Request $request): string

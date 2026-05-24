@@ -56,7 +56,7 @@
 
             <a href="{{ route('admin.orders.index') }}" class="brand-admin-nav-link {{ request()->routeIs('admin.orders.*') ? 'bg-brand-light text-brand-primary' : '' }}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-4 w-4 shrink-0" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6h2.5l1.5 9.5h9.75l1.5-6.5H8.15" /><circle cx="10" cy="19" r="1.5" /><circle cx="17" cy="19" r="1.5" /></svg>
-                <span>Orders</span>
+                <span>Active Orders</span>
             </a>
 
             <a href="{{ route('admin.history.index') }}" class="brand-admin-nav-link {{ request()->routeIs('admin.history.*') ? 'bg-brand-light text-brand-primary' : '' }}">
@@ -74,14 +74,9 @@
                 <span>User Management</span>
             </a>
 
-            <a href="{{ route('admin.about.edit') }}" class="brand-admin-nav-link {{ request()->routeIs('admin.about.*') ? 'bg-brand-light text-brand-primary' : '' }}">
+            <a href="{{ route('admin.about.edit') }}" class="brand-admin-nav-link {{ request()->routeIs('admin.about.*') || request()->routeIs('admin.faq.*') ? 'bg-brand-light text-brand-primary' : '' }}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-4 w-4 shrink-0" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 17v-5" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 8.25h.01" /><circle cx="12" cy="12" r="8.25" /></svg>
                 <span>About</span>
-            </a>
-
-            <a href="{{ route('admin.faq.index') }}" class="brand-admin-nav-link {{ request()->routeIs('admin.faq.*') ? 'bg-brand-light text-brand-primary' : '' }}">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-4 w-4 shrink-0" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18h.01" /><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75a2.25 2.25 0 1 1 3.3 1.99c-.88.47-1.55 1.2-1.55 2.26V15" /><circle cx="12" cy="12" r="8.25" /></svg>
-                <span>FAQ</span>
             </a>
 
             <a href="{{ route('admin.settings.index') }}" class="brand-admin-nav-link {{ request()->routeIs('admin.settings.*') ? 'bg-brand-light text-brand-primary' : '' }}">
@@ -213,26 +208,41 @@
         </header>
 
         <main class="p-4 sm:p-6 lg:p-8">
-            <div class="mx-auto mb-6 grid max-w-7xl gap-3">
+            <div class="pointer-events-none fixed inset-x-0 top-20 z-[80] mx-auto grid w-full max-w-lg gap-3 px-4">
                 @if (session('success'))
-                    <div class="rounded-3xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 shadow-sm">
-                        {{ session('success') }}
+                    <div class="pointer-events-auto flex items-start justify-between gap-4 rounded-3xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 shadow-sm transition duration-300"
+                         data-flash-alert
+                         data-flash-delay="4200">
+                        <div>{{ session('success') }}</div>
+                        <button type="button" class="text-lg leading-none text-emerald-700 transition hover:text-emerald-950" data-flash-dismiss aria-label="Dismiss notification">
+                            &times;
+                        </button>
                     </div>
                 @endif
 
                 @if (session('error'))
-                    <div class="rounded-3xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 shadow-sm">
-                        {{ session('error') }}
+                    <div class="pointer-events-auto flex items-start justify-between gap-4 rounded-3xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 shadow-sm transition duration-300"
+                         data-flash-alert
+                         data-flash-delay="7000">
+                        <div>{{ session('error') }}</div>
+                        <button type="button" class="text-lg leading-none text-rose-700 transition hover:text-rose-950" data-flash-dismiss aria-label="Dismiss notification">
+                            &times;
+                        </button>
                     </div>
                 @endif
 
                 @if ($errors->any())
-                    <div class="rounded-3xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 shadow-sm">
+                    <div class="pointer-events-auto flex items-start justify-between gap-4 rounded-3xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 shadow-sm transition duration-300"
+                         data-flash-alert
+                         data-flash-auto-dismiss="false">
                         <ul class="list-disc space-y-1 pl-5">
                             @foreach ($errors->all() as $error)
                                 <li>{{ $error }}</li>
                             @endforeach
                         </ul>
+                        <button type="button" class="text-lg leading-none text-rose-700 transition hover:text-rose-950" data-flash-dismiss aria-label="Dismiss notification">
+                            &times;
+                        </button>
                     </div>
                 @endif
             </div>

@@ -117,6 +117,7 @@
                     method="POST"
                     action="{{ route('custom-order.submit') }}"
                     @if (! $canSubmit) onsubmit="return false;" @endif
+                    enctype="multipart/form-data"
                     class="grid gap-5 sm:grid-cols-2"
                 >
 
@@ -211,6 +212,25 @@
                         >{{ old('description') }}</textarea>
 
                         @error('description')
+                            <p class="mt-1 text-sm text-brand-secondary">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div class="sm:col-span-2">
+                        <label class="mb-2 block text-sm font-semibold text-brand-primary">Reference image</label>
+
+                        <input
+                            type="file"
+                            name="reference_image"
+                            accept="image/jpeg,image/png,image/webp"
+                            class="brand-input bg-white/95"
+                        >
+
+                        <p class="mt-2 text-xs text-brand-ink/55">
+                            Optional. Accepted formats: JPG, JPEG, PNG, and WEBP. Max size: 4MB.
+                        </p>
+
+                        @error('reference_image')
                             <p class="mt-1 text-sm text-brand-secondary">{{ $message }}</p>
                         @enderror
                     </div>

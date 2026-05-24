@@ -197,44 +197,76 @@
                         @csrf
 
                         @php
-                            $ratingValue = (string) old('rating', '');
+                            $oldRating = old('rating');
+                            $ratingValue = in_array((string) $oldRating, ['1', '2', '3', '4', '5'], true)
+                                ? (int) $oldRating
+                                : null;
                         @endphp
 
-                        <div>
-                            <label class="mb-2 block text-sm font-semibold text-brand-primary">
-                                Your Rating
-                            </label>
+                        <div data-rating-control>
+                            <div class="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
+                                <label id="review-rating-label" class="block text-sm font-semibold text-brand-primary">
+                                    Your Rating
+                                </label>
 
-                            <div class="flex flex-wrap gap-2 sm:flex-nowrap">
+                                <p id="review-rating-help" class="text-xs font-medium text-brand-ink/60">
+                                    Select your rating: 1 yarn = lowest, 5 yarns = highest
+                                </p>
+                            </div>
+
+                            <input
+                                type="hidden"
+                                name="rating"
+                                value="{{ $ratingValue ?? '' }}"
+                                data-rating-input
+                            >
+
+                            <div
+                                class="mt-3 flex flex-wrap gap-2 sm:flex-nowrap"
+                                role="group"
+                                aria-labelledby="review-rating-label"
+                                aria-describedby="review-rating-help review-rating-selected"
+                            >
                                 @foreach ([1, 2, 3, 4, 5] as $rating)
                                     @php
-                                        $isActive = $ratingValue !== '' && (int) $rating <= (int) $ratingValue;
+                                        $isActive = $ratingValue !== null && $rating <= $ratingValue;
+                                        $isSelected = $ratingValue === $rating;
                                     @endphp
 
-                                    <label
-                                        class="group inline-flex h-12 w-12 cursor-pointer items-center justify-center rounded-2xl border transition sm:h-14 sm:w-14 {{ $isActive ? 'border-brand-primary bg-brand-light shadow-sm' : 'border-brand-border bg-white/80 opacity-55 hover:opacity-100 hover:border-brand-secondary hover:bg-brand-light/40' }}"
+                                    <button
+                                        type="button"
+                                        class="group inline-flex h-12 w-12 cursor-pointer items-center justify-center rounded-2xl border transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent/70 sm:h-14 sm:w-14 {{ $isActive ? 'border-brand-primary bg-brand-light shadow-sm' : 'border-brand-border bg-white/80 opacity-55 hover:border-brand-secondary hover:bg-brand-light/40 hover:opacity-100' }}"
+                                        data-rating-button
+                                        data-rating-value="{{ $rating }}"
+                                        aria-pressed="{{ $isSelected ? 'true' : 'false' }}"
+                                        aria-label="Rate {{ $rating }} out of 5"
+                                        title="Rate {{ $rating }} out of 5"
                                     >
-                                        <input
-                                            type="radio"
-                                            name="rating"
-                                            value="{{ $rating }}"
-                                            class="peer sr-only"
-                                            {{ $ratingValue === (string) $rating ? 'checked' : '' }}
-                                            required
+                                        <span
+                                            class="inline-flex h-8 w-8 items-center justify-center transition group-hover:scale-105 sm:h-9 sm:w-9 {{ $isActive ? 'opacity-100' : 'opacity-35' }}"
+                                            data-rating-icon
                                         >
-
-                                        <span class="inline-flex h-8 w-8 items-center justify-center transition group-hover:scale-105 peer-focus-visible:ring-2 peer-focus-visible:ring-brand-accent/60 sm:h-9 sm:w-9 {{ $isActive ? 'opacity-100' : 'opacity-35' }}">
                                             <img
                                                 src="{{ asset('images/yarn.png') }}"
                                                 alt=""
                                                 class="h-full w-full object-contain"
                                             >
                                         </span>
-
-                                        <span class="sr-only">Rate {{ $rating }} out of 5</span>
-                                    </label>
+                                    </button>
                                 @endforeach
                             </div>
+
+                            <p
+                                id="review-rating-selected"
+                                class="mt-3 text-sm font-semibold text-brand-primary"
+                                data-rating-selected-text
+                            >
+                                Selected: {{ $ratingValue ? $ratingValue . ' out of 5' : 'none yet' }}
+                            </p>
+
+                            <p class="mt-2 hidden text-sm text-brand-secondary" data-rating-client-error>
+                                Please select a rating from 1 to 5 yarns.
+                            </p>
 
                             @error('rating')
                                 <p class="mt-2 text-sm text-brand-secondary">{{ $message }}</p>
@@ -311,10 +343,27 @@
 
                         <div class="review-card hidden rounded-3xl border border-brand-border bg-white p-5">
 
-                            <div class="flex gap-1 text-brand-secondary">
-                                @for ($i = 0; $i < 5; $i++)
-                                    <x-yarn-icon class="h-4 w-4 {{ $i < $testimonial->rating ? 'text-brand-secondary' : 'text-brand-light' }}" />
-                                @endfor
+                            @php
+                                $displayRating = (int) $testimonial->rating;
+                            @endphp
+
+                            <div
+                                class="flex items-center gap-2"
+                                aria-label="{{ $displayRating }} out of 5 yarn rating"
+                            >
+                                <div class="flex gap-1" aria-hidden="true">
+                                    @for ($rating = 1; $rating <= 5; $rating++)
+                                        <img
+                                            src="{{ asset('images/yarn.png') }}"
+                                            alt=""
+                                            class="h-5 w-5 object-contain {{ $rating <= $displayRating ? 'opacity-100' : 'opacity-25' }}"
+                                        >
+                                    @endfor
+                                </div>
+
+                                <span class="text-xs font-semibold text-brand-primary">
+                                    {{ $displayRating }} out of 5
+                                </span>
                             </div>
 
                             <p class="mt-4 text-sm leading-6 text-brand-ink/70">
@@ -375,6 +424,85 @@ function prevReviews() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('[data-rating-control]').forEach((ratingControl) => {
+        const input = ratingControl.querySelector('[data-rating-input]');
+        const buttons = Array.from(ratingControl.querySelectorAll('[data-rating-button]'));
+        const selectedText = ratingControl.querySelector('[data-rating-selected-text]');
+        const clientError = ratingControl.querySelector('[data-rating-client-error]');
+        const form = ratingControl.closest('form');
+
+        const setPreview = (value) => {
+            buttons.forEach((button) => {
+                const rating = Number(button.dataset.ratingValue);
+                const icon = button.querySelector('[data-rating-icon]');
+                const isActive = rating <= value;
+
+                button.classList.toggle('border-brand-primary', isActive);
+                button.classList.toggle('bg-brand-light', isActive);
+                button.classList.toggle('shadow-sm', isActive);
+                button.classList.toggle('border-brand-border', ! isActive);
+                button.classList.toggle('bg-white/80', ! isActive);
+                button.classList.toggle('opacity-55', ! isActive);
+                button.classList.toggle('hover:border-brand-secondary', ! isActive);
+                button.classList.toggle('hover:bg-brand-light/40', ! isActive);
+                button.classList.toggle('hover:opacity-100', ! isActive);
+
+                if (icon) {
+                    icon.classList.toggle('opacity-100', isActive);
+                    icon.classList.toggle('opacity-35', ! isActive);
+                }
+            });
+        };
+
+        const selectedValue = () => {
+            const value = Number(input?.value || 0);
+
+            return Number.isInteger(value) && value >= 1 && value <= 5 ? value : 0;
+        };
+
+        const syncSelection = () => {
+            const value = selectedValue();
+
+            setPreview(value);
+
+            buttons.forEach((button) => {
+                button.setAttribute('aria-pressed', Number(button.dataset.ratingValue) === value ? 'true' : 'false');
+            });
+
+            if (selectedText) {
+                selectedText.textContent = value ? `Selected: ${value} out of 5` : 'Selected: none yet';
+            }
+        };
+
+        buttons.forEach((button) => {
+            const value = Number(button.dataset.ratingValue);
+
+            button.addEventListener('click', () => {
+                input.value = String(value);
+                clientError?.classList.add('hidden');
+                syncSelection();
+            });
+
+            button.addEventListener('mouseenter', () => setPreview(value));
+            button.addEventListener('focus', () => setPreview(value));
+            button.addEventListener('blur', syncSelection);
+        });
+
+        ratingControl.addEventListener('mouseleave', syncSelection);
+
+        form?.addEventListener('submit', (event) => {
+            if (selectedValue()) {
+                return;
+            }
+
+            event.preventDefault();
+            clientError?.classList.remove('hidden');
+            buttons[0]?.focus();
+        });
+
+        syncSelection();
+    });
+
     updateReviews();
 });
 </script>

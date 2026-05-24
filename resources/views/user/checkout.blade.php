@@ -63,9 +63,14 @@
                                     <p class="font-semibold">
                                         {{ $item->product->name }}
                                     </p>
-                                    @if ($item->yarnColor?->name || $item->variant_name)
+                                    @if ($item->productVariant?->name || $item->variant_name)
                                         <p class="text-xs text-brand-ink/55">
-                                            Yarn color: {{ $item->yarnColor?->name ?? $item->variant_name }}
+                                            Variant: {{ $item->productVariant?->name ?? $item->variant_name }}
+                                        </p>
+                                    @endif
+                                    @if ($item->productVariant?->sku)
+                                        <p class="text-xs text-brand-ink/55">
+                                            SKU: {{ $item->productVariant?->sku }}
                                         </p>
                                     @endif
                                     <p class="text-xs text-brand-ink/55">

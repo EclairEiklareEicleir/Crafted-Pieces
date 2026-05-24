@@ -6,34 +6,29 @@
     $pageTitle = 'Edit FAQ';
 @endphp
 
-<div class="mb-6">
-    <h2 class="text-xl font-semibold text-brand-primary">
-        Edit Chatbot FAQ
-    </h2>
-    <p class="text-sm text-brand-ink/70">
-        Update the question and answer for this chatbot entry
-    </p>
+<div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+    <div>
+        <h2 class="text-xl font-semibold text-brand-primary">
+            Edit Chatbot FAQ
+        </h2>
+        <p class="text-sm text-brand-ink/70">
+            Update the question and answer for this chatbot entry
+        </p>
+    </div>
+
+    <x-back-button href="{{ route('admin.chatbot.index') }}" label="Back to Chatbot" />
 </div>
 
-{{-- BACK BUTTON --}}
-<div class="mb-4">
-    <a href="{{ route('admin.chatbot.index') }}"
-       class="text-sm text-brand-primary hover:underline">
-        ← Back to FAQs
-    </a>
-</div>
-
-{{-- FORM --}}
 <div class="rounded-2xl border border-brand-border bg-white p-6 shadow-sm">
 
-    <form method="POST"
+    <form id="chatbot-faq-update-form"
+          method="POST"
           action="{{ route('admin.chatbot.update', $faq) }}"
           class="space-y-5">
 
         @csrf
         @method('PUT')
 
-        {{-- QUESTION --}}
         <div>
             <label class="text-sm font-medium text-brand-primary">
                 Question
@@ -52,7 +47,6 @@
             @enderror
         </div>
 
-        {{-- ANSWER --}}
         <div>
             <label class="text-sm font-medium text-brand-primary">
                 Answer
@@ -70,7 +64,6 @@
             @enderror
         </div>
 
-        {{-- KEYWORDS --}}
         <div>
             <label class="text-sm font-medium text-brand-primary">
                 Keywords (optional)
@@ -92,34 +85,31 @@
                 <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
             @enderror
         </div>
-
-        {{-- ACTIONS --}}
-        <div class="flex items-center justify-between pt-4">
-
-            {{-- DELETE --}}
-            <form method="POST"
-                  action="{{ route('admin.chatbot.destroy', $faq) }}"
-                  onsubmit="return confirm('Delete this FAQ?')">
-
-                @csrf
-                @method('DELETE')
-
-                <button type="submit"
-                        class="text-sm text-red-600 hover:underline">
-                    Delete FAQ
-                </button>
-
-            </form>
-
-            {{-- UPDATE --}}
-            <button type="submit"
-                    class="brand-btn-primary px-6 py-3 text-sm">
-                Update FAQ
-            </button>
-
-        </div>
-
     </form>
+
+    <div class="mt-5 flex items-center justify-between gap-3">
+        <form method="POST"
+              action="{{ route('admin.chatbot.destroy', $faq) }}"
+              data-confirm-title="Delete Chatbot FAQ?"
+              data-confirm-message="Are you sure you want to delete this chatbot FAQ?"
+              data-confirm-final-title="Final Confirmation"
+              data-confirm-final-message="This chatbot response will be removed. Are you absolutely sure?"
+              data-confirm-final-action="Yes, Delete">
+            @csrf
+            @method('DELETE')
+
+            <button type="submit"
+                    class="text-sm text-red-600 hover:underline">
+                Delete FAQ
+            </button>
+        </form>
+
+        <button type="submit"
+                form="chatbot-faq-update-form"
+                class="brand-btn-primary px-6 py-3 text-sm">
+            Update FAQ
+        </button>
+    </div>
 
 </div>
 

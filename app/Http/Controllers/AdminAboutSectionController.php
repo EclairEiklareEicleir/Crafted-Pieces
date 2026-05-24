@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AboutSection;
+use App\Models\Faq;
 use Illuminate\Http\Request;
 
 class AdminAboutSectionController extends Controller
@@ -12,13 +13,16 @@ class AdminAboutSectionController extends Controller
      */
     public function edit()
     {
-        $aboutSection = AboutSection::first();
+        $aboutSection = AboutSection::first() ?? new AboutSection([
+            'heading' => '',
+            'content' => '',
+        ]);
 
-        if (!$aboutSection) {
-            abort(404, 'No About section found. Please contact support.');
-        }
+        $faqs = Faq::orderBy('order', 'asc')
+            ->orderBy('id')
+            ->get();
 
-        return view('admin.about.edit', compact('aboutSection'));
+        return view('admin.about.edit', compact('aboutSection', 'faqs'));
     }
 
     /**
@@ -26,20 +30,15 @@ class AdminAboutSectionController extends Controller
      */
     public function update(Request $request)
     {
-        $aboutSection = AboutSection::first();
-
-        if (!$aboutSection) {
-            abort(404, 'No About section found. Please contact support.');
-        }
-
         $validated = $request->validate([
             'heading' => 'required|string|max:255',
             'content' => 'required|string',
         ]);
 
-        $aboutSection->update($validated);
+        $aboutSection = AboutSection::first() ?? new AboutSection();
+        $aboutSection->fill($validated)->save();
 
-        return redirect()->route('admin.about.edit')
+        return redirect(route('admin.about.edit') . '#about-content')
             ->with('success', 'About section has been updated.');
     }
 }

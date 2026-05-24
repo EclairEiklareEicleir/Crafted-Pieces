@@ -5,7 +5,7 @@
 <div class="space-y-8">
 
     {{-- PAGE HEADER --}}
-    <div class="flex items-center justify-between">
+    <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
 
         <div>
 
@@ -17,6 +17,12 @@
                 Manage categories and crochet products.
             </p>
 
+        </div>
+
+        <div class="flex flex-wrap gap-3">
+            <x-back-button href="{{ route('admin.dashboard') }}" label="Back to Dashboard" />
+            <a href="{{ route('admin.products.export') }}" data-no-loading="true" class="brand-btn-secondary whitespace-nowrap px-5 py-2 text-sm">Export CSV</a>
+            <a href="{{ route('admin.products.create') }}" class="brand-btn-primary whitespace-nowrap px-5 py-2 text-sm">Create Product</a>
         </div>
 
     </div>
@@ -375,120 +381,6 @@
         @endforeach
 
     {{-- ========================= --}}
-    {{-- YARN COLOR MANAGEMENT --}}
-    {{-- ========================= --}}
-    <div class="rounded-4xl border border-brand-border bg-white p-5 shadow-sm sm:p-6">
-
-        <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-            <div>
-                <h2 class="font-display text-2xl font-semibold text-brand-primary">
-                    Yarn Colors
-                </h2>
-
-                <p class="mt-1 text-sm text-brand-ink/55">
-                    Global colors are available to every product unless a product has its own allowed color list.
-                </p>
-            </div>
-
-            <form method="POST"
-                  action="{{ route('admin.yarn-colors.store') }}"
-                  enctype="multipart/form-data"
-                  class="grid gap-3 lg:min-w-184 lg:grid-cols-[minmax(0,1fr)_8rem_7rem_auto] lg:items-start">
-                @csrf
-
-                <input type="text"
-                       name="name"
-                       value="{{ old('name') }}"
-                       placeholder="Color name"
-                       class="brand-input"
-                       required>
-
-                <input type="text"
-                       name="hex_color"
-                       value="{{ old('hex_color') }}"
-                       placeholder="#f79eb8"
-                       class="brand-input"
-                       pattern="^#[0-9A-Fa-f]{6}$">
-
-                <input type="number"
-                       name="sort_order"
-                       value="{{ old('sort_order', 0) }}"
-                       min="0"
-                       class="brand-input">
-
-                <button class="brand-btn-primary px-5 py-3 text-sm">
-                    Add Color
-                </button>
-
-                <div class="lg:col-span-4">
-                    <input type="file"
-                           name="preview_image"
-                           accept=".jpg,.jpeg,.png,.webp"
-                           class="brand-input bg-white px-4 py-3">
-                    <p class="mt-2 text-xs text-brand-ink/55">
-                        Optional preview image for specialty yarns.
-                    </p>
-                </div>
-            </form>
-        </div>
-
-        <div class="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-            @forelse ($yarnColors as $color)
-                <div class="rounded-[1.75rem] border border-brand-border bg-brand-surface p-4">
-                    <form method="POST"
-                          action="{{ route('admin.yarn-colors.update', $color) }}"
-                          enctype="multipart/form-data">
-                        @csrf
-                        @method('PUT')
-
-                        <div class="flex items-center gap-3">
-                            <span class="h-10 w-10 shrink-0 rounded-full border border-brand-border shadow-sm" style="background-color: {{ $color->hex_color ?? '#ffffff' }}"></span>
-
-                            <div class="grid min-w-0 flex-1 gap-2">
-                                <input type="text" name="name" value="{{ $color->name }}" class="brand-input py-2" required>
-                                <div class="grid gap-2 sm:grid-cols-2">
-                                    <input type="text" name="hex_color" value="{{ $color->hex_color }}" class="brand-input py-2" pattern="^#[0-9A-Fa-f]{6}$">
-                                    <input type="number" name="sort_order" value="{{ $color->sort_order }}" min="0" class="brand-input py-2">
-                                </div>
-                                <input type="file"
-                                       name="preview_image"
-                                       accept=".jpg,.jpeg,.png,.webp"
-                                       class="brand-input bg-white px-3 py-2 text-xs">
-                            </div>
-                        </div>
-
-                        <div class="mt-3 flex flex-wrap items-center justify-between gap-3">
-                            <label class="flex items-center gap-2 text-sm text-brand-ink/70">
-                                <input type="checkbox" name="is_active" value="1" @checked($color->is_active)>
-                                Active
-                            </label>
-
-                            <button class="inline-flex items-center justify-center rounded-full border border-brand-secondary/30 bg-white px-4 py-2 text-xs font-semibold text-brand-secondary transition hover:border-brand-secondary hover:bg-brand-light/60">
-                                Save
-                            </button>
-                        </div>
-                    </form>
-
-                    <form method="POST"
-                          action="{{ route('admin.yarn-colors.destroy', $color) }}"
-                          class="mt-3 border-t border-brand-border pt-3">
-                        @csrf
-                        @method('DELETE')
-
-                        <button class="text-xs font-semibold text-red-600">
-                            Delete {{ $color->name }}
-                        </button>
-                    </form>
-                </div>
-            @empty
-                <div class="rounded-[1.75rem] border border-brand-border bg-brand-surface p-6 text-sm text-brand-ink/55">
-                    No yarn colors yet.
-                </div>
-            @endforelse
-        </div>
-    </div>
-
-    {{-- ========================= --}}
     {{-- PRODUCT MANAGEMENT --}}
     {{-- ========================= --}}
     <div class="rounded-4xl border border-brand-border bg-white p-6 shadow-sm">
@@ -587,7 +479,11 @@
                                         </p>
 
                                         <p class="mt-1 text-xs text-brand-ink/55">
-                                            {{ $product->yarnColors->isNotEmpty() ? $product->yarnColors->pluck('name')->join(', ') : 'All active yarn colors' }}
+                                            @if ($product->variants->isNotEmpty())
+                                                {{ $product->variants->take(3)->map(fn ($variant) => trim(collect([$variant->yarn_color, $variant->size, $variant->material])->filter()->join(' • ')))->filter()->join(', ') }}
+                                            @else
+                                                No variants yet
+                                            @endif
                                         </p>
 
                                     </div>
@@ -654,6 +550,79 @@
 
                             </td>
 
+                        </tr>
+
+                        <tr class="bg-brand-surface/35">
+                            <td colspan="7" class="px-4 pb-5 pt-0">
+                                @if ($product->variants->isNotEmpty())
+                                    <div class="overflow-hidden rounded-[1.5rem] border border-brand-border bg-white shadow-sm">
+                                        <div class="border-b border-brand-border px-4 py-3">
+                                            <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-secondary">
+                                                Variants
+                                            </p>
+                                        </div>
+
+                                        <table class="w-full text-left text-sm">
+                                            <thead class="text-xs uppercase tracking-[0.16em] text-brand-ink/55">
+                                                <tr>
+                                                    <th class="px-4 py-3">Variant</th>
+                                                    <th class="px-4 py-3">Variant Color</th>
+                                                    <th class="px-4 py-3">SKU</th>
+                                                    <th class="px-4 py-3">Price</th>
+                                                    <th class="px-4 py-3">Stock</th>
+                                                    <th class="px-4 py-3">Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="divide-y divide-brand-border">
+                                                @foreach ($product->variants as $variant)
+                                                    <tr>
+                                                        <td class="px-4 py-3">
+                                                            <div class="flex items-center gap-3">
+                                                                <div class="brand-checkerboard flex h-12 w-12 items-center justify-center overflow-hidden rounded-2xl border border-brand-border p-1">
+                                                                    <img src="{{ $variant->image_url ?: $product->floating_image_url }}"
+                                                                         alt="{{ $variant->name }}"
+                                                                         class="h-full w-full object-contain">
+                                                                </div>
+
+                                                                <div>
+                                                                    <p class="font-semibold text-brand-primary">{{ $variant->name }}</p>
+                                                                    <p class="text-xs text-brand-ink/55">
+                                                                        {{ $variant->size ?: 'Variant record' }}
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+
+                                                        <td class="px-4 py-3 text-brand-ink/70">
+                                                            {{ $variant->yarn_color ?? '—' }}
+                                                        </td>
+
+                                                        <td class="px-4 py-3 text-brand-ink/70">
+                                                            {{ $variant->sku ?: 'Auto-generated' }}
+                                                        </td>
+
+                                                        <td class="px-4 py-3 text-brand-ink/70">
+                                                            ₱ {{ number_format((float) $variant->price, 2) }}
+                                                        </td>
+
+                                                        <td class="px-4 py-3 text-brand-ink/70">
+                                                            {{ (int) $variant->stock }}
+                                                        </td>
+
+                                                        <td class="px-4 py-3">
+                                                            <x-status-badge :status="$variant->availability_label === 'Available' ? 'active' : 'inactive'" context="toggle" :label="$variant->availability_label" />
+                                                        </td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                @else
+                                    <div class="rounded-[1.5rem] border border-dashed border-brand-border bg-white px-4 py-5 text-sm text-brand-ink/60">
+                                        No variants yet.
+                                    </div>
+                                @endif
+                            </td>
                         </tr>
 
                     @empty

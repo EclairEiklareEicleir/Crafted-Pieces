@@ -12,9 +12,7 @@ class AdminFaqController extends Controller
      */
     public function index()
     {
-        $faqs = Faq::orderBy('order', 'asc')->paginate(20);
-
-        return view('admin.faq.index', compact('faqs'));
+        return redirect(route('admin.about.edit') . '#faqs');
     }
 
     /**
@@ -22,7 +20,7 @@ class AdminFaqController extends Controller
      */
     public function create()
     {
-        return view('admin.faq.create');
+        return redirect(route('admin.about.edit') . '#faq-create');
     }
 
     /**
@@ -41,7 +39,7 @@ class AdminFaqController extends Controller
 
         Faq::create($validated);
 
-        return redirect()->route('admin.faq.index')
+        return redirect(route('admin.about.edit') . '#faqs')
             ->with('success', 'FAQ has been created successfully.');
     }
 
@@ -50,7 +48,7 @@ class AdminFaqController extends Controller
      */
     public function edit(Faq $faq)
     {
-        return view('admin.faq.edit', compact('faq'));
+        return redirect(route('admin.about.edit') . '#faq-' . $faq->id);
     }
 
     /**
@@ -69,7 +67,7 @@ class AdminFaqController extends Controller
 
         $faq->update($validated);
 
-        return redirect()->route('admin.faq.index')
+        return redirect(route('admin.about.edit') . '#faq-' . $faq->id)
             ->with('success', 'FAQ has been updated successfully.');
     }
 
@@ -80,7 +78,7 @@ class AdminFaqController extends Controller
     {
         $faq->delete();
 
-        return redirect()->route('admin.faq.index')
+        return redirect(route('admin.about.edit') . '#faqs')
             ->with('success', 'FAQ has been deleted successfully.');
     }
 }

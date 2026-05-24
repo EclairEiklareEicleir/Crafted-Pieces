@@ -21,6 +21,10 @@ class OrderController extends Controller
             abort(403);
         }
 
+        if ($order->customOrderRequest) {
+            return app(CheckoutController::class)->downloadCustomReceipt($order->customOrderRequest);
+        }
+
         if (! extension_loaded('gd')) {
             Log::error('Receipt PDF generation failed because the PHP GD extension is missing.', [
                 'order_id' => $order->id,
@@ -32,6 +36,7 @@ class OrderController extends Controller
         }
 
         $order->load('items.product', 'items.productVariant', 'items.yarnColor');
+        $order->loadMissing('customOrderRequest');
 
         $pricing = (new PricingService())
             ->calculateFromOrder($order);
@@ -53,6 +58,8 @@ class OrderController extends Controller
             ->latest()
             ->get();
 
+        $orders->loadMissing('customOrderRequest');
+
         return view('user.orders.index', compact('orders'));
     }
 
@@ -66,6 +73,7 @@ class OrderController extends Controller
         }
 
         $order->load('items.product', 'items.productVariant', 'items.yarnColor');
+        $order->loadMissing('customOrderRequest');
         return view('user.orders.show', compact('order'));
     }
 
@@ -99,6 +107,8 @@ class OrderController extends Controller
                 'order_reference' => 'Order not found. Please check your details.',
             ]);
         }
+
+        $order->loadMissing('customOrderRequest');
 
         $pricing = (new PricingService())
             ->calculateFromOrder($order);

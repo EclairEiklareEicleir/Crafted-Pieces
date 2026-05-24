@@ -56,6 +56,8 @@ class CustomOrderPayMongoController extends Controller
                         'payment_method' => 'PayMongo',
                     ]);
 
+                    $customOrder->syncLinkedOrder();
+
                     return redirect()->route('custom-order.paymongo.success', $customOrder);
                 }
 
@@ -77,6 +79,8 @@ class CustomOrderPayMongoController extends Controller
                 'payment_status' => 'pending',
                 'paymongo_checkout_id' => $session['checkout_session_id'],
             ]);
+
+            $customOrder->syncLinkedOrder();
 
             return redirect()->away($session['checkout_url']);
         } catch (\Throwable $e) {
@@ -111,6 +115,8 @@ public function success(Request $request, CustomOrderRequest $customOrder, PayMo
                     'status' => CustomOrderRequest::STATUS_PAID,
                     'payment_method' => 'PayMongo',
                 ]);
+
+                $customOrder->syncLinkedOrder();
             }
 
         } catch (\Throwable $e) {

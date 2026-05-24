@@ -63,6 +63,7 @@ class CheckoutController extends Controller
         $order = DB::transaction(function () use ($validated, $pricing, $cartItems, $paymentMethod, $guestSessionId) {
             $order = Order::create([
                 'user_id' => Auth::id(),
+                'order_type' => 'online_order',
                 'guest_session_id' => Auth::check() ? null : $guestSessionId,
                 'full_name' => $validated['full_name'],
                 'email' => $validated['email'],
@@ -261,7 +262,7 @@ class CheckoutController extends Controller
     private function cartAvailabilityMessage(Collection $cartItems): ?string
     {
         foreach ($cartItems as $item) {
-            if ($message = $this->productAvailabilityMessage($item->product, (int) $item->quantity)) {
+            if ($message = $this->productAvailabilityMessage($item->product, (int) $item->quantity, $item->productVariant)) {
                 return $message;
             }
         }
@@ -269,7 +270,7 @@ class CheckoutController extends Controller
         return null;
     }
 
-    private function productAvailabilityMessage(?\App\Models\Product $product, int $quantity): ?string
+    private function productAvailabilityMessage(?\App\Models\Product $product, int $quantity, ?\App\Models\ProductVariant $variant = null): ?string
     {
         if (! $product) {
             return 'One of the products in your cart is no longer available.';
@@ -279,12 +280,16 @@ class CheckoutController extends Controller
             return $product->name . ' is not available right now.';
         }
 
-        if ($product->stock < 1) {
+        $availableStock = $variant && $variant->stock !== null
+            ? (int) $variant->stock
+            : (int) $product->stock;
+
+        if ($availableStock < 1) {
             return $product->name . ' is out of stock.';
         }
 
-        if ($quantity > $product->stock) {
-            return 'Only ' . $product->stock . ' item(s) are available for ' . $product->name . '.';
+        if ($quantity > $availableStock) {
+            return 'Only ' . $availableStock . ' item(s) are available for ' . $product->name . '.';
         }
 
         return null;

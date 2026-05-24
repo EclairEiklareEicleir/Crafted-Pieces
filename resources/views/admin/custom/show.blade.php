@@ -4,6 +4,7 @@
 
 @php
     $status = strtolower($request->status);
+    $quoteStatus = $request->quote_status ?? 'pending';
 
     $isLocked = in_array($status, [
         \App\Models\CustomOrderRequest::STATUS_AWAITING_PAYMENT,
@@ -19,7 +20,7 @@
 <div class="grid gap-6 lg:grid-cols-[0.8fr_1.2fr]">
 
     <div class="lg:col-span-2">
-        <x-back-button href="{{ route('admin.custom.index') }}" label="Back to Inbox" />
+        <x-back-button href="{{ route('admin.custom.index') }}" label="Back to Custom Orders" />
     </div>
 
     {{-- LEFT INFO --}}
@@ -42,6 +43,8 @@
                 <p><strong>Theme:</strong> {{ $request->design_theme }}</p>
                 <p><strong>Preferred Size:</strong> {{ $request->preferred_size }}</p>
                 <p><strong>Payment Method:</strong> {{ $request->payment_method ?? '—' }}</p>
+
+                <p><strong>Quote Status:</strong> <x-status-badge :status="$quoteStatus" context="quote" /></p>
 
                 <div id="payment-details" class="flex flex-wrap items-center gap-3">
                     <strong>Payment Status:</strong>
@@ -75,6 +78,22 @@
 
                 @if ($request->paid_at)
                     <p><strong>Paid At:</strong> {{ $request->paid_at->format('M d, Y h:i A') }}</p>
+                @endif
+
+                @if ($request->reference_image_url)
+                    <div class="rounded-3xl border border-brand-border bg-brand-light/30 p-4">
+                        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-brand-secondary">
+                            Reference Image
+                        </p>
+
+                        <img src="{{ $request->reference_image_url }}"
+                             alt="Reference image"
+                             class="mt-3 max-h-80 w-full rounded-3xl border border-brand-border object-contain bg-white p-2">
+                    </div>
+                @else
+                    <p class="rounded-3xl border border-dashed border-brand-border bg-brand-light/20 px-4 py-3 text-sm text-brand-ink/60">
+                        No reference image uploaded.
+                    </p>
                 @endif
 
             </div>
@@ -218,9 +237,16 @@
                     Write a reply
                 </label>
 
+                <select id="admin-reply-template" class="brand-input mb-3">
+                    <option value="">Choose a template</option>
+                    <option value="Please wait for the seller’s response before proceeding to the next step. Once your custom order details and price are confirmed, you will be guided to the payment or next transaction process.">Default follow-up</option>
+                    <option value="Thank you for the update. We are reviewing your custom order and will get back to you shortly.">Thank you / review update</option>
+                </select>
+
                 <textarea
                     name="message"
                     rows="4"
+                    id="admin-reply-textarea"
                     placeholder="Reply to customer..."
                     class="brand-input min-h-28 resize-none rounded-3xl border border-[#e7bfce] bg-white/95"
                     required></textarea>
@@ -242,5 +268,25 @@
     </div>
 
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const bindTemplate = (selectId, textareaId) => {
+        const select = document.getElementById(selectId);
+        const textarea = document.getElementById(textareaId);
+
+        if (!select || !textarea) return;
+
+        select.addEventListener('change', () => {
+            if (select.value) {
+                textarea.value = select.value;
+            }
+        });
+    };
+
+    bindTemplate('custom-message-template', 'custom-message-textarea');
+    bindTemplate('admin-reply-template', 'admin-reply-textarea');
+});
+</script>
 
 @endsection

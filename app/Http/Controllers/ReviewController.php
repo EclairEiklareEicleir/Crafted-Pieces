@@ -14,6 +14,11 @@ class ReviewController extends Controller
             'rating' => ['required', 'integer', 'min:1', 'max:5'],
             'comment' => ['required', 'string', 'max:1000'],
             'is_anonymous' => ['nullable'],
+        ], [
+            'rating.required' => 'Please select a rating from 1 to 5 yarns.',
+            'rating.integer' => 'Please select a valid rating from 1 to 5 yarns.',
+            'rating.min' => 'Please select a valid rating from 1 to 5 yarns.',
+            'rating.max' => 'Please select a valid rating from 1 to 5 yarns.',
         ]);
 
         Review::create([

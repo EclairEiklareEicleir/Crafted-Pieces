@@ -21,6 +21,9 @@
 
         <div class="flex flex-wrap items-center gap-3">
             <x-back-button href="{{ route('admin.dashboard') }}" label="Back to Dashboard" />
+            <a href="{{ route('admin.users.create') }}" class="brand-btn-primary px-5 py-2 text-sm">
+                Add User
+            </a>
             <a href="{{ route('admin.history.index') }}" class="brand-btn-secondary px-5 py-2 text-sm">
                 View Order History
             </a>
@@ -38,7 +41,7 @@
         <select name="role" class="brand-input py-3" onchange="submitFilter()">
             <option value="">All Roles</option>
             <option value="user" {{ request('role') === 'user' ? 'selected' : '' }}>Customer</option>
-            <option value="owner" {{ request('role') === 'owner' ? 'selected' : '' }}>Owner</option>
+            <option value="owner" {{ request('role') === 'owner' ? 'selected' : '' }}>Admin</option>
         </select>
 
         <select name="status" class="brand-input py-3" onchange="submitFilter()">
@@ -78,7 +81,7 @@
                                     @endif
                                 </span>
                                 <span class="text-xs text-brand-ink/55">
-                                    {{ $user->role === 'owner' ? 'Admin owner' : 'Customer account' }}
+                                    {{ $user->role === 'owner' ? 'Admin account' : 'Customer account' }}
                                 </span>
                             </div>
                         </td>
@@ -88,7 +91,7 @@
                         </td>
 
                         <td class="py-4 pr-4">
-                            <x-status-badge :status="$user->role" context="generic" :label="ucfirst($user->role)" />
+                            <x-status-badge :status="$user->role" context="generic" :label="$user->role === 'owner' ? 'Admin' : 'Customer'" />
                         </td>
 
                         <td class="py-4 pr-4">
@@ -137,9 +140,7 @@
         </table>
     </div>
 
-    <div class="mt-6">
-        {{ $users->links() }}
-    </div>
+    <x-admin-pagination :paginator="$users" label="User management pagination" />
 </div>
 
 <script>

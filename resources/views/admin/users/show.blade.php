@@ -30,7 +30,7 @@
 
                 <div class="rounded-3xl border border-brand-border bg-brand-light/30 p-4">
                     <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-ink/55">Role</p>
-                    <p class="mt-2 text-sm text-brand-primary">{{ ucfirst($user->role) }}</p>
+                    <p class="mt-2 text-sm text-brand-primary">{{ $user->role === 'owner' ? 'Admin' : 'Customer' }}</p>
                 </div>
 
                 <div class="rounded-3xl border border-brand-border bg-brand-light/30 p-4">
@@ -127,7 +127,7 @@
             </p>
 
             <p>
-                Account type: <span class="font-semibold text-brand-primary">{{ $user->role === 'owner' ? 'Admin owner' : 'Customer' }}</span>
+                Account type: <span class="font-semibold text-brand-primary">{{ $user->role === 'owner' ? 'Admin' : 'Customer' }}</span>
             </p>
 
             <p>

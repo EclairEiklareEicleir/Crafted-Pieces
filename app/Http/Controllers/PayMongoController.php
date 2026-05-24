@@ -118,6 +118,8 @@ class PayMongoController extends Controller
                     'paid_at' => now(),
                 ]);
 
+                $this->deductOrderStock($payable->fresh(['items.productVariant', 'items.product']));
+
                 Mail::to($payable->email)->send(
                     new OrderReceiptMail($payable->fresh())
                 );
@@ -134,6 +136,8 @@ class PayMongoController extends Controller
                     'paid_at' => now(),
                     'status' => CustomOrderRequest::STATUS_PAID,
                 ]);
+
+                $payable->syncLinkedOrder();
 
                 Mail::to($payable->email)
                     ->send(new CustomOrderCreatedMail($payable->fresh()));
@@ -244,5 +248,20 @@ class PayMongoController extends Controller
         return ! auth()->check()
             && $order->user_id === null
             && $order->guest_session_id === $request->session()->getId();
+    }
+
+    private function deductOrderStock(Order $order): void
+    {
+        foreach ($order->items as $item) {
+            $variant = $item->productVariant;
+
+            if ($variant) {
+                $variant->decrement('stock', (int) $item->quantity);
+                $variant->product?->syncStockFromVariants();
+                continue;
+            }
+
+            $item->product?->decrement('stock', (int) $item->quantity);
+        }
     }
 }

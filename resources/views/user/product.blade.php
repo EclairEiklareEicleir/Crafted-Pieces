@@ -2,12 +2,12 @@
 
 @section('content')
 @php
-    $availableYarnColors = \App\Models\YarnColor::activeOptionsForProduct($product);
-    $selectedYarnColor = $availableYarnColors->first();
-    $selectedVariant = $selectedYarnColor ? $product->variantForYarnColor($selectedYarnColor) : $product->defaultVariant;
+    $availableVariants = $product->availableVariants();
+    $unavailableVariants = $product->variants->filter(fn ($variant) => ! (($variant->status ?? 'active') === 'active' && (int) ($variant->stock ?? 0) > 0))->values();
+    $selectedVariant = $availableVariants->firstWhere('is_default', true) ?? $availableVariants->first() ?? $product->defaultVariant;
     $heroImage = $selectedVariant?->floating_image_url ?? $product->floating_image_url;
 @endphp
-<section class="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
+<section class="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8" data-product-default-image="{{ $product->floating_image_url }}">
     <div class="grid gap-10 lg:grid-cols-[0.95fr_1.05fr]">
 
         {{-- PRODUCT IMAGE --}}
@@ -41,29 +41,42 @@
             <div class="mt-8 grid gap-4 sm:grid-cols-3">
 
                 <div class="rounded-3xl border border-brand-border bg-white p-4">
-                    <p class="text-xs uppercase tracking-[0.18em] text-brand-secondary">Price</p>
-                    <p class="mt-2 text-2xl font-semibold text-brand-primary">
-                        PHP {{ number_format($product->price) }}
+                    <p class="text-xs uppercase tracking-[0.18em] text-brand-secondary">Variant Price</p>
+                    <p class="mt-2 text-2xl font-semibold text-brand-primary" data-selected-variant-price>
+                        PHP {{ number_format((float) ($selectedVariant?->price ?? $product->price), 2) }}
                     </p>
                 </div>
 
                 <div class="rounded-3xl border border-brand-border bg-white p-4">
-                    <p class="text-xs uppercase tracking-[0.18em] text-brand-secondary">Stock</p>
-                    <p class="mt-2 text-2xl font-semibold text-brand-primary">
-                        {{ $product->stock }}
+                    <p class="text-xs uppercase tracking-[0.18em] text-brand-secondary">Variant Stock</p>
+                    <p class="mt-2 text-2xl font-semibold text-brand-primary" data-selected-variant-stock>
+                        {{ $selectedVariant ? (int) $selectedVariant->stock : (int) $product->stock }}
                     </p>
                 </div>
 
                 <div class="rounded-3xl border border-brand-border bg-white p-4">
                     <p class="text-xs uppercase tracking-[0.18em] text-brand-secondary">
-                        Product Type
+                        Variant Status
                     </p>
 
-                    <p class="mt-2 text-lg font-semibold capitalize text-brand-primary">
-                        {{ $product->product_type }}
+                    <p class="mt-2 text-lg font-semibold capitalize text-brand-primary" data-selected-variant-status>
+                        {{ $selectedVariant?->availability_label ?? 'No available variants' }}
                     </p>
                 </div>
 
+            </div>
+
+            <div class="mt-4 rounded-3xl border border-brand-border bg-white p-4 text-sm text-brand-ink/70">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-brand-secondary">Selected Variant</p>
+                        <p class="mt-1 text-base font-semibold text-brand-primary" id="selected-variant-name">{{ $selectedVariant?->name ?? $product->name }}</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-brand-secondary">SKU</p>
+                        <p class="mt-1 font-semibold text-brand-primary" id="selected-variant-sku">{{ $selectedVariant?->sku ?? 'Auto-generated' }}</p>
+                    </div>
+                </div>
             </div>
 
             {{-- ACTIONS --}}
@@ -79,51 +92,52 @@
 
                 <div class="mt-5 flex flex-wrap gap-3">
 
-                    <form method="POST" action="{{ route('cart.add', $product->slug) }}" class="space-y-4">
+                    <form method="POST" action="{{ route('cart.add', $product->slug) }}" class="space-y-4" data-product-form>
                         @csrf
                         <input type="hidden" name="quantity" value="1">
-                        <input type="hidden" name="product_variant_id" value="{{ $selectedVariant?->id }}" data-selected-variant-field>
+                        <input type="hidden" value="{{ $selectedVariant?->id ?? '' }}" data-selected-variant-field>
 
-                        @if ($availableYarnColors->isNotEmpty())
+                        @if ($availableVariants->isNotEmpty())
                             <div>
                                 <p class="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-brand-secondary">
-                                    Choose yarn color
+                                    Choose variant
                                 </p>
 
                                 <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                                    @foreach ($availableYarnColors as $color)
-                                        @php
-                                            $variant = $product->variantForYarnColor($color);
-                                            $variantImage = $variant?->floating_image_url;
-                                        @endphp
-
-                                        <label class="group/color flex cursor-pointer items-center gap-3 rounded-2xl border border-brand-border bg-brand-light/20 px-3 py-3 text-sm transition hover:border-brand-secondary hover:bg-brand-light/35">
+                                    @foreach ($availableVariants as $variant)
+                                        <label data-variant-card class="group/color flex cursor-pointer items-center gap-3 rounded-2xl border border-brand-border bg-brand-light/20 px-3 py-3 text-sm transition hover:border-brand-secondary hover:bg-brand-light/35">
                                             <input type="radio"
-                                                   name="yarn_color_id"
-                                                   value="{{ $color->id }}"
-                                                   data-yarn-color-option
-                                                   data-variant-id="{{ $variant?->id }}"
-                                                   data-variant-image="{{ $variantImage }}"
-                                                   {{ $selectedYarnColor?->id === $color->id ? 'checked' : '' }}
+                                                   name="product_variant_id"
+                                                   id="product-{{ $product->id }}-variant-{{ $variant->id }}"
+                                                   value="{{ $variant->id }}"
+                                                   data-variant-option
+                                                   data-variant-id="{{ $variant->id }}"
+                                                   data-variant-image="{{ $variant?->floating_image_url }}"
+                                                   data-variant-name="{{ $variant->name ?: $variant->yarn_color }}"
+                                                   data-variant-price="{{ number_format((float) $variant->price, 2, '.', '') }}"
+                                                   data-variant-stock="{{ (int) $variant->stock }}"
+                                                   data-variant-status="{{ $variant->availability_label }}"
+                                                   data-variant-sku="{{ $variant->sku ?? 'Auto-generated' }}"
+                                                   {{ $selectedVariant?->id === $variant->id ? 'checked' : '' }}
                                                    required>
 
-                                            <span class="h-5 w-5 shrink-0 rounded-full border border-brand-border shadow-sm" style="background-color: {{ $color->hex_color ?? '#ffffff' }}"></span>
+                                            <span class="h-5 w-5 shrink-0 rounded-full border border-brand-border shadow-sm" @style(['background-color: ' . ($variant->hex_color ?: '#ffffff')])></span>
 
                                             <span class="min-w-0">
-                                                <span class="block font-semibold text-brand-primary">{{ $color->name }}</span>
-                                                @if ($color->hex_color)
-                                                    <span class="mt-1 inline-flex items-center gap-2 text-xs text-brand-ink/60">
-                                                        {{ $color->hex_color }}
-                                                    </span>
-                                                @endif
+                                                <span class="block font-semibold text-brand-primary">{{ $variant->name ?: $variant->yarn_color }}</span>
+                                                <span class="mt-1 block text-xs text-brand-ink/60">PHP {{ number_format((float) $variant->price, 2) }} • Stock {{ (int) $variant->stock }}</span>
                                             </span>
                                         </label>
                                     @endforeach
                                 </div>
                             </div>
+                        @elseif ($unavailableVariants->isNotEmpty())
+                            <p class="rounded-2xl border border-brand-border bg-brand-surface px-4 py-3 text-sm text-brand-ink/70">
+                                No available variants.
+                            </p>
                         @endif
 
-                        <button type="submit" class="brand-btn-primary px-5 py-3 text-sm shadow-md hover:-translate-y-0.5">
+                        <button type="submit" class="brand-btn-primary px-5 py-3 text-sm shadow-md hover:-translate-y-0.5" @disabled($availableVariants->isEmpty())>
                             Add to cart
                         </button>
                     </form>
@@ -145,25 +159,76 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
+        const productRoot = document.querySelector('[data-product-default-image]');
+        const productForm = productRoot?.querySelector('[data-product-form]');
         const heroImage = document.getElementById('product-hero-image');
-        const variantField = document.querySelector('[data-selected-variant-field]');
-        const defaultImage = @json($product->floating_image_url);
+        const defaultImage = productRoot?.dataset.productDefaultImage || '';
+        const selectedVariantName = productRoot?.querySelector('#selected-variant-name');
+        const selectedVariantSku = productRoot?.querySelector('#selected-variant-sku');
+        const selectedVariantPrice = productRoot?.querySelector('[data-selected-variant-price]');
+        const selectedVariantStock = productRoot?.querySelector('[data-selected-variant-stock]');
+        const selectedVariantStatus = productRoot?.querySelector('[data-selected-variant-status]');
+        const selectedVariantField = productForm?.querySelector('[data-selected-variant-field]');
+        const selectedCardClasses = ['border-brand-primary', 'bg-brand-primary/5', 'ring-1', 'ring-brand-primary/15'];
 
-        if (!heroImage) return;
+        if (!productRoot || !productForm || !heroImage) return;
 
-        document.querySelectorAll('[data-yarn-color-option]').forEach((input) => {
+        const updateSelectedCard = (input) => {
+            productForm.querySelectorAll('[data-variant-card]').forEach((card) => {
+                card.classList.remove(...selectedCardClasses);
+            });
+
+            const activeCard = input?.closest('[data-variant-card]');
+
+            if (activeCard) {
+                activeCard.classList.add(...selectedCardClasses);
+            }
+        };
+
+        const syncVariant = (input) => {
+            if (selectedVariantField) {
+                selectedVariantField.value = input.dataset.variantId || '';
+            }
+
+            if (selectedVariantName) {
+                selectedVariantName.textContent = input.dataset.variantName || '';
+            }
+
+            if (selectedVariantSku) {
+                selectedVariantSku.textContent = input.dataset.variantSku || '';
+            }
+
+            if (selectedVariantPrice) {
+                selectedVariantPrice.textContent = `PHP ${Number(input.dataset.variantPrice || 0).toFixed(2)}`;
+            }
+
+            if (selectedVariantStock) {
+                selectedVariantStock.textContent = input.dataset.variantStock || '';
+            }
+
+            if (selectedVariantStatus) {
+                selectedVariantStatus.textContent = input.dataset.variantStatus || '';
+            }
+
+            heroImage.src = input.dataset.variantImage || defaultImage;
+            updateSelectedCard(input);
+        };
+
+        productForm.querySelectorAll('[data-variant-option]').forEach((input) => {
             input.addEventListener('change', () => {
                 if (!input.checked) {
                     return;
                 }
 
-                if (variantField) {
-                    variantField.value = input.dataset.variantId || '';
-                }
-
-                heroImage.src = input.dataset.variantImage || defaultImage;
+                syncVariant(input);
             });
         });
+
+        const checkedVariant = productForm.querySelector('[data-variant-option]:checked');
+
+        if (checkedVariant) {
+            syncVariant(checkedVariant);
+        }
     });
 </script>
 @endsection

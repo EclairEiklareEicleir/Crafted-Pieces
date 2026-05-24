@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Product;
-use App\Models\YarnColor;
+use App\Models\ProductVariant;
 use App\Support\SessionCart;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -35,8 +35,7 @@ class CartController extends Controller
     public function add(Request $request, $slug)
     {
         $request->validate([
-            'yarn_color_id' => 'required|integer|exists:yarn_colors,id',
-            'product_variant_id' => 'nullable|integer|exists:product_variants,id',
+            'product_variant_id' => 'required|integer|exists:product_variants,id',
             'quantity' => 'nullable|integer|min:1|max:99',
         ]);
 
@@ -44,37 +43,35 @@ class CartController extends Controller
 
         $product = Product::with(['variants' => function ($query) {
             $query->orderBy('sort_order')->orderBy('id');
-        }, 'defaultVariant', 'yarnColors'])->where('slug', $slug)->firstOrFail();
+        }, 'defaultVariant'])->where('slug', $slug)->firstOrFail();
+
+        $product->syncMissingVariantsFromLegacyYarnColors();
+        $product->load(['variants' => function ($query) {
+            $query->orderBy('sort_order')->orderBy('id');
+        }, 'defaultVariant']);
 
         if ($message = $this->productAvailabilityMessage($product, $quantity)) {
             return back()->withErrors(['product' => $message]);
         }
 
-        $availableYarnColors = YarnColor::activeOptionsForProduct($product);
-        $yarnColor = $availableYarnColors->firstWhere('id', (int) $request->yarn_color_id);
+        $variant = $product->variants->firstWhere('id', (int) $request->product_variant_id);
 
-        if (! $yarnColor) {
-            return back()->withErrors(['yarn_color_id' => 'Please choose an available yarn color for this product.']);
+        if (! $variant) {
+            return back()->withErrors(['product_variant_id' => 'Please choose an available variant for this product.']);
         }
 
-        $variant = $product->variantForYarnColor($yarnColor);
-
-        if ($request->filled('product_variant_id')) {
-            $requestedVariant = $product->variants->firstWhere('id', (int) $request->product_variant_id);
-
-            if ($requestedVariant && $product->variantMatchesYarnColor($requestedVariant, $yarnColor)) {
-                $variant = $requestedVariant;
-            }
+        if (($variant->status ?? 'inactive') !== 'active' || (int) ($variant->stock ?? 0) < 1) {
+            return back()->withErrors(['product_variant_id' => 'Please choose an available variant for this product.']);
         }
 
         if (! Auth::check()) {
-            $newQuantity = SessionCart::quantityFor($product, $yarnColor) + $quantity;
+            $newQuantity = SessionCart::quantityFor($product, $variant) + $quantity;
 
-            if ($message = $this->productAvailabilityMessage($product, $newQuantity)) {
+            if ($message = $this->productAvailabilityMessage($product, $newQuantity, $variant)) {
                 return back()->withErrors(['quantity' => $message]);
             }
 
-            SessionCart::add($product, $variant, $yarnColor, $quantity);
+            SessionCart::add($product, $variant, null, $quantity);
 
             return back()->with('success', 'Added to cart');
         }
@@ -86,34 +83,37 @@ class CartController extends Controller
 
         $item = $cart->items()
             ->where('product_id', $product->id)
-            ->where('yarn_color_id', $yarnColor->id)
+            ->where('product_variant_id', $variant->id)
             ->first();
 
         $newQuantity = (int) ($item?->quantity ?? 0) + $quantity;
 
-        if ($message = $this->productAvailabilityMessage($product, $newQuantity)) {
+        if ($message = $this->productAvailabilityMessage($product, $newQuantity, $variant)) {
             return back()->withErrors(['quantity' => $message]);
         }
 
         if ($item) {
             $item->increment('quantity', $quantity);
 
-            if ($variant && $item->product_variant_id !== $variant->id) {
+            if ($item->product_variant_id !== $variant->id) {
                 $item->update([
                     'product_variant_id' => $variant->id,
+                    'yarn_color_id' => null,
+                    'variant_name' => $variant->name ?: $variant->yarn_color,
+                    'variant_hex_color' => $variant->hex_color,
                     'variant_image_path' => $variant->image_path,
                 ]);
             }
         } else {
             $cart->items()->create([
                 'product_id' => $product->id,
-                'product_variant_id' => $variant?->id,
-                'yarn_color_id' => $yarnColor->id,
-                'variant_name' => $yarnColor->name,
-                'variant_hex_color' => $yarnColor->hex_color,
-                'variant_image_path' => $variant?->image_path ?? $product->image,
+                'product_variant_id' => $variant->id,
+                'yarn_color_id' => null,
+                'variant_name' => $variant->name ?: $variant->yarn_color,
+                'variant_hex_color' => $variant->hex_color,
+                'variant_image_path' => $variant->image_path ?? $product->image,
                 'quantity' => $quantity,
-                'price' => $product->price,
+                'price' => $variant->price ?? $product->price,
             ]);
         }
 
@@ -135,7 +135,7 @@ class CartController extends Controller
                 return back()->withErrors(['cart' => 'That cart item could not be found.']);
             }
 
-            if ($message = $this->productAvailabilityMessage($item->product, $quantity)) {
+            if ($message = $this->productAvailabilityMessage($item->product, $quantity, $item->productVariant)) {
                 return back()->withErrors(['quantity' => $message]);
             }
 
@@ -150,7 +150,7 @@ class CartController extends Controller
             return back()->withErrors(['cart' => 'Your cart is empty.']);
         }
 
-        $item = CartItem::with('product')
+        $item = CartItem::with(['product', 'productVariant', 'yarnColor'])
             ->where('id', $id)
             ->whereHas('cart', function ($query) use ($cart) {
                 $query->where('id', $cart->id);
@@ -161,7 +161,7 @@ class CartController extends Controller
             return back()->withErrors(['cart' => 'That cart item could not be found.']);
         }
 
-        if ($message = $this->productAvailabilityMessage($item->product, $quantity)) {
+        if ($message = $this->productAvailabilityMessage($item->product, $quantity, $item->productVariant)) {
             return back()->withErrors(['quantity' => $message]);
         }
 
@@ -203,7 +203,7 @@ class CartController extends Controller
         return back()->with('success', 'Item removed');
     }
 
-    private function productAvailabilityMessage(?Product $product, int $quantity): ?string
+    private function productAvailabilityMessage(?Product $product, int $quantity, ?ProductVariant $variant = null): ?string
     {
         if (! $product) {
             return 'This product is no longer available.';
@@ -213,12 +213,16 @@ class CartController extends Controller
             return 'This product is not available right now.';
         }
 
-        if ($product->stock < 1) {
+        $availableStock = $variant && $variant->stock !== null
+            ? (int) $variant->stock
+            : (int) $product->stock;
+
+        if ($availableStock < 1) {
             return 'This product is out of stock.';
         }
 
-        if ($quantity > $product->stock) {
-            return 'Only ' . $product->stock . ' item(s) are available for this product.';
+        if ($quantity > $availableStock) {
+            return 'Only ' . $availableStock . ' item(s) are available for this product.';
         }
 
         return null;

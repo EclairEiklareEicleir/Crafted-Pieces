@@ -46,6 +46,7 @@
         : false;
     $quoteAmount = $order->final_price ?? $order->estimated_price ?? ($pricing['base_price'] ?? 0);
     $paymentStatus = strtolower($order->payment_status ?? 'unpaid');
+    $quoteStatus = $order->quote_status ?? 'pending';
 @endphp
 
 <section class="relative min-h-screen overflow-hidden">
@@ -97,6 +98,8 @@
                                 {{ $status['label'] }}
                             </span>
 
+                            <x-status-badge :status="$quoteStatus" context="quote" />
+
                             <span class="inline-flex items-center rounded-full border border-brand-border bg-white px-3 py-1 text-xs font-semibold text-brand-primary">
                                 Payment: {{ ucfirst(str_replace('_', ' ', $paymentStatus)) }}
                             </span>
@@ -132,6 +135,22 @@
                                     {{ $order->admin_notes }}
                                 </p>
                             </div>
+                        @endif
+
+                        @if ($order->reference_image_url)
+                            <div class="mt-5 rounded-3xl border border-brand-border bg-white/90 p-4">
+                                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-brand-secondary">
+                                    Reference image
+                                </p>
+
+                                <img src="{{ $order->reference_image_url }}"
+                                     alt="Reference image"
+                                     class="mt-3 max-h-80 w-full rounded-3xl border border-brand-border object-contain bg-white p-2">
+                            </div>
+                        @else
+                            <p class="mt-5 rounded-3xl border border-dashed border-brand-border bg-white/90 px-4 py-3 text-sm text-brand-ink/60">
+                                No reference image uploaded.
+                            </p>
                         @endif
 
                     </div>
@@ -230,6 +249,11 @@
                         <div class="flex items-start justify-between gap-4 rounded-[1.25rem] bg-brand-light/25 p-4">
                             <dt class="font-medium text-brand-ink/60">Payment status</dt>
                             <dd class="text-right font-semibold text-brand-primary">{{ ucfirst(str_replace('_', ' ', $paymentStatus)) }}</dd>
+                        </div>
+
+                        <div class="flex items-start justify-between gap-4 rounded-[1.25rem] bg-brand-light/25 p-4">
+                            <dt class="font-medium text-brand-ink/60">Quote status</dt>
+                            <dd class="text-right font-semibold text-brand-primary">{{ $order->quote_status_label }}</dd>
                         </div>
 
                         @if ($order->quoted_at)

@@ -9,7 +9,7 @@
 <div class="grid gap-6 lg:grid-cols-[1fr_20rem]">
 
     <div class="lg:col-span-2">
-        <x-back-button href="{{ route('admin.users.show', $user) }}" label="Back to User Details" />
+        <x-back-button href="{{ route('admin.users.index') }}" label="Back to Users" />
     </div>
 
     <div class="rounded-4xl border border-brand-border bg-white p-6 shadow-sm">
@@ -46,7 +46,7 @@
                 @else
                     <select name="role" class="mt-2 brand-input" required>
                         <option value="user" {{ old('role', $user->role) === 'user' ? 'selected' : '' }}>Customer</option>
-                        <option value="owner" {{ old('role', $user->role) === 'owner' ? 'selected' : '' }}>Owner</option>
+                        <option value="owner" {{ old('role', $user->role) === 'owner' ? 'selected' : '' }}>Admin</option>
                     </select>
                 @endif
             </div>

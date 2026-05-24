@@ -11,27 +11,20 @@ use Illuminate\Support\Facades\Log;
 
 class AdminOrderController extends Controller
 {
-    private const ACTIVE_ORDER_STATUSES = [
-        'pending',
-        'processing',
-        'shipped',
-        'out_for_delivery',
-    ];
+    private const ACTIVE_ORDER_STATUSES = Order::ACTIVE_ORDER_STATUSES;
 
-    private const ORDER_STATUSES = [
-        'pending',
-        'processing',
-        'shipped',
-        'out_for_delivery',
-        'delivered',
-        'received',
-        'cancelled',
-    ];
+    private const ORDER_STATUSES = Order::ORDER_STATUSES;
+
+    private const PAYMENT_STATUSES = Order::PAYMENT_STATUSES;
 
     private const ORDER_STATUS_NOTIFICATIONS = [
         'pending' => [
             'title' => 'Order Status Updated',
             'message' => 'Your order is now pending.',
+        ],
+        'awaiting_payment' => [
+            'title' => 'Order Awaiting Payment',
+            'message' => 'Your order is awaiting payment.',
         ],
         'processing' => [
             'title' => 'Order Status Updated',
@@ -53,45 +46,122 @@ class AdminOrderController extends Controller
             'title' => 'Order Received',
             'message' => 'Your order has been marked as received.',
         ],
+        'completed' => [
+            'title' => 'Order Completed',
+            'message' => 'Your order has been completed.',
+        ],
         'cancelled' => [
             'title' => 'Order Cancelled',
             'message' => 'Your order has been cancelled.',
+        ],
+        'refunded' => [
+            'title' => 'Order Refunded',
+            'message' => 'Your order has been refunded.',
+        ],
+        'rejected' => [
+            'title' => 'Order Rejected',
+            'message' => 'Your order has been rejected.',
+        ],
+        'failed' => [
+            'title' => 'Order Failed',
+            'message' => 'Your order could not be completed.',
         ],
     ];
 
     // LIST + FILTER + SEARCH + PAGINATION
     public function index(Request $request)
     {
+        $validated = $request->validate([
+            'search' => ['nullable', 'string', 'max:255'],
+            'status' => ['nullable', 'string', Rule::in(self::ACTIVE_ORDER_STATUSES)],
+            'payment_status' => ['nullable', 'string', Rule::in(self::PAYMENT_STATUSES)],
+        ]);
+
+        $search = trim((string) ($validated['search'] ?? ''));
+        $status = trim((string) ($validated['status'] ?? ''));
+        $paymentStatus = trim((string) ($validated['payment_status'] ?? ''));
+
         $query = Order::query()
-            ->whereIn('status', self::ACTIVE_ORDER_STATUSES)
+            ->with('user')
+            ->activeOrders()
             ->latest();
 
-        // SEARCH (name/email/id)
-        if ($request->filled('search')) {
-            $search = $request->search;
+        // SEARCH (id/reference/name/email/status/payment status)
+        if ($search !== '') {
+            $normalizedSearch = strtolower(str_replace([' ', '-'], '_', $search));
+            $numericSearch = ltrim($search, '#');
 
-            $query->where(function ($q) use ($search) {
+            $query->where(function ($q) use ($search, $normalizedSearch, $numericSearch) {
                 $q->where('full_name', 'like', "%{$search}%")
                   ->orWhere('email', 'like', "%{$search}%")
-                  ->orWhere('id', $search);
+                  ->orWhere('public_reference', 'like', "%{$search}%")
+                  ->orWhere('status', $normalizedSearch)
+                  ->orWhere('payment_status', $normalizedSearch)
+                  ->orWhereHas('user', function ($userQuery) use ($search) {
+                      $userQuery->where('name', 'like', "%{$search}%")
+                          ->orWhere('email', 'like', "%{$search}%");
+                  });
+
+                if (ctype_digit($numericSearch)) {
+                    $q->orWhere('id', (int) $numericSearch);
+                }
             });
         }
 
         // STATUS FILTER
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
+        if ($status !== '') {
+            $query->where('status', $status);
         }
 
-        $orders = $query->paginate(10)->withQueryString();
+        // PAYMENT FILTER
+        if ($paymentStatus !== '') {
+            $query->where('payment_status', $paymentStatus);
+        }
 
-        return view('admin.orders.index', compact('orders'));
+        $orders = $query->paginate(12)->withQueryString();
+
+        return view('admin.orders.index', [
+            'orders' => $orders,
+            'orderStatuses' => self::ACTIVE_ORDER_STATUSES,
+            'paymentStatuses' => self::PAYMENT_STATUSES,
+            'bulkStatuses' => self::ORDER_STATUSES,
+        ]);
     }
 
     // SHOW SINGLE ORDER
     public function show(Order $order)
     {
-        $order->load('items.product', 'items.productVariant', 'items.yarnColor');
-        return view('admin.orders.show', compact('order'));
+        $order->load('items.product', 'items.productVariant', 'items.yarnColor', 'user');
+        $order->loadMissing('customOrderRequest');
+
+        return view('admin.orders.show', [
+            'order' => $order,
+            'orderStatuses' => self::ORDER_STATUSES,
+        ]);
+    }
+
+    public function updatePaymentStatus(Request $request, Order $order)
+    {
+        $request->validate([
+            'payment_status' => ['required', 'string', Rule::in(['pending', 'paid'])],
+        ]);
+
+        if (($order->order_type ?? 'online_order') !== 'walk_in_order') {
+            return back()->withErrors(['payment_status' => 'Manual payment updates are only available for walk-in orders.']);
+        }
+
+        $paymentStatus = $request->string('payment_status')->toString();
+        $updates = ['payment_status' => $paymentStatus];
+
+        if ($paymentStatus === 'paid') {
+            $updates['paid_at'] = now();
+        } else {
+            $updates['paid_at'] = null;
+        }
+
+        $order->update($updates);
+
+        return back()->with('success', 'Payment status updated.');
     }
 
     // UPDATE SINGLE STATUS
@@ -113,6 +183,10 @@ class AdminOrderController extends Controller
     // DELETE SINGLE
     public function destroy(Order $order)
     {
+        if ($order->isActiveOrder()) {
+            return back()->with('error', 'Active orders cannot be deleted from this action.');
+        }
+
         $order->delete();
         return back()->with('success', 'Order deleted.');
     }
@@ -120,27 +194,39 @@ class AdminOrderController extends Controller
     // BULK ACTIONS
     public function bulkAction(Request $request)
     {
-        $request->validate([
-            'orders' => 'required|array',
-            'action' => ['required', 'string', Rule::in(array_merge(['delete'], self::ORDER_STATUSES))],
+        $validated = $request->validate([
+            'orders' => ['required', 'array', 'min:1'],
+            'orders.*' => ['integer', 'exists:orders,id'],
+            'action' => ['required', 'string', Rule::in(self::ORDER_STATUSES)],
+        ], [
+            'orders.required' => 'Select at least one order before applying a bulk action.',
+            'orders.min' => 'Select at least one order before applying a bulk action.',
+            'action.required' => 'Choose a bulk action before applying it.',
+            'action.in' => 'Active orders cannot be deleted from this bulk action.',
         ]);
 
-        $selectedOrders = Order::whereIn('id', $request->orders)->with('user')->get();
+        $selectedOrders = Order::activeOrders()
+            ->whereIn('id', $validated['orders'])
+            ->with('user')
+            ->get();
 
-        switch ($request->action) {
-
-            case 'delete':
-                Order::whereIn('id', $request->orders)->delete();
-                break;
-
-            default:
-                $selectedOrders->each(function (Order $order) use ($request) {
-                    $this->applyStatusUpdate($order, $request->action);
-                });
-                break;
+        if ($selectedOrders->count() !== count(array_unique($validated['orders']))) {
+            return back()->with('error', 'Only active orders can be updated from Active Orders.');
         }
 
-        return back()->with('success', 'Bulk action completed.');
+        $updatedCount = 0;
+
+        $selectedOrders->each(function (Order $order) use ($validated, &$updatedCount) {
+            if ($this->applyStatusUpdate($order, $validated['action'])) {
+                $updatedCount++;
+            }
+        });
+
+        if ($updatedCount === 0) {
+            return back()->with('success', 'No selected orders needed a status change.');
+        }
+
+        return back()->with('success', $updatedCount . ' selected order' . ($updatedCount === 1 ? '' : 's') . ' updated.');
     }
 
     // MANUAL ORDER INSERT (PROF REQUIREMENT)
@@ -155,6 +241,7 @@ class AdminOrderController extends Controller
         ]);
 
         Order::create($validated + [
+            'order_type' => 'walk_in_order',
             'payment_status' => 'pending',
             'status' => 'pending',
         ]);
@@ -178,6 +265,7 @@ class AdminOrderController extends Controller
         }
 
         $order->load('items.product', 'items.productVariant', 'items.yarnColor');
+        $order->loadMissing('customOrderRequest');
 
         $pricing = [
             'subtotal' => $order->subtotal ?? $order->computed_subtotal,
@@ -195,17 +283,30 @@ class AdminOrderController extends Controller
         return $pdf->download('receipt-order-' . $order->id . '.pdf');
     }
 
-    private function applyStatusUpdate(Order $order, string $status): void
+    private function applyStatusUpdate(Order $order, string $status): bool
     {
-        if ($order->status !== $status) {
-            $order->update(['status' => $status]);
+        if ($order->status === $status) {
+            return false;
         }
 
+        $order->update(['status' => $status]);
         $this->notifyOrderCustomer($order, $status);
+
+        return true;
     }
 
     private function notifyOrderCustomer(Order $order, string $status): void
     {
+        if (! $order->user_id) {
+            return;
+        }
+
+        $order->loadMissing('user');
+
+        if (! $order->user) {
+            return;
+        }
+
         $notification = self::ORDER_STATUS_NOTIFICATIONS[$status] ?? null;
 
         if (! $notification) {

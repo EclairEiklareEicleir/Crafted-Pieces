@@ -6,31 +6,25 @@
     $pageTitle = 'Create FAQ';
 @endphp
 
-<div class="mb-6">
-    <h2 class="text-xl font-semibold text-brand-primary">
-        Create Chatbot FAQ
-    </h2>
-    <p class="text-sm text-brand-ink/70">
-        Add a new question and answer for the chatbot assistant
-    </p>
+<div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+    <div>
+        <h2 class="text-xl font-semibold text-brand-primary">
+            Create Chatbot FAQ
+        </h2>
+        <p class="text-sm text-brand-ink/70">
+            Add a new question and answer for the chatbot assistant
+        </p>
+    </div>
+
+    <x-back-button href="{{ route('admin.chatbot.index') }}" label="Back to Chatbot" />
 </div>
 
-{{-- BACK BUTTON --}}
-<div class="mb-4">
-    <a href="{{ route('admin.chatbot.index') }}"
-       class="text-sm text-brand-primary hover:underline">
-        ← Back to FAQs
-    </a>
-</div>
-
-{{-- FORM --}}
 <div class="rounded-2xl border border-brand-border bg-white p-6 shadow-sm">
 
     <form method="POST" action="{{ route('admin.chatbot.store') }}" class="space-y-5">
 
         @csrf
 
-        {{-- QUESTION --}}
         <div>
             <label class="text-sm font-medium text-brand-primary">
                 Question
@@ -50,7 +44,6 @@
             @enderror
         </div>
 
-        {{-- ANSWER --}}
         <div>
             <label class="text-sm font-medium text-brand-primary">
                 Answer
@@ -69,7 +62,6 @@
             @enderror
         </div>
 
-        {{-- KEYWORDS --}}
         <div>
             <label class="text-sm font-medium text-brand-primary">
                 Keywords (optional)
@@ -92,7 +84,6 @@
             @enderror
         </div>
 
-        {{-- SUBMIT --}}
         <div class="flex justify-end pt-4">
             <button
                 type="submit"

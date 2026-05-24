@@ -22,6 +22,10 @@
                             Order #{{ $order->id }}
                         </p>
 
+                        <p class="mt-1 text-xs font-semibold uppercase tracking-[0.14em] text-brand-secondary">
+                            {{ $order->order_type_label }}
+                        </p>
+
                         <p class="text-sm text-[#6f5a51]">
                             {{ $order->created_at->format('M d, Y') }}
                         </p>

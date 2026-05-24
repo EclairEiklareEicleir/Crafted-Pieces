@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Notification;
 use App\Models\User;
+use Illuminate\Support\Facades\Storage;
 
 
 class CustomOrderController extends Controller
@@ -68,6 +69,8 @@ public function show(CustomOrderRequest $customOrder)
             'custom_order_request_id' => $customOrder->id,
             'user_id' => Auth::id(),
             'message' => $request->message,
+            'message_type' => 'text',
+            'is_system' => false,
         ]);
 
         return back();
@@ -93,7 +96,14 @@ public function show(CustomOrderRequest $customOrder)
             'design_theme' => 'nullable|string|max:255',
             'preferred_size' => 'nullable|string|max:50',
             'description' => 'required|string',
+            'reference_image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
         ]);
+
+        $referenceImagePath = null;
+
+        if ($request->hasFile('reference_image')) {
+            $referenceImagePath = $request->file('reference_image')->store('custom-orders/reference-images', 'public');
+        }
 
         $estimate = $this->calculateEstimate($validated);
 
@@ -105,8 +115,10 @@ public function show(CustomOrderRequest $customOrder)
             'design_theme' => $validated['design_theme'],
             'preferred_size' => $validated['preferred_size'],
             'description' => $validated['description'],
+            'reference_image_path' => $referenceImagePath,
             'estimated_price' => $estimate,
             'status' => CustomOrderRequest::STATUS_PENDING,
+            'quote_status' => CustomOrderRequest::QUOTE_STATUS_PENDING,
         ]);
 
         $admins = User::where('role', 'owner')->get();
@@ -120,6 +132,80 @@ public function show(CustomOrderRequest $customOrder)
         }
 
         return redirect()->route('custom-order.show', $order);
+    }
+
+    public function acceptQuote(Request $request, CustomOrderRequest $customOrder)
+    {
+        if (! Auth::check() || $customOrder->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        if ((float) ($customOrder->final_price ?? 0) <= 0) {
+            return back()->withErrors(['quote' => 'A quoted price is required before acceptance.']);
+        }
+
+        $customOrder->update([
+            'quote_status' => CustomOrderRequest::QUOTE_STATUS_ACCEPTED,
+            'status' => CustomOrderRequest::STATUS_AWAITING_PAYMENT,
+            'payment_due_at' => $customOrder->payment_due_at ?? now()->addDays(3),
+            'payment_status' => $customOrder->payment_status ?: 'pending',
+        ]);
+
+        $customOrder->syncLinkedOrder();
+
+        CustomOrderMessage::create([
+            'custom_order_request_id' => $customOrder->id,
+            'user_id' => Auth::id(),
+            'message' => 'The customer accepted the quoted price and can proceed to payment.',
+            'message_type' => 'system',
+            'is_system' => true,
+            'meta' => [
+                'event' => 'quote_accepted',
+                'quoted_price' => (float) $customOrder->final_price,
+            ],
+        ]);
+
+        Notification::notifyUser(User::where('role', 'owner')->first(), [
+            'title' => 'Quote Accepted',
+            'message' => 'The customer accepted the quoted price for a custom order.',
+            'link' => route('admin.custom.show', $customOrder),
+        ]);
+
+        return back()->with('success', 'Quoted price accepted. You may continue to payment.');
+    }
+
+    public function declineQuote(Request $request, CustomOrderRequest $customOrder)
+    {
+        if (! Auth::check() || $customOrder->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $customOrder->update([
+            'quote_status' => CustomOrderRequest::QUOTE_STATUS_DECLINED,
+            'status' => CustomOrderRequest::STATUS_QUOTED,
+            'payment_due_at' => null,
+        ]);
+
+        $customOrder->syncLinkedOrder();
+
+        CustomOrderMessage::create([
+            'custom_order_request_id' => $customOrder->id,
+            'user_id' => Auth::id(),
+            'message' => 'The customer declined the quoted price and wants to continue discussing the request.',
+            'message_type' => 'system',
+            'is_system' => true,
+            'meta' => [
+                'event' => 'quote_declined',
+            ],
+        ]);
+
+        Notification::notifyUser(User::where('role', 'owner')->first(), [
+            'title' => 'Quote Declined',
+            'message' => 'The customer declined the quoted price for a custom order.',
+            'link' => route('admin.custom.show', $customOrder),
+        ]);
+
+        return back()->with('success', 'Quoted price declined. You can keep discussing the order.');
     }
 
     /*
@@ -138,8 +224,11 @@ public function show(CustomOrderRequest $customOrder)
         }
 
         $customOrder->update([
-            'status' => CustomOrderRequest::STATUS_PAID
+            'status' => CustomOrderRequest::STATUS_PAID,
+            'payment_status' => 'paid',
         ]);
+
+        $customOrder->syncLinkedOrder();
 
         return redirect()
             ->route('custom-order.show', $customOrder)

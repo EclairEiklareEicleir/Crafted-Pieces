@@ -298,16 +298,6 @@
                                     </a>
                                 @endif
 
-                                <a href="{{ route('orders') }}"
-                                   class="brand-dropdown-link {{ request()->routeIs('orders') ? 'bg-brand-light text-brand-primary' : '' }}">
-                                    Orders
-                                </a>
-
-                                <a href="{{ route('custom-order.index') }}"
-                                   class="brand-dropdown-link whitespace-nowrap {{ request()->routeIs('custom-order.index') ? 'bg-brand-light text-brand-primary' : '' }}">
-                                    Custom Orders
-                                </a>
-
                                 @if (Route::has('account'))
                                     <a href="{{ route('account') }}"
                                        class="brand-dropdown-link {{ request()->routeIs('account') ? 'bg-brand-light text-brand-primary' : '' }}">

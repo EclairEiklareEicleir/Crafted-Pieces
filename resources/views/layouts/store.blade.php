@@ -19,10 +19,14 @@
 
     @if (session('success') || $errors->any())
 
-        <div id="global-alert" class="fixed right-4 top-4 z-9999 w-full max-w-lg px-4">
+        <div id="global-alert"
+             class="fixed right-4 top-4 z-9999 w-full max-w-lg px-4 transition duration-300"
+             data-flash-alert
+             data-flash-delay="{{ session('success') && ! $errors->any() ? 4200 : 7000 }}"
+             data-flash-auto-dismiss="{{ $errors->any() ? 'false' : 'true' }}">
 
             <div id="global-alert-box"
-                 class="translate-x-[120%] rounded-2xl border border-[#eadfd7] bg-white shadow-2xl transition-all duration-500 ease-out">
+                 class="rounded-2xl border border-[#eadfd7] bg-white shadow-2xl transition-all duration-300 ease-out">
 
                 <div class="flex items-start justify-between gap-4 p-5">
 
@@ -44,8 +48,11 @@
 
                     </div>
 
-                    <button onclick="closeGlobalAlert()"
-                            class="text-2xl leading-none text-[#6f5a51] hover:text-black transition">
+                    <button type="button"
+                            data-flash-dismiss
+                            aria-label="Dismiss notification"
+                            class="text-[0px] leading-none text-[#6f5a51] hover:text-black transition">
+                        <span class="text-2xl" aria-hidden="true">&times;</span>
                         ×
                     </button>
 
@@ -53,31 +60,6 @@
 
             </div>
         </div>
-
-        <script>
-            window.addEventListener('DOMContentLoaded', () => {
-
-                const alertBox = document.getElementById('global-alert-box');
-
-                requestAnimationFrame(() => {
-                    alertBox.classList.remove('translate-x-[120%]');
-                    alertBox.classList.add('translate-x-0');
-                });
-
-            });
-
-            function closeGlobalAlert() {
-
-                const alertBox = document.getElementById('global-alert-box');
-
-                alertBox.classList.remove('translate-x-0');
-                alertBox.classList.add('translate-x-[120%]');
-
-                setTimeout(() => {
-                    document.getElementById('global-alert')?.remove();
-                }, 500);
-            }
-        </script>
 
     @endif
 

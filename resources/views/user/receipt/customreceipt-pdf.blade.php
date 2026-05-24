@@ -125,7 +125,7 @@
                 </tr>
                 <tr>
                     <td><strong>Item:</strong> {{ $order->item_type }}</td>
-                    <td class="right"><span class="badge">{{ ucfirst(str_replace('_', ' ', $order->status)) }}</span></td>
+                    <td class="right"><strong>Order Status:</strong> {{ ucfirst(str_replace('_', ' ', $order->status)) }}</td>
                 </tr>
                 @if ($order->preferred_size || $order->design_theme)
                     <tr>

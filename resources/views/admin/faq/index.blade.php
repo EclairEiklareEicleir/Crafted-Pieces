@@ -37,7 +37,14 @@
                             <td class="px-3 py-3">
                                 <div class="flex gap-2">
                                     <a href="{{ route('admin.faq.edit', $faq) }}" class="font-semibold text-brand-secondary hover:text-brand-primary transition">Edit</a>
-                                    <form action="{{ route('admin.faq.destroy', $faq) }}" method="POST" class="inline-block" onsubmit="return confirm('Are you sure? This action cannot be undone.');">
+                                    <form action="{{ route('admin.faq.destroy', $faq) }}"
+                                          method="POST"
+                                          class="inline-block"
+                                          data-confirm-title="Delete FAQ?"
+                                          data-confirm-message="Are you sure you want to delete this FAQ?"
+                                          data-confirm-final-title="Final Confirmation"
+                                          data-confirm-final-message="This FAQ will be removed from the public About page. Are you absolutely sure?"
+                                          data-confirm-final-action="Yes, Delete">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="font-semibold text-red-600 hover:text-red-700 transition">Delete</button>
@@ -50,9 +57,7 @@
             </table>
         </div>
 
-        <div class="mt-6">
-            {{ $faqs->links() }}
-        </div>
+        <x-admin-pagination :paginator="$faqs" label="FAQ pagination" />
     @else
         <div class="mt-8 rounded-3xl border-2 border-dashed border-brand-border bg-brand-light/50 p-8 text-center">
             <p class="text-brand-ink/70">No FAQs yet. <a href="{{ route('admin.faq.create') }}" class="font-semibold text-brand-secondary hover:text-brand-primary">Create the first one</a>.</p>
