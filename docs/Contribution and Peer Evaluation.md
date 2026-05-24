@@ -64,7 +64,7 @@
 
 | Alrazel R. Llave | System & Frontend Support | Assisted in frontend Blade structuring and layout organization, supported UI implementation across multiple modules, performed debugging and UI adjustments during development, and contributed to overall system-wide frontend stability. |
 |  | Feature Implementation | Implemented search system and integrated PayMongo payment system, while also supporting backend-controller connections and frontend-to-backend alignment. |
-|  | Development Assistance | Participated in feature-level testing and validation, assisted in refining admin and storefront UI behavior, and contributed to structural improvements during iterative development. |
+| | Development Assistance | Participated in feature-level testing and validation, assisted in refining admin and storefront UI behavior, and contributed to structural improvements during iterative development. |
 |  | Models & Database | Worked with core models including User, Product, Category, ProductVariant, YarnColor, Order, and OrderItem. |
 
 ---
