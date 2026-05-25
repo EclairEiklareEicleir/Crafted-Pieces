@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\User;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -20,7 +21,19 @@ class RoleMiddleware
             return redirect()->route('home');
         }
 
-        $userRole = Auth::user()->role;
+        $user = Auth::user();
+
+        if (($user->status ?? User::STATUS_ACTIVE) !== User::STATUS_ACTIVE) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return redirect()->route('home')->withErrors([
+                'auth' => 'Your account has been disabled.',
+            ]);
+        }
+
+        $userRole = $user->role;
 
         if (!in_array($userRole, $roles)) {
             abort(403, 'Unauthorized');

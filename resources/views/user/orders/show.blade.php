@@ -2,9 +2,38 @@
 
 @section('content')
 
+@php
+    /*
+    |--------------------------------------------------------------------------
+    | SOURCE OF TRUTH (ORDER SNAPSHOT)
+    |--------------------------------------------------------------------------
+    | No recalculation, no service calls.
+    | This ensures receipts NEVER change after checkout.
+    */
+    $pricing = [
+        'subtotal' => $order->subtotal,
+        'platform_fee' => $order->platform_fee,
+        'vat' => $order->vat_amount,
+        'delivery_fee' => $order->delivery_fee,
+        'total' => $order->total_amount,
+    ];
+
+    $isLoggedInOwner = auth()->check() && $order->user_id === auth()->id();
+    $backButtonHref = $isLoggedInOwner ? route('orders') : route('orders.track.form');
+    $backButtonLabel = $isLoggedInOwner ? 'Back to My Orders' : 'Back to Track Order';
+@endphp
+
 <section class="mx-auto max-w-4xl px-4 py-14">
 
-    <div class="rounded-[2rem] border border-[#eadfd7] bg-white p-6 shadow-sm">
+    <div class="mb-6 flex items-center justify-between gap-3">
+        <x-back-button href="{{ $backButtonHref }}" label="{{ $backButtonLabel }}" />
+
+        <a href="{{ $order->customOrderRequest ? route('custom-order.receipt', $order->customOrderRequest) : route('orders.receipt.download', $order->id) }}" data-no-loading="true" class="brand-btn-primary px-5 py-3 text-sm">
+            Download Receipt
+        </a>
+    </div>
+
+    <div class="rounded-4xl border border-brand-border bg-white p-6 shadow-sm">
 
         {{-- HEADER --}}
         <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
@@ -19,9 +48,7 @@
                 </p>
             </div>
 
-            <div class="text-sm font-semibold text-[#a86b57]">
-                Status: {{ ucfirst($order->status) }}
-            </div>
+            <x-status-badge :status="$order->status" context="order" />
 
         </div>
 
@@ -30,8 +57,18 @@
 
             <p><strong>Name:</strong> {{ $order->full_name }}</p>
             <p><strong>Email:</strong> {{ $order->email }}</p>
+            <p><strong>Type:</strong> {{ $order->order_type_label }}</p>
             <p><strong>Shipping:</strong> {{ $order->shipping_address }}</p>
             <p><strong>Payment:</strong> {{ $order->payment_method }}</p>
+
+            @if ($order->customOrderRequest)
+                <p class="mt-2 text-brand-secondary">
+                    Linked custom order #{{ $order->customOrderRequest->id }}
+                    <a href="{{ route('custom-order.show', $order->customOrderRequest) }}" class="font-semibold underline">
+                        open thread
+                    </a>
+                </p>
+            @endif
 
         </div>
 
@@ -40,28 +77,47 @@
 
             @foreach ($order->items as $item)
 
+                @php
+                    $product = $item->product;
+                    $itemImage = $item->productVariant?->floating_image_url
+                        ?: \App\Support\ProductImage::floatingUrl($item->variant_image_path)
+                        ?: ($product?->floating_image_url ?? 'https://placehold.co/600x600/png');
+                @endphp
+
                 <div class="flex items-center justify-between py-5">
 
                     <div class="flex items-center gap-4">
 
-                        {{-- optional product image --}}
-                        @if ($item->product?->image)
-                            <img src="{{ $item->product->image }}"
-                                 class="h-16 w-16 rounded-xl object-cover border border-[#eadfd7]">
-                        @endif
+                        <img
+                            src="{{ $itemImage }}"
+                            class="h-16 w-16 rounded-xl border border-brand-border bg-brand-surface object-contain p-1.5"
+                            alt="{{ $product?->name ?? 'Product image' }}"
+                        >
 
                         <div>
 
                             <p class="font-semibold text-[#4d3028]">
-                                {{ $item->product->name ?? 'Deleted Product' }}
+                                {{ $product->name ?? 'Deleted Product' }}
                             </p>
+
+                            @if ($item->productVariant?->name || $item->variant_name)
+                                <p class="text-xs text-[#8d5848]">
+                                    Variant: {{ $item->productVariant?->name ?? $item->variant_name }}
+                                </p>
+                            @endif
+
+                            @if ($item->productVariant?->sku)
+                                <p class="text-xs text-[#8d5848]">
+                                    SKU: {{ $item->productVariant?->sku }}
+                                </p>
+                            @endif
 
                             <p class="text-sm text-[#6f5a51]">
                                 Qty: {{ $item->quantity }}
                             </p>
 
                             <p class="text-xs text-[#8d5848]">
-                                PHP {{ number_format($item->price) }} each
+                                PHP {{ number_format($item->price, 2) }} each
                             </p>
 
                         </div>
@@ -69,34 +125,77 @@
                     </div>
 
                     <div class="font-semibold text-[#8d5848]">
-                        PHP {{ number_format($item->quantity * $item->price) }}
+                        PHP {{ number_format($item->quantity * $item->price, 2) }}
                     </div>
 
                 </div>
 
             @endforeach
 
-        </div>
-
-        {{-- TOTAL --}}
-        <div class="mt-6 flex items-center justify-between border-t border-[#efe3da] pt-5">
-
-            <span class="font-semibold text-[#4d3028]">
-                Total
-            </span>
-
-            <span class="font-semibold text-[#4d3028]">
-                PHP {{ number_format($order->total_amount) }}
-            </span>
+            @if ($order->items->isEmpty())
+                <div class="py-3 text-sm text-brand-ink/60">
+                    No product line items are attached to this order.
+                    @if ($order->customOrderRequest)
+                        Use the linked custom order thread for status updates and notes.
+                    @endif
+                </div>
+            @endif
 
         </div>
 
-        {{-- BACK BUTTON --}}
-        <div class="mt-8">
-            <a href="{{ route('orders') }}"
-               class="inline-block rounded-full bg-[#5d342b] px-6 py-3 text-sm font-semibold text-white">
-                Back to Orders
+        {{-- TOTAL BREAKDOWN --}}
+        <div class="mt-6 border-t border-[#efe3da] pt-5 space-y-2">
+
+            <div class="flex justify-between text-sm text-[#6f5a51]">
+                <span>Subtotal</span>
+                <span class="font-semibold text-[#4d3028]">
+                    PHP {{ number_format($pricing['subtotal'], 2) }}
+                </span>
+            </div>
+
+            <div class="flex justify-between text-sm text-[#6f5a51]">
+                <span>Platform Fee</span>
+                <span class="font-semibold text-[#4d3028]">
+                    PHP {{ number_format($pricing['platform_fee'], 2) }}
+                </span>
+            </div>
+
+            <div class="flex justify-between text-sm text-[#6f5a51]">
+                <span>VAT</span>
+                <span class="font-semibold text-[#4d3028]">
+                    PHP {{ number_format($pricing['vat'], 2) }}
+                </span>
+            </div>
+
+            <div class="flex justify-between text-sm text-[#6f5a51]">
+                <span>Delivery Fee</span>
+                <span class="font-semibold text-[#4d3028]">
+                    PHP {{ number_format($pricing['delivery_fee'], 2) }}
+                </span>
+            </div>
+
+            <div class="flex justify-between font-semibold text-[#4d3028] pt-2 border-t border-[#efe3da]">
+                <span>Total</span>
+                <span>
+                    PHP {{ number_format($pricing['total'], 2) }}
+                </span>
+            </div>
+
+        </div>
+
+        {{-- ACTIONS --}}
+        <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+
+            <p class="text-sm text-brand-ink/60">
+                Keep this receipt for your records.
+            </p>
+
+            <a href="{{ $order->customOrderRequest ? route('custom-order.receipt', $order->customOrderRequest) : route('orders.receipt.download', $order->id) }}"
+               data-no-loading="true"
+               class="brand-btn-primary px-5 py-3 text-sm">
+                Download Receipt
             </a>
+
         </div>
 
     </div>

@@ -2,313 +2,332 @@
 
 @section('content')
 
-<div class="rounded-[2rem] border border-[#eadfd7] bg-white p-6 shadow-sm">
+@php
+    $statusLabel = fn ($status) => ucwords(str_replace('_', ' ', $status));
+    $hasFilters = request()->filled('search')
+        || request()->filled('status')
+        || request()->filled('payment_status');
+@endphp
 
-    {{-- HEADER --}}
-    <div class="flex items-center justify-between">
+<div class="rounded-4xl border border-brand-border bg-white p-5 shadow-sm sm:p-6">
 
-        <h2 class="font-display text-2xl font-semibold text-[#4d3028]">
-            Orders
-        </h2>
+    <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <div>
+            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-brand-secondary">
+                Product Orders
+            </p>
 
-        {{-- MANUAL ORDER CREATION --}}
-        <a href="{{ route('admin.orders.create') }}"
-           class="rounded-full bg-[#5d342b] px-5 py-2 text-sm text-white whitespace-nowrap">
-            + Create Order
-        </a>
+            <h2 class="mt-2 font-display text-3xl font-semibold text-brand-primary">
+                Active Orders
+            </h2>
 
+            <p class="mt-2 text-sm text-brand-ink/60">
+                Manage orders that still need fulfillment action or payment follow-up.
+            </p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3">
+            <x-back-button href="{{ route('admin.dashboard') }}" label="Back to Dashboard" />
+
+            <a href="{{ route('admin.orders.create') }}"
+               class="brand-btn-primary whitespace-nowrap px-5 py-2 text-sm">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-4 w-4" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12h14" />
+                </svg>
+
+                <span>Create Order</span>
+            </a>
+        </div>
     </div>
 
-    {{-- FILTER + BULK BAR --}}
-    <div class="mt-6 flex flex-wrap items-center gap-3">
+    <form method="GET" id="filterForm" class="mt-6 grid gap-3 lg:grid-cols-[minmax(18rem,1fr)_13rem_13rem_auto]">
+        <div>
+            <label for="orders-search" class="sr-only">Search orders</label>
 
-        {{-- SEARCH + FILTER --}}
-        <form method="GET"
-              id="filterForm"
-              class="flex flex-1 items-center gap-3 min-w-0">
+            <div class="relative">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-ink/45" aria-hidden="true">
+                    <circle cx="11" cy="11" r="6.5" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m16 16 4 4" />
+                </svg>
 
-            {{-- SEARCH --}}
-            <input
-                type="text"
-                name="search"
-                value="{{ request('search') }}"
-                placeholder="Search by name, email, or order ID"
-                class="flex-1 min-w-0 rounded-2xl border px-4 py-2"
-                oninput="submitFilter()"
-            >
+                <input
+                    id="orders-search"
+                    type="text"
+                    name="search"
+                    value="{{ request('search') }}"
+                    placeholder="Search order ID, customer, email, status, or payment"
+                    class="brand-input py-3 pl-10"
+                >
+            </div>
+        </div>
 
-            {{-- FILTER --}}
+        <div>
+            <label for="orders-status" class="sr-only">Order status</label>
+
             <select
+                id="orders-status"
                 name="status"
-                onchange="submitFilter()"
-                class="rounded-2xl border px-4 py-2 whitespace-nowrap">
+                class="brand-input py-3"
+                onchange="this.form.submit()"
+            >
+                <option value="">All Statuses</option>
 
-                <option value="">All Status</option>
-
-                <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>
-                    Pending
-                </option>
-
-                <option value="processing" {{ request('status') === 'processing' ? 'selected' : '' }}>
-                    Processing
-                </option>
-
-                <option value="shipped" {{ request('status') === 'shipped' ? 'selected' : '' }}>
-                    Shipped
-                </option>
-
-                <option value="out_for_delivery" {{ request('status') === 'out_for_delivery' ? 'selected' : '' }}>
-                    Out for Delivery
-                </option>
-
-                <option value="delivered" {{ request('status') === 'delivered' ? 'selected' : '' }}>
-                    Delivered
-                </option>
-
-                <option value="received" {{ request('status') === 'received' ? 'selected' : '' }}>
-                    Received
-                </option>
-
-                <option value="cancelled" {{ request('status') === 'cancelled' ? 'selected' : '' }}>
-                    Cancelled
-                </option>
-
+                @foreach ($orderStatuses as $status)
+                    <option value="{{ $status }}" @selected(request('status') === $status)>
+                        {{ $statusLabel($status) }}
+                    </option>
+                @endforeach
             </select>
+        </div>
 
-        </form>
+        <div>
+            <label for="orders-payment-status" class="sr-only">Payment status</label>
 
-        {{-- SEPARATOR --}}
-        <span class="text-[#b59a8c] font-semibold">|</span>
+            <select
+                id="orders-payment-status"
+                name="payment_status"
+                class="brand-input py-3"
+                onchange="this.form.submit()"
+            >
+                <option value="">All Payments</option>
 
-        {{-- BULK ACTIONS --}}
+                @foreach ($paymentStatuses as $paymentStatus)
+                    <option value="{{ $paymentStatus }}" @selected(request('payment_status') === $paymentStatus)>
+                        {{ $statusLabel($paymentStatus) }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+
+        <div class="flex flex-wrap gap-2">
+            <button type="submit" class="brand-btn-primary px-5 py-3 text-sm">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-4 w-4" aria-hidden="true">
+                    <circle cx="11" cy="11" r="6.5" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m16 16 4 4" />
+                </svg>
+
+                <span>Search</span>
+            </button>
+
+            @if ($hasFilters)
+                <a href="{{ route('admin.orders.index') }}" class="brand-btn-secondary px-5 py-3 text-sm">
+                    Reset
+                </a>
+            @endif
+        </div>
+    </form>
+
+    <div id="bulkPanel" class="mt-4 hidden rounded-3xl border border-brand-border bg-brand-light/30 p-4">
         <form method="POST"
               action="{{ route('admin.orders.bulk') }}"
-              class="flex items-center gap-3">
-
+              id="bulkOrdersForm"
+              class="grid gap-3 md:grid-cols-[1fr_16rem_auto] md:items-center">
             @csrf
+
+            <div>
+                <p id="bulkSelectionCount" class="text-sm font-semibold text-brand-primary">
+                    0 orders selected
+                </p>
+
+                <p id="bulkError" class="mt-1 hidden text-sm text-brand-secondary">
+                    Select at least one order before applying a bulk action.
+                </p>
+            </div>
 
             <select
                 name="action"
-                class="rounded-2xl border px-4 py-2 whitespace-nowrap">
+                id="bulkAction"
+                class="brand-input py-3"
+                required
+                disabled
+            >
+                <option value="">Choose bulk action</option>
 
-                <option value="">Bulk Action</option>
-
-                <option value="shipped">
-                    Mark Shipped
-                </option>
-
-                <option value="delivered">
-                    Mark Delivered
-                </option>
-
-                <option value="received">
-                    Mark Received
-                </option>
-
-                <option value="delete">
-                    Delete
-                </option>
+                @foreach ($bulkStatuses as $status)
+                    <option value="{{ $status }}">
+                        Mark as {{ $statusLabel($status) }}
+                    </option>
+                @endforeach
 
             </select>
 
-            <button class="rounded-2xl bg-[#5d342b] px-5 py-2 text-sm text-white whitespace-nowrap">
+            <button type="submit"
+                    id="bulkApplyButton"
+                    class="brand-btn-primary px-5 py-3 text-sm"
+                    disabled>
                 Apply
             </button>
-
         </form>
-
     </div>
 
-    {{-- TABLE --}}
     <div class="mt-6 overflow-x-auto">
-
-        <table class="w-full text-left text-sm">
-
-            <thead class="text-xs uppercase tracking-[0.16em] text-[#8f7a70]">
-
+        <table class="w-full min-w-[58rem] text-left text-sm">
+            <thead class="border-y border-brand-border bg-brand-surface/70 text-xs uppercase tracking-[0.14em] text-brand-ink/55">
                 <tr>
-
-                    <th class="py-3 pr-4">
-                        <input type="checkbox" id="selectAll">
+                    <th class="w-10 py-3 pl-3 pr-4">
+                        <input type="checkbox"
+                               id="selectAll"
+                               class="h-4 w-4 rounded border-brand-border text-brand-primary"
+                               aria-label="Select all orders">
                     </th>
 
-                    <th class="py-3 pr-4">
-                        Order
-                    </th>
-
-                    <th class="py-3 pr-4">
-                        Customer
-                    </th>
-
-                    <th class="py-3 pr-4">
-                        Total
-                    </th>
-
-                    <th class="py-3 pr-4">
-                        Status
-                    </th>
-
-                    <th class="py-3 pr-4">
-                        Actions
-                    </th>
-
+                    <th class="py-3 pr-4">Order</th>
+                    <th class="py-3 pr-4">Customer</th>
+                    <th class="py-3 pr-4">Type</th>
+                    <th class="py-3 pr-4">Total</th>
+                    <th class="py-3 pr-4">Status</th>
+                    <th class="py-3 pr-4">Payment</th>
+                    <th class="py-3 pr-4">Date</th>
+                    <th class="py-3 pr-3 text-right">Actions</th>
                 </tr>
-
             </thead>
 
-            <tbody class="divide-y divide-[#efe3da]">
-
+            <tbody class="divide-y divide-brand-border">
                 @forelse ($orders as $order)
-
-                    <tr>
-
-                        <td class="py-4 pr-4">
-
+                    <tr class="align-top transition hover:bg-brand-surface/50">
+                        <td class="py-4 pl-3 pr-4">
                             <input type="checkbox"
                                    name="orders[]"
-                                   value="{{ $order->id }}">
-
+                                   value="{{ $order->id }}"
+                                   form="bulkOrdersForm"
+                                   class="h-4 w-4 rounded border-brand-border text-brand-primary"
+                                   data-order-checkbox
+                                   aria-label="Select order #{{ $order->id }}">
                         </td>
 
-                        <td class="py-4 pr-4 font-medium text-[#4d3028]">
-
-                            #{{ $order->id }}
-
-                        </td>
-
-                        <td class="py-4 pr-4 text-[#6f5a51]">
-
-                            {{ $order->full_name }}
-
-                        </td>
-
-                        <td class="py-4 pr-4 text-[#6f5a51]">
-
-                            PHP {{ number_format($order->total_amount) }}
-
-                        </td>
-
-                        <td class="py-4 pr-4 text-[#6f5a51]">
-
-                            {{ ucfirst(str_replace('_', ' ', $order->status)) }}
-
-                        </td>
-
-                        {{-- ACTIONS --}}
                         <td class="py-4 pr-4">
-
-                            <div class="flex flex-wrap items-center gap-3">
-
-                                {{-- VIEW --}}
-                                <a href="{{ route('admin.orders.show', $order->id) }}"
-                                   class="font-semibold text-[#a86b57]">
-                                    View
-                                </a>
-
-                                {{-- SHIPPED --}}
-                                <form method="POST"
-                                      action="{{ route('admin.orders.status', $order->id) }}">
-
-                                    @csrf
-
-                                    <input type="hidden"
-                                           name="status"
-                                           value="shipped">
-
-                                    <button class="text-blue-600 text-sm">
-                                        Mark Shipped
-                                    </button>
-
-                                </form>
-
-                                {{-- DELIVERED --}}
-                                <form method="POST"
-                                      action="{{ route('admin.orders.status', $order->id) }}">
-
-                                    @csrf
-
-                                    <input type="hidden"
-                                           name="status"
-                                           value="delivered">
-
-                                    <button class="text-green-600 text-sm">
-                                        Mark Delivered
-                                    </button>
-
-                                </form>
-
-                                {{-- DELETE --}}
-                                <form method="POST"
-                                      action="{{ route('admin.orders.destroy', $order->id) }}">
-
-                                    @csrf
-                                    @method('DELETE')
-
-                                    <button class="text-sm text-red-600">
-                                        Delete
-                                    </button>
-
-                                </form>
-
+                            <div class="font-semibold text-brand-primary">
+                                #{{ $order->id }}
                             </div>
 
+                            @if ($order->public_reference)
+                                <div class="mt-1 text-xs text-brand-ink/50">
+                                    {{ $order->public_reference }}
+                                </div>
+                            @endif
                         </td>
 
-                    </tr>
+                        <td class="py-4 pr-4">
+                            <div class="font-medium text-brand-primary">
+                                {{ $order->full_name ?: ($order->user?->name ?? 'Guest Customer') }}
+                            </div>
 
+                            <div class="mt-1 text-xs text-brand-ink/55">
+                                {{ $order->email ?: ($order->user?->email ?? 'No email') }}
+                            </div>
+                        </td>
+
+                        <td class="py-4 pr-4">
+                            <span class="brand-pill">{{ $order->order_type_label }}</span>
+                        </td>
+
+                        <td class="py-4 pr-4 font-medium text-brand-ink/75">
+                            PHP {{ number_format((float) $order->total_amount, 2) }}
+                        </td>
+
+                        <td class="py-4 pr-4">
+                            <x-status-badge :status="$order->status" context="order" />
+                        </td>
+
+                        <td class="py-4 pr-4">
+                            <x-status-badge :status="$order->payment_status ?? 'unpaid'" context="payment" />
+                        </td>
+
+                        <td class="py-4 pr-4 text-brand-ink/60">
+                            {{ $order->created_at?->format('M d, Y') ?? 'No date' }}
+                        </td>
+
+                        <td class="py-4 pr-3">
+                            <div class="flex items-center justify-end gap-2">
+                                <a href="{{ route('admin.orders.show', $order->id) }}"
+                                   class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-brand-border bg-white text-brand-primary transition hover:border-brand-secondary hover:bg-brand-light hover:text-brand-secondary"
+                                   title="View order"
+                                   aria-label="View order #{{ $order->id }}">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-4 w-4" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12 18 18.75 12 18.75 2.25 12 2.25 12Z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 15.75a3.75 3.75 0 1 0 0-7.5 3.75 3.75 0 0 0 0 7.5Z" />
+                                    </svg>
+                                </a>
+
+                            </div>
+                        </td>
+                    </tr>
                 @empty
-
                     <tr>
+                        <td colspan="9" class="py-10 text-center">
+                            <p class="font-semibold text-brand-primary">
+                                {{ $hasFilters ? 'No orders match your filters.' : 'No orders found.' }}
+                            </p>
 
-                        <td colspan="6"
-                            class="py-6 text-center text-gray-500">
-
-                            No orders found.
-
+                            <p class="mt-1 text-sm text-brand-ink/60">
+                                {{ $hasFilters ? 'Try a different search term or clear the filters.' : 'New product orders will appear here.' }}
+                            </p>
                         </td>
-
                     </tr>
-
                 @endforelse
-
             </tbody>
-
         </table>
-
     </div>
 
-    {{-- PAGINATION --}}
-    <div class="mt-6">
-
-        {{ $orders->links() }}
-
-    </div>
+    <x-admin-pagination :paginator="$orders" label="Active orders pagination" />
 
 </div>
 
 <script>
+document.addEventListener('DOMContentLoaded', () => {
+    const selectAll = document.getElementById('selectAll');
+    const checkboxes = Array.from(document.querySelectorAll('[data-order-checkbox]'));
+    const bulkPanel = document.getElementById('bulkPanel');
+    const bulkForm = document.getElementById('bulkOrdersForm');
+    const bulkAction = document.getElementById('bulkAction');
+    const bulkApplyButton = document.getElementById('bulkApplyButton');
+    const bulkSelectionCount = document.getElementById('bulkSelectionCount');
+    const bulkError = document.getElementById('bulkError');
 
-document.getElementById('selectAll').addEventListener('click', function () {
+    const syncBulkState = () => {
+        const selectedCount = checkboxes.filter((checkbox) => checkbox.checked).length;
+        const hasSelection = selectedCount > 0;
 
-    let checkboxes = document.querySelectorAll('input[name="orders[]"]')
+        bulkPanel?.classList.toggle('hidden', ! hasSelection);
+        bulkAction?.toggleAttribute('disabled', ! hasSelection);
+        bulkApplyButton?.toggleAttribute('disabled', ! hasSelection);
+        bulkError?.classList.add('hidden');
 
-    checkboxes.forEach(cb => cb.checked = this.checked)
+        if (bulkSelectionCount) {
+            bulkSelectionCount.textContent = `${selectedCount} order${selectedCount === 1 ? '' : 's'} selected`;
+        }
 
-})
+        if (selectAll) {
+            selectAll.checked = checkboxes.length > 0 && selectedCount === checkboxes.length;
+            selectAll.indeterminate = selectedCount > 0 && selectedCount < checkboxes.length;
+        }
+    };
 
-let filterTimeout
+    selectAll?.addEventListener('change', () => {
+        checkboxes.forEach((checkbox) => {
+            checkbox.checked = selectAll.checked;
+        });
 
-function submitFilter() {
+        syncBulkState();
+    });
 
-    clearTimeout(filterTimeout)
+    checkboxes.forEach((checkbox) => {
+        checkbox.addEventListener('change', syncBulkState);
+    });
 
-    filterTimeout = setTimeout(() => {
+    bulkForm?.addEventListener('submit', (event) => {
+        const selectedCount = checkboxes.filter((checkbox) => checkbox.checked).length;
 
-        document.getElementById('filterForm').submit()
+        if (selectedCount === 0) {
+            event.preventDefault();
+            bulkError?.classList.remove('hidden');
+            return;
+        }
 
-    }, 300)
-}
+    });
 
+    syncBulkState();
+});
 </script>
 
 @endsection

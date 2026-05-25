@@ -4,6 +4,10 @@
 
 <section class="mx-auto max-w-5xl px-4 py-14">
 
+    <div class="mb-6 flex items-center justify-between gap-3">
+        <x-back-button href="{{ route('shop') }}" label="Back to Shop" />
+    </div>
+
     <h1 class="text-3xl font-semibold text-[#4d3028]">
         My Orders
     </h1>
@@ -20,6 +24,10 @@
                     <div>
                         <p class="font-semibold text-[#4d3028]">
                             Order #{{ $order->id }}
+                        </p>
+
+                        <p class="mt-1 text-xs font-semibold uppercase tracking-[0.14em] text-brand-secondary">
+                            {{ $order->order_type_label }}
                         </p>
 
                         <p class="text-sm text-[#6f5a51]">

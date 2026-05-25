@@ -24,9 +24,9 @@
 
 | Member | Rating | Justification |
 |---|---|---|
-| Alrazel R. Llave | 100/100 | I gave Alrazel a perfect score because he contributed a lot to the frontend side of the system and helped make the interface more complete and organized. He worked on important features such as the search functionality and PayMongo payment integration, while also helping connect the frontend with backend processes. He was also active in testing, debugging, and making UI adjustments whenever improvements were needed. |
-| Harry B. Lawang | 100/100 | I gave Harry a perfect score because he handled the major backend structure and core system logic of the project. He worked on important parts such as authentication, cart, checkout, orders, custom orders, notifications, admin dashboard, database design, routes, models, migrations, and overall system architecture. He also helped fix critical issues during development and guided the team in making sure the system worked properly. |
-| Charles Jefferson A. Betonio | 100/100 | I gave myself a perfect score because I consistently contributed to the project through frontend UI/UX improvements, admin content systems, and quality assurance testing. I worked on the FAQ and About management modules, improved parts of the authentication interface, navigation, checkout UI, and form feedback. I also helped test features, identify bugs, report issues, and suggest improvements to make the system more stable and user-friendly. |
+| Alrazel R. Llave | (TO BE FILLED) | (TO BE FILLED) |
+| Harry B. Lawang | (TO BE FILLED) | (TO BE FILLED) |
+| Charles Jefferson A. Betonio | (TO BE FILLED) | (TO BE FILLED) |
 
 ---
 
@@ -34,9 +34,9 @@
 
 | Member | Rating | Justification |
 |---|---|---|
-| Charles Jefferson A. Betonio | 100/100 | I gave Charles a perfect score because he contributed consistently to the UI/UX side of the project and helped improve the overall user experience of the system. He also worked on admin-managed content features such as the FAQ and About sections, and he played an important role in testing the system. His feedback, bug reports, and validation of features helped improve the quality, stability, and consistency of the final project. |
-| Harry B. Lawang | 100/100 | I gave Harry a perfect score because he led the backend development and handled most of the core structure of the system. He developed important modules such as authentication, cart, checkout, orders, custom orders, notifications, and the admin dashboard. He also designed the database structure, models, migrations, middleware, and service logic, which helped connect the whole system together and made the project functional. |
-| Alrazel R. Llave | 100/100 | I gave myself a perfect score because I actively contributed to the frontend implementation and system integration of the project. I helped structure and organize Blade views, supported UI implementation across different modules, and worked on important features such as search functionality and PayMongo payment integration. I also assisted in debugging, frontend-to-backend alignment, and feature testing to help make the system more complete and stable. |
+| Charles Jefferson A. Betonio | (TO BE FILLED) | (TO BE FILLED) |
+| Harry B. Lawang | (TO BE FILLED) | (TO BE FILLED) |
+| Alrazel R. Llave | (TO BE FILLED) | (TO BE FILLED) |
 
 ---
 

@@ -10,6 +10,14 @@ class CustomOrderMessage extends Model
         'custom_order_request_id',
         'user_id',
         'message',
+        'message_type',
+        'is_system',
+        'meta',
+    ];
+
+    protected $casts = [
+        'is_system' => 'boolean',
+        'meta' => 'array',
     ];
 
     public function customOrderRequest()

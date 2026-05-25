@@ -6,9 +6,33 @@ use App\Models\CustomOrderMessage;
 use App\Models\CustomOrderRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\CustomOrderQuotationMail;
+use Illuminate\Support\Facades\Log;
+use App\Models\Notification;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class AdminCustomOrderController extends Controller
 {
+    private const ACTIVE_STATUSES = [
+        CustomOrderRequest::STATUS_PENDING,
+        CustomOrderRequest::STATUS_QUOTED,
+        CustomOrderRequest::STATUS_AWAITING_PAYMENT,
+        CustomOrderRequest::STATUS_PAID,
+        CustomOrderRequest::STATUS_IN_PROGRESS,
+    ];
+
+    private const RESOLVED_STATUSES = [
+        CustomOrderRequest::STATUS_COMPLETED,
+        CustomOrderRequest::STATUS_REJECTED,
+        'received',
+        'cancelled',
+        'declined',
+        'quote_declined',
+        'refunded',
+        'resolved',
+    ];
+
     /*
     |--------------------------------------------------------------------------
     | LIST ALL CUSTOM REQUESTS
@@ -16,9 +40,18 @@ class AdminCustomOrderController extends Controller
     */
     public function index()
     {
-        $requests = CustomOrderRequest::latest()->get();
+        $activeRequests = CustomOrderRequest::whereNotIn('status', self::RESOLVED_STATUSES)
+            ->latest()
+            ->get();
 
-        return view('admin.custom.index', compact('requests'));
+        $resolvedRequests = CustomOrderRequest::whereIn('status', self::RESOLVED_STATUSES)
+            ->latest()
+            ->get();
+
+        return view('admin.custom.index', [
+            'activeRequests' => $activeRequests,
+            'resolvedRequests' => $resolvedRequests,
+        ]);
     }
 
     /*
@@ -52,6 +85,12 @@ class AdminCustomOrderController extends Controller
             'message' => $httpRequest->message,
         ]);
 
+        Notification::notifyUser($customOrder->user, [
+            'title' => 'New Admin Reply',
+            'message' => 'Admin replied to your custom order request.',
+            'link' => route('custom-order.show', $customOrder),
+        ]);
+
         return back();
     }
 
@@ -70,16 +109,29 @@ class AdminCustomOrderController extends Controller
         $customOrder->update([
             'final_price' => $validated['final_price'],
             'admin_notes' => $validated['admin_notes'],
+            'quoted_at' => now(),
+            'quote_status' => CustomOrderRequest::QUOTE_STATUS_QUOTED,
 
             // quotation stage
             'status' => CustomOrderRequest::STATUS_QUOTED,
         ]);
 
+        Notification::notifyUser($customOrder->user, [
+            'title' => 'Quotation Received',
+            'message' => 'Your custom order has been quoted and awaiting payment.',
+            'link' => route('custom-order.show', $customOrder),
+        ]);
+
         CustomOrderMessage::create([
             'custom_order_request_id' => $customOrder->id,
             'user_id' => Auth::id(),
-            'message' => 'Quotation sent: PHP ' .
+            'message' => 'The seller has quoted a price for your custom order. Quoted Price: PHP ' .
                 number_format($validated['final_price'], 2),
+            'message_type' => 'quote',
+            'is_system' => true,
+            'meta' => [
+                'quoted_price' => (float) $validated['final_price'],
+            ],
         ]);
 
         return back()->with('success', 'Quotation sent.');
@@ -92,7 +144,7 @@ class AdminCustomOrderController extends Controller
     */
     public function accept(CustomOrderRequest $customOrder)
     {
-        logger()->info('ADMIN ACCEPT HIT', [
+        Log::info('ADMIN ACCEPT HIT', [
             'id' => $customOrder->id,
             'status' => $customOrder->status,
         ]);
@@ -107,11 +159,15 @@ class AdminCustomOrderController extends Controller
             CustomOrderRequest::STATUS_QUOTED,
         ])) {
 
-            logger()->warning('ACCEPT BLOCKED', [
+            Log::warning('ACCEPT BLOCKED', [
                 'status' => $customOrder->status
             ]);
 
             abort(403, 'Order cannot be accepted at this stage.');
+        }
+
+        if ((float) ($customOrder->final_price ?? 0) <= 0) {
+            abort(422, 'Please send a valid quotation before moving this request to payment.');
         }
 
         /*
@@ -123,10 +179,20 @@ class AdminCustomOrderController extends Controller
 
             // waiting for customer payment
             'status' => CustomOrderRequest::STATUS_AWAITING_PAYMENT,
+            'quote_status' => CustomOrderRequest::QUOTE_STATUS_ACCEPTED,
 
             // payment deadline (3 days)
             'payment_due_at' => now()->addDays(3),
+
+            'payment_status' => $customOrder->payment_status === 'paid'
+                ? CustomOrderRequest::STATUS_PAID
+                : ($customOrder->payment_status ?: 'unpaid'),
         ]);
+
+        $customOrder->syncLinkedOrder();
+
+        Mail::to($customOrder->email)
+            ->send(new CustomOrderQuotationMail($customOrder));
 
         /*
         |--------------------------------------------------------------------------
@@ -139,9 +205,14 @@ class AdminCustomOrderController extends Controller
             'message' =>
                 'Your request has been approved. ' .
                 'Please complete payment within 3 days.',
+            'message_type' => 'system',
+            'is_system' => true,
+            'meta' => [
+                'event' => 'admin_approved',
+            ],
         ]);
 
-        logger()->info('ORDER MOVED TO PAYMENT STAGE');
+        Log::info('ORDER MOVED TO PAYMENT STAGE');
 
         return back()->with(
             'success',
@@ -161,7 +232,16 @@ class AdminCustomOrderController extends Controller
         }
 
         $customOrder->update([
-            'status' => CustomOrderRequest::STATUS_REJECTED
+            'status' => CustomOrderRequest::STATUS_REJECTED,
+            'quote_status' => CustomOrderRequest::QUOTE_STATUS_DECLINED,
+        ]);
+
+        $customOrder->syncLinkedOrder();
+
+        Notification::notifyUser($customOrder->user, [
+            'title' => 'Request Rejected',
+            'message' => 'Admin rejected your custom order request.',
+            'link' => route('custom-order.show', $customOrder),
         ]);
 
         CustomOrderMessage::create([
@@ -174,5 +254,47 @@ class AdminCustomOrderController extends Controller
             'success',
             'Order rejected successfully.'
         );
+    }
+
+    public function destroy(CustomOrderRequest $customOrder)
+    {
+        try {
+            $customOrder->delete();
+
+            return redirect()
+                ->route('admin.custom.index')
+                ->with('success', 'Custom order request deleted.');
+        } catch (\Throwable $e) {
+            report($e);
+
+            return back()->with('error', 'Unable to delete this custom order request right now.');
+        }
+    }
+
+    public function downloadReceipt(CustomOrderRequest $customOrder)
+    {
+        if (! extension_loaded('gd')) {
+            Log::error('Admin custom receipt PDF generation failed because the PHP GD extension is missing.', [
+                'custom_order_id' => $customOrder->id,
+                'php_binary' => PHP_BINARY,
+            ]);
+
+            abort(500, 'PDF receipts require the PHP GD extension. Enable extension=gd in C:\\xampp\\php\\php.ini and restart Apache or php artisan serve.');
+        }
+
+        $pricing = [
+            'base_price' => $customOrder->final_price ?? $customOrder->estimated_price,
+            'platform_fee' => 0,
+            'delivery_fee' => 0,
+            'vat' => 0,
+            'total' => $customOrder->final_price ?? $customOrder->estimated_price,
+        ];
+
+        $pdf = Pdf::loadView('user.receipt.customreceipt-pdf', [
+            'order' => $customOrder,
+            'pricing' => $pricing,
+        ]);
+
+        return $pdf->download('custom-receipt-' . $customOrder->id . '.pdf');
     }
 }

@@ -1,0 +1,67 @@
+@extends('layouts.admin')
+
+@section('content')
+<div class="rounded-4xl border border-brand-border bg-white p-6 shadow-sm">
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <h2 class="font-display text-2xl font-semibold text-brand-primary">FAQ Management</h2>
+            <p class="mt-2 text-sm text-brand-ink/70">Create, edit, and manage frequently asked questions on the public website.</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+            <x-back-button href="{{ route('admin.dashboard') }}" label="Back to Dashboard" />
+            <a href="{{ route('admin.faq.create') }}" class="brand-btn-primary px-5 py-2 text-sm">+ New FAQ</a>
+        </div>
+    </div>
+
+    @if ($faqs->count())
+        <div class="mt-8 overflow-x-auto">
+            <table class="w-full text-left text-sm">
+                <thead class="border-b border-brand-border">
+                    <tr>
+                        <th class="px-3 py-3 font-semibold text-brand-primary">Order</th>
+                        <th class="px-3 py-3 font-semibold text-brand-primary">Question</th>
+                        <th class="px-3 py-3 font-semibold text-brand-primary">Status</th>
+                        <th class="px-3 py-3 font-semibold text-brand-primary">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($faqs as $faq)
+                        <tr class="border-b border-brand-border/50 hover:bg-brand-light/30 transition">
+                            <td class="px-3 py-3 text-brand-ink/70">{{ $faq->order }}</td>
+                            <td class="px-3 py-3">
+                                <p class="font-medium text-brand-primary">{{ $faq->question }}</p>
+                            </td>
+                            <td class="px-3 py-3">
+                                <x-status-badge :status="$faq->active ? 'active' : 'inactive'" context="toggle" />
+                            </td>
+                            <td class="px-3 py-3">
+                                <div class="flex gap-2">
+                                    <a href="{{ route('admin.faq.edit', $faq) }}" class="font-semibold text-brand-secondary hover:text-brand-primary transition">Edit</a>
+                                    <form action="{{ route('admin.faq.destroy', $faq) }}"
+                                          method="POST"
+                                          class="inline-block"
+                                          data-confirm-title="Delete FAQ?"
+                                          data-confirm-message="Are you sure you want to delete this FAQ?"
+                                          data-confirm-final-title="Final Confirmation"
+                                          data-confirm-final-message="This FAQ will be removed from the public About page. Are you absolutely sure?"
+                                          data-confirm-final-action="Yes, Delete">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="font-semibold text-red-600 hover:text-red-700 transition">Delete</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+
+        <x-admin-pagination :paginator="$faqs" label="FAQ pagination" />
+    @else
+        <div class="mt-8 rounded-3xl border-2 border-dashed border-brand-border bg-brand-light/50 p-8 text-center">
+            <p class="text-brand-ink/70">No FAQs yet. <a href="{{ route('admin.faq.create') }}" class="font-semibold text-brand-secondary hover:text-brand-primary">Create the first one</a>.</p>
+        </div>
+    @endif
+</div>
+@endsection

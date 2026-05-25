@@ -2,26 +2,40 @@
 
 @section('content')
 
+@php
+    $backButtonHref = $type === 'custom-order'
+        ? route('custom-order.show', $item)
+        : route('orders.show', $item);
+
+    $backButtonLabel = $type === 'custom-order'
+        ? 'Back to Ticket'
+        : 'Back to Order';
+@endphp
+
 <section class="mx-auto max-w-3xl px-4 py-16">
 
-    <h1 class="text-3xl font-semibold text-[#4d3028]">
+    <div class="mb-6 flex items-center justify-between gap-3">
+        <x-back-button href="{{ $backButtonHref }}" label="{{ $backButtonLabel }}" />
+    </div>
+
+    <h1 class="text-3xl font-semibold text-brand-primary">
         Payment Summary
     </h1>
 
-    <div class="mt-6 rounded-2xl border border-[#eadfd7] bg-white p-6">
+    <div class="mt-6 rounded-2xl border border-brand-border bg-white p-6">
 
-        <p class="text-sm text-[#6f5a51]">
+        <p class="text-sm text-brand-ink/70">
             You are paying for:
         </p>
 
-        <p class="mt-2 text-xl font-semibold text-[#4d3028]">
+        <p class="mt-2 text-xl font-semibold text-brand-primary">
             {{ ucfirst(str_replace('-', ' ', $type)) }}
         </p>
 
         <hr class="my-4">
 
         {{-- ITEM INFO --}}
-        <div class="text-sm text-[#6f5a51] space-y-1">
+        <div class="space-y-1 text-sm text-brand-ink/70">
 
             @if ($type === 'custom-order')
                 <p><strong>Item:</strong> {{ $item->item_type }}</p>
@@ -37,33 +51,46 @@
         <hr class="my-4">
 
         {{-- BREAKDOWN --}}
-        <div class="space-y-2 text-sm">
+        <div class="space-y-2 text-sm text-brand-ink/70">
+
+            @if ($type === 'custom-order')
+
+                {{-- CUSTOM ORDER = FIXED PRICE --}}
+                <p>
+                    Base Price:
+                    <strong>₱{{ number_format($pricing['base_price'], 2) }}</strong>
+                </p>
+
+            @else
+
+                {{-- CART ORDER = DETAILED BREAKDOWN --}}
+                <p>
+                    Subtotal:
+                    <strong>₱{{ number_format($pricing['subtotal'], 2) }}</strong>
+                </p>
+
+            @endif
 
             <p>
-                Base Amount:
-                <strong>₱{{ number_format($breakdown['base_amount'], 2) }}</strong>
+                Platform Fee:
+                <strong>₱{{ number_format($pricing['platform_fee'], 2) }}</strong>
             </p>
 
             <p>
-                Platform Fee (5%):
-                <strong>₱{{ number_format($breakdown['platform_fee'], 2) }}</strong>
+                Delivery Fee:
+                <strong>₱{{ number_format($pricing['delivery_fee'], 2) }}</strong>
             </p>
 
-            <p class="text-lg">
-                Total:
-                <strong>₱{{ number_format($breakdown['total_amount'], 2) }}</strong>
+            <p>
+                VAT:
+                <strong>₱{{ number_format($pricing['vat'], 2) }}</strong>
             </p>
 
             <hr>
 
-            <p class="text-green-700">
-                Deposit Required (50%):
-                <strong>₱{{ number_format($breakdown['deposit'], 2) }}</strong>
-            </p>
-
-            <p class="text-[#6f5a51]">
-                Remaining Balance:
-                <strong>₱{{ number_format($breakdown['balance'], 2) }}</strong>
+            <p class="text-lg text-brand-primary">
+                Final Amount Payable:
+                <strong>₱{{ number_format($pricing['total'], 2) }}</strong>
             </p>
 
         </div>
@@ -74,8 +101,8 @@
 
             @csrf
 
-            <button class="w-full rounded-full bg-[#5d342b] py-3 text-white">
-                Pay Deposit (Mock)
+            <button class="brand-btn-primary w-full py-3">
+                Pay Now
             </button>
 
         </form>

@@ -2,7 +2,12 @@
 
 namespace App\Providers;
 
+use App\Models\Cart;
+use App\Support\SessionCart;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
+use App\Models\Notification;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -19,6 +24,26 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        View::composer('components.navbar', function ($view) {
+
+            /** @var Cart|null $cart */
+            $cart = Auth::check() ? Cart::current(false) : null;
+
+            $cartCount = Auth::check()
+                ? ($cart ? $cart->items()->sum('quantity') : 0)
+                : SessionCart::count();
+            $unreadCount = 0;
+
+            if (Auth::check()) {
+                $unreadCount = Notification::where('user_id', Auth::id())
+                    ->unread()
+                    ->count();
+            }
+
+            $view->with([
+                'cartCount' => $cartCount,
+                'unreadCount' => $unreadCount,
+            ]);
+        });
     }
 }

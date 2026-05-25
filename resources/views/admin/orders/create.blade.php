@@ -4,13 +4,19 @@
 
 <div class="max-w-3xl mx-auto rounded-[2rem] border border-[#eadfd7] bg-white p-6 shadow-sm">
 
-    <h2 class="font-display text-2xl font-semibold text-[#4d3028]">
-        Create Manual Order
-    </h2>
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+            <h2 class="font-display text-2xl font-semibold text-[#4d3028]">
+                Create Manual Order
+            </h2>
 
-    <p class="mt-2 text-sm text-[#6f5a51]">
-        Admin-only order creation (bypasses cart system)
-    </p>
+            <p class="mt-2 text-sm text-[#6f5a51]">
+                Admin-only order creation (bypasses cart system)
+            </p>
+        </div>
+
+        <x-back-button href="{{ route('admin.orders.index') }}" label="Back to Orders" />
+    </div>
 
     <form method="POST" action="{{ route('admin.orders.store') }}" class="mt-6 space-y-4">
 

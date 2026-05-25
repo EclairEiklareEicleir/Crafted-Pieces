@@ -3,59 +3,155 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>the_crafted_pieces</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    <title>{{ config('app.name', 'Crafted Pieces') }}</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/crafted-pieces-logo.png') }}">
+    <link rel="shortcut icon" href="{{ asset('images/crafted-pieces-logo.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/crafted-pieces-logo.png') }}">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="bg-gray-50">
+<body class="min-h-screen text-brand-ink antialiased">
 
-    {{-- NAVBAR --}}
     <x-navbar />
 
-    {{-- PAGE CONTENT --}}
+    @if (session('success') || $errors->any())
+
+        <div id="global-alert"
+             class="fixed right-4 top-4 z-9999 w-full max-w-lg px-4 transition duration-300"
+             data-flash-alert
+             data-flash-delay="{{ session('success') && ! $errors->any() ? 4200 : 7000 }}"
+             data-flash-auto-dismiss="{{ $errors->any() ? 'false' : 'true' }}">
+
+            <div id="global-alert-box"
+                 class="rounded-2xl border border-[#eadfd7] bg-white shadow-2xl transition-all duration-300 ease-out">
+
+                <div class="flex items-start justify-between gap-4 p-5">
+
+                    <div class="text-base font-medium text-[#4d3028] leading-relaxed">
+
+                        @if (session('success'))
+                            <p>{{ session('success') }}</p>
+                        @endif
+
+                        @if ($errors->any())
+                            <div class="space-y-2">
+                                @foreach ($errors->all() as $error)
+                                    <div class="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+                                        {{ $error }}
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
+
+                    </div>
+
+                    <button type="button"
+                            data-flash-dismiss
+                            aria-label="Dismiss notification"
+                            class="text-[0px] leading-none text-[#6f5a51] hover:text-black transition">
+                        <span class="text-2xl" aria-hidden="true">&times;</span>
+                        ×
+                    </button>
+
+                </div>
+
+            </div>
+        </div>
+
+    @endif
+
     @yield('content')
 
-    {{-- AUTH MODAL --}}
     <x-auth-modal />
 
-    {{-- Footer --}}
     <x-footer />
 
-    {{-- AUTO OPEN MODAL ON ERROR --}}
-    @if ($errors->any())
+    <x-chatbot />
+
+    <x-brand-loader />
+
+    @php
+        $authForm = session('auth_form');
+    @endphp
+
+    @if ($authForm)
         <script>
             window.addEventListener('DOMContentLoaded', () => {
+
                 openAuthModal();
-                showLogin();
+
+                const form = '{{ $authForm }}';
+
+                if (form === 'register') {
+                    showRegister();
+                } else {
+                    showLogin();
+                }
+
             });
         </script>
     @endif
 
-    {{-- GLOBAL SCRIPTS --}}
     <script>
-        let authState = 'login'; // "login" | "register"
+        let authState = 'login';
+
+        function updateModalLock() {
+            const openModal = document.querySelector('[data-auth-modal]:not(.hidden), [data-legal-modal]:not(.hidden), [data-search-modal]:not(.hidden)');
+            document.body.classList.toggle('overflow-hidden', Boolean(openModal));
+        }
+
+        function openLegalModal(type) {
+            const modal = document.querySelector(`[data-legal-modal="${type}"]`);
+
+            if (!modal) return;
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            updateModalLock();
+        }
+
+        function closeLegalModal(type) {
+            const modal = document.querySelector(`[data-legal-modal="${type}"]`);
+
+            if (!modal) return;
+
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            updateModalLock();
+        }
 
         function openAuthModal() {
             const modal = document.getElementById('auth-modal');
+
+            if (!modal) return;
+
             modal.classList.remove('hidden');
+            modal.classList.add('flex');
 
             requestAnimationFrame(() => {
                 modal.classList.add('opacity-100');
                 modal.classList.remove('opacity-0');
             });
 
+            updateModalLock();
             renderAuth();
         }
 
         function closeAuthModal() {
             const modal = document.getElementById('auth-modal');
 
+            if (!modal) return;
+
             modal.classList.remove('opacity-100');
             modal.classList.add('opacity-0');
 
             setTimeout(() => {
                 modal.classList.add('hidden');
+                modal.classList.remove('flex');
+                updateModalLock();
             }, 200);
         }
 
@@ -92,14 +188,12 @@
 
         function showLogin() {
             authState = 'login';
-
             resetForm('register-form');
             renderAuth();
         }
 
         function showRegister() {
             authState = 'register';
-
             resetForm('login-form');
             renderAuth();
             initRegisterGuard();
@@ -125,10 +219,58 @@
             updateButtonState();
         }
 
+        function togglePasswordVisibility(button) {
+            const targetId = button.dataset.passwordTarget;
+            const passwordInput = document.getElementById(targetId);
+            if (!passwordInput) return;
+
+            const visible = passwordInput.type === 'text';
+            passwordInput.type = visible ? 'password' : 'text';
+
+            button.innerHTML = visible
+                ? `
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-5 w-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8a4 4 0 0 1 0 8 4 4 0 0 1 0-8Z" />
+                    </svg>
+                  `
+                : `
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-5 w-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.5 8.5 15.5 15.5" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.5 8.5 8.5 15.5" />
+                    </svg>
+                  `;
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             initRegisterGuard();
+
+            document.querySelectorAll('[data-auth-modal-open]').forEach((button) => {
+                button.addEventListener('click', () => {
+                    openAuthModal();
+                    showLogin();
+                });
+            });
+
+            document.querySelectorAll('[data-legal-modal-open]').forEach((button) => {
+                button.addEventListener('click', () => {
+                    openLegalModal(button.dataset.legalModalOpen);
+                });
+            });
+
+            document.querySelectorAll('[data-legal-modal-close]').forEach((button) => {
+                button.addEventListener('click', () => {
+                    closeLegalModal(button.dataset.legalModalClose);
+                });
+            });
         });
     </script>
 
 </body>
+
+<script>
+    window.chatbotContext = 'general';
+</script>
+
 </html>

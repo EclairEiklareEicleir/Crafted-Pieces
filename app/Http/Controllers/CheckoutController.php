@@ -5,95 +5,132 @@ namespace App\Http\Controllers;
 use App\Models\Cart;
 use App\Models\Order;
 use App\Models\CustomOrderRequest;
+use App\Services\PayMongoService;
+use App\Services\PricingService;
+use App\Support\SessionCart;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class CheckoutController extends Controller
 {
+    private function getCart(Request $request, bool $create = true): ?Cart
+    {
+        return Auth::check() ? Cart::current($create) : null;
+    }
+
     /*
     |--------------------------------------------------------------------------
-    | CART HANDLING
+    | CART CHECKOUT
     |--------------------------------------------------------------------------
     */
 
-    private function getCart()
+    public function index(Request $request)
     {
-        if (Auth::check()) {
-            return Cart::firstOrCreate([
-                'user_id' => Auth::id()
-            ]);
-        }
+        $cartItems = $this->currentCartItems($request);
 
-        return Cart::firstOrCreate([
-            'session_id' => session()->getId()
-        ]);
-    }
+        $pricing = (new PricingService)->calculate($cartItems);
 
-    public function index()
-    {
-        $cart = $this->getCart();
-
-        $cartItems = $cart
-            ? $cart->items()->with('product')->get()
-            : collect();
-
-        return view('user.checkout', compact('cartItems'));
+        return view('user.checkout', compact('cartItems', 'pricing'));
     }
 
     public function submit(Request $request)
     {
-        $cart = $this->getCart();
+        $cart = $this->getCart($request, false);
+        $cartItems = $this->currentCartItems($request);
 
-        if (! $cart || $cart->items()->count() === 0) {
-            return back()->withErrors([
-                'checkout' => 'Your cart is empty.'
-            ]);
+        if ($cartItems->isEmpty()) {
+            return back()->withErrors(['checkout' => 'Your cart is empty.']);
+        }
+
+        if ($message = $this->cartAvailabilityMessage($cartItems)) {
+            return back()->withErrors(['checkout' => $message]);
         }
 
         $validated = $request->validate([
             'full_name' => 'required|string|max:255',
             'email' => 'required|email|max:255',
             'shipping_address' => 'required|string',
-            'payment_method' => 'required|string',
         ]);
 
-        $cartItems = $cart->items()->with('product')->get();
+        $pricing = (new PricingService)->calculate($cartItems);
+        $paymentMethod = 'PayMongo';
+        $guestSessionId = $request->session()->getId();
 
-        $total = $cartItems->sum(function ($item) {
-            return $item->quantity * $item->price;
+        $order = DB::transaction(function () use ($validated, $pricing, $cartItems, $paymentMethod, $guestSessionId) {
+            $order = Order::create([
+                'user_id' => Auth::id(),
+                'order_type' => 'online_order',
+                'guest_session_id' => Auth::check() ? null : $guestSessionId,
+                'full_name' => $validated['full_name'],
+                'email' => $validated['email'],
+                'shipping_address' => $validated['shipping_address'],
+                'payment_method' => $paymentMethod,
+                'payment_status' => 'pending',
+                'subtotal' => $pricing['subtotal'],
+                'platform_fee' => $pricing['platform_fee'],
+                'delivery_fee' => $pricing['delivery_fee'],
+                'vat_amount' => $pricing['vat'],
+                'total_amount' => $pricing['total'],
+                'status' => 'pending',
+            ]);
+
+            foreach ($cartItems as $item) {
+                $order->items()->create([
+                    'product_id' => $item->product_id,
+                    'product_variant_id' => $item->product_variant_id,
+                    'yarn_color_id' => $item->yarn_color_id,
+                    'variant_name' => $item->variant_name,
+                    'variant_hex_color' => $item->variant_hex_color,
+                    'variant_image_path' => $item->variant_image_path,
+                    'quantity' => $item->quantity,
+                    'price' => $item->price,
+                ]);
+            }
+
+            return $order->load('items.product', 'items.productVariant', 'items.yarnColor');
         });
 
-        $order = Order::create([
-            'user_id' => Auth::id(),
-            'full_name' => $validated['full_name'],
-            'email' => $validated['email'],
-            'shipping_address' => $validated['shipping_address'],
-            'payment_method' => $validated['payment_method'],
-            'total_amount' => $total,
-            'status' => 'pending',
-        ]);
+        try {
+            $payMongoSession = app(PayMongoService::class)->createCheckoutSession($order);
 
-        foreach ($cartItems as $item) {
-            $order->items()->create([
-                'product_id' => $item->product_id,
-                'quantity' => $item->quantity,
-                'price' => $item->price,
+            $order->update([
+                'paymongo_checkout_id' => $payMongoSession['checkout_session_id'],
             ]);
+
+            if (Auth::check()) {
+                $cart?->items()->delete();
+            } else {
+                SessionCart::clear();
+            }
+
+            return redirect()->away($payMongoSession['checkout_url']);
+        } catch (\Throwable $e) {
+            report($e);
+
+            return back()
+                ->withInput()
+                ->withErrors(['checkout' => 'Unable to start PayMongo checkout right now. Please try again.']);
         }
-
-        $cart->items()->delete();
-
-        return redirect()->route('checkout.success', $order);
     }
 
-    public function success(Order $order)
+    public function success(Request $request, Order $order)
     {
+        if (! $this->canAccessOrder($request, $order)) {
+            abort(403);
+        }
+
+        $order->load('items.product', 'items.productVariant', 'items.yarnColor');
+
         return view('user.order-success', compact('order'));
     }
 
     /*
     |--------------------------------------------------------------------------
-    | UNIVERSAL PAYMENT SYSTEM (CUSTOM + ORDERS)
+    | PAYMENT
     |--------------------------------------------------------------------------
     */
 
@@ -101,130 +138,48 @@ class CheckoutController extends Controller
     {
         $item = $this->resolvePaymentItem($type, $id);
 
-        /*
-        |--------------------------------------------------------------------------
-        | AUTO EXPIRE UNPAID CUSTOM ORDERS
-        |--------------------------------------------------------------------------
-        */
-        if (
-            $type === 'custom-order' &&
-            $item->paymentIsExpired()
-        ) {
-
-            $item->update([
-                'status' => CustomOrderRequest::STATUS_REJECTED
-            ]);
-
-            return redirect()
-                ->route('custom-order.show', $item)
-                ->withErrors([
-                    'payment' => 'Payment deadline has expired.'
-                ]);
+        if (! Auth::check() || $item->user_id !== Auth::id()) {
+            abort(403);
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | SECURITY CHECK
-        |--------------------------------------------------------------------------
-        */
-        if (Auth::check()) {
+        if ($type === 'custom-order') {
 
-            if (
-                $type === 'custom-order' &&
-                $item->user_id !== Auth::id()
-            ) {
-                abort(403, 'Unauthorized payment access.');
-            }
+            $basePrice = $item->final_price ?? $item->estimated_price;
+            $pricing = (new PricingService)->calculateCustomOrder($basePrice);
 
-            if (
-                $type === 'order' &&
-                $item->user_id !== Auth::id()
-            ) {
-                abort(403, 'Unauthorized payment access.');
-            }
+        } else {
+            $pricing = (new PricingService)->calculateFromOrder($item);
         }
 
-        $amount = $this->resolveAmount($item, $type);
-
-        $breakdown = $this->buildPaymentBreakdown($amount);
-
-        return view('user.payment', [
-            'type' => $type,
-            'item' => $item,
-            'breakdown' => $breakdown
-        ]);
+        return view('user.payment', compact('type', 'item', 'pricing'));
     }
 
     public function processPayment(Request $request, $type, $id)
     {
         $item = $this->resolvePaymentItem($type, $id);
 
-        /*
-        |--------------------------------------------------------------------------
-        | AUTO EXPIRE BEFORE PAYMENT PROCESS
-        |--------------------------------------------------------------------------
-        */
-        if (
-            $type === 'custom-order' &&
-            $item->paymentIsExpired()
-        ) {
-
-            $item->update([
-                'status' => CustomOrderRequest::STATUS_REJECTED
-            ]);
-
-            return redirect()
-                ->route('custom-order.show', $item)
-                ->withErrors([
-                    'payment' => 'Payment deadline expired.'
-                ]);
+        if ($type === 'custom-order' && $item->paymentIsExpired()) {
+            $item->update(['status' => CustomOrderRequest::STATUS_REJECTED]);
+            return back()->withErrors(['payment' => 'Payment expired']);
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | SECURITY CHECK
-        |--------------------------------------------------------------------------
-        */
-        if (
-            $type === 'custom-order' &&
-            $item->user_id !== Auth::id()
-        ) {
+        if (! Auth::check() || $item->user_id !== Auth::id()) {
             abort(403);
         }
 
-        if (
-            $type === 'order' &&
-            $item->user_id !== Auth::id()
-        ) {
-            abort(403);
-        }
+        $item->update([
+            'status' => $type === 'custom-order'
+                ? CustomOrderRequest::STATUS_PAID
+                : 'paid',
+            'paid_at' => now(),
+        ]);
 
-        switch ($type) {
-
-            case 'custom-order':
-
-                $item->update([
-                    'status' => CustomOrderRequest::STATUS_PAID,
-                    'paid_at' => now(),
-                ]);
-
-                return redirect()
-                    ->route('custom-order.show', $item)
-                    ->with('success', 'Custom order payment successful.');
-
-            case 'order':
-
-                $item->update([
-                    'status' => 'paid'
-                ]);
-
-                return redirect()
-                    ->route('checkout.success', $item)
-                    ->with('success', 'Order payment successful.');
-
-            default:
-                abort(404);
-        }
+        return redirect()->route(
+            $type === 'custom-order'
+                ? 'custom-order.show'
+                : 'checkout.success',
+            $item
+        )->with('success', 'Payment successful.');
     }
 
     /*
@@ -236,56 +191,107 @@ class CheckoutController extends Controller
     private function resolvePaymentItem($type, $id)
     {
         return match ($type) {
-
             'custom-order' => CustomOrderRequest::findOrFail($id),
-
             'order' => Order::findOrFail($id),
-
             default => abort(404),
         };
     }
 
     /*
     |--------------------------------------------------------------------------
-    | AMOUNT RESOLVER
+    | RECEIPT
     |--------------------------------------------------------------------------
     */
 
-    private function resolveAmount($item, $type)
+    public function downloadCustomReceipt(CustomOrderRequest $order)
     {
-        return match ($type) {
+        if (! Auth::check() || $order->user_id !== Auth::id()) {
+            abort(403);
+        }
 
-            'custom-order' => $item->final_price ?? $item->estimated_price,
+        if (! extension_loaded('gd')) {
+            Log::error('Custom receipt PDF generation failed because the PHP GD extension is missing.', [
+                'custom_order_id' => $order->id,
+                'user_id' => Auth::id(),
+                'php_binary' => PHP_BINARY,
+            ]);
 
-            'order' => $item->total_amount,
+            abort(500, 'PDF receipts require the PHP GD extension. Enable extension=gd in C:\\xampp\\php\\php.ini and restart Apache or php artisan serve.');
+        }
 
-            default => 0,
-        };
+        $pricingService = new PricingService();
+
+        $basePrice = $order->final_price ?? $order->estimated_price;
+
+        $pricing = $pricingService->calculateCustomOrder($basePrice);
+
+        $pdf = Pdf::loadView('user.receipt.customreceipt-pdf', [
+            'order' => $order,
+            'pricing' => $pricing,
+        ]);
+
+        return $pdf->download('custom-receipt-' . $order->id . '.pdf');
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | PAYMENT BREAKDOWN ENGINE
-    |--------------------------------------------------------------------------
-    */
-
-    private function buildPaymentBreakdown($amount)
+    private function canAccessOrder(Request $request, Order $order): bool
     {
-        $platformFeeRate = 0.05; // 5%
-        $depositRate = 0.50;     // 50%
+        if (Auth::check() && $order->user_id === Auth::id()) {
+            return true;
+        }
 
-        $platformFee = $amount * $platformFeeRate;
-        $total = $amount + $platformFee;
+        if (! Auth::check() && $order->user_id === null && $order->guest_session_id === $request->session()->getId()) {
+            return true;
+        }
 
-        $deposit = $total * $depositRate;
-        $balance = $total - $deposit;
+        return $request->hasValidSignature();
+    }
 
-        return [
-            'base_amount' => round($amount, 2),
-            'platform_fee' => round($platformFee, 2),
-            'total_amount' => round($total, 2),
-            'deposit' => round($deposit, 2),
-            'balance' => round($balance, 2),
-        ];
+    private function currentCartItems(Request $request): Collection
+    {
+        if (! Auth::check()) {
+            return SessionCart::items();
+        }
+
+        $cart = $this->getCart($request, false);
+
+        return $cart
+            ? $cart->items()->with(['product', 'productVariant', 'yarnColor'])->get()
+            : collect();
+    }
+
+    private function cartAvailabilityMessage(Collection $cartItems): ?string
+    {
+        foreach ($cartItems as $item) {
+            if ($message = $this->productAvailabilityMessage($item->product, (int) $item->quantity, $item->productVariant)) {
+                return $message;
+            }
+        }
+
+        return null;
+    }
+
+    private function productAvailabilityMessage(?\App\Models\Product $product, int $quantity, ?\App\Models\ProductVariant $variant = null): ?string
+    {
+        if (! $product) {
+            return 'One of the products in your cart is no longer available.';
+        }
+
+        if (! $product->is_active) {
+            return $product->name . ' is not available right now.';
+        }
+
+        $availableStock = $variant && $variant->stock !== null
+            ? (int) $variant->stock
+            : (int) $product->stock;
+
+        if ($availableStock < 1) {
+            return $product->name . ' is out of stock.';
+        }
+
+        if ($quantity > $availableStock) {
+            return 'Only ' . $availableStock . ' item(s) are available for ' . $product->name . '.';
+        }
+
+        return null;
     }
 }

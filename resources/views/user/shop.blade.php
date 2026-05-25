@@ -6,29 +6,31 @@
     <div class="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
 
         <div>
-            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-[#a86b57]">
+            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-brand-secondary">
                 Catalog
             </p>
 
-            <h1 class="mt-2 font-display text-4xl font-semibold text-[#4d3028]">
+            <h1 class="mt-2 font-display text-4xl font-semibold text-brand-primary">
                 Shop Crochet Pieces
             </h1>
 
-            <p class="mt-4 max-w-2xl text-[#6f5a51]">
+            <p class="mt-4 max-w-2xl text-brand-ink/70">
                 Browse ready stock, made-to-order items, and custom crochet pieces.
             </p>
         </div>
 
-        <a href="{{ route('custom-order') }}"
-           class="rounded-full bg-[#5d342b] px-5 py-3 text-sm font-semibold text-white shadow-md transition hover:-translate-y-0.5">
-            Request a quote
-        </a>
+        @auth
+            <a href="{{ route('custom-order') }}"
+               class="brand-btn-primary px-5 py-3 text-sm shadow-md hover:-translate-y-0.5">
+                Request a quote
+            </a>
+        @endauth
 
     </div>
 
     {{-- FLASH MESSAGE (FIX #3) --}}
     @if (session('status'))
-        <div class="mt-6 rounded-2xl border border-[#eadfd7] bg-white p-4 text-sm text-[#5d342b]">
+        <div class="mt-6 rounded-2xl border border-brand-border bg-white p-4 text-sm text-brand-primary">
             {{ session('status') }}
         </div>
     @endif
@@ -38,14 +40,14 @@
 
         <a href="{{ route('shop') }}"
            class="rounded-full border px-4 py-2 text-sm font-semibold
-           {{ !$activeCategory ? 'border-[#b8745f] bg-[#b8745f] text-white' : 'border-[#eadfd7] bg-white text-[#5d4a43]' }}">
+           {{ !$activeCategory ? 'border-brand-primary bg-brand-primary text-white' : 'border-brand-border bg-white text-brand-ink/75' }}">
             All
         </a>
 
         @foreach ($categories as $category)
             <a href="{{ route('shop', ['category' => $category->slug]) }}"
                class="rounded-full border px-4 py-2 text-sm font-semibold
-               {{ $activeCategory === $category->slug ? 'border-[#b8745f] bg-[#b8745f] text-white' : 'border-[#eadfd7] bg-white text-[#5d4a43]' }}">
+               {{ $activeCategory === $category->slug ? 'border-brand-primary bg-brand-primary text-white' : 'border-brand-border bg-white text-brand-ink/75' }}">
                 {{ $category->name }}
             </a>
         @endforeach
@@ -58,7 +60,7 @@
         @forelse ($products as $product)
             <x-product-card :product="$product" />
         @empty
-            <div class="rounded-2xl border border-[#eadfd7] bg-white p-6 text-sm text-[#6f5a51]">
+            <div class="rounded-2xl border border-brand-border bg-white p-6 text-sm text-brand-ink/70">
                 No products found for this category.
             </div>
         @endforelse
