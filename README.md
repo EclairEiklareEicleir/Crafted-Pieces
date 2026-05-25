@@ -2,11 +2,11 @@
 
 ## Team Members and Roles
 
-| Member | Role |
-|---|---|
-| Charles Jefferson A. Betonio | Frontend Developer, UI/UX Designer, Quality Assurance (QA) Tester |
-| Harry B. Lawang | Leader, Full-Stack Developer, Backend & System Architect |
-| Alrazel R. Llave | Frontend Developer, UI Implementation Lead, Secondary Full-Stack Developer |
+| GitHub Account | Member | Role |
+|---|---|---|
+| `charlezb`, `betoniocharlesjefferson-dotcom` | Charles Jefferson A. Betonio | Frontend Developer, UI/UX Designer, Quality Assurance (QA) Tester |
+| `EclairEiklareEicleir` | Harry B. Lawang | Leader, Full-Stack Developer, Backend & System Architect |
+| `to0tskie` | Alrazel R. Llave | Frontend Developer, UI Implementation Lead, Secondary Full-Stack Developer |
 
 ---
 
