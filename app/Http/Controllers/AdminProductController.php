@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 class AdminProductController extends Controller
 {
@@ -25,59 +25,86 @@ class AdminProductController extends Controller
         ]);
     }
 
-    public function export(): StreamedResponse
+    public function export(): Response
     {
         $products = Product::with(['category', 'variants'])->latest()->get();
-        $filename = 'product-export-' . now()->format('Ymd_His') . '.csv';
+        $rows = [];
+        $totalStock = 0;
+        $lowStockCount = 0;
+        $outOfStockCount = 0;
 
-        return response()->streamDownload(function () use ($products) {
-            $output = fopen('php://output', 'w');
+        foreach ($products as $product) {
+            $variants = $product->variants->isNotEmpty() ? $product->variants : collect([null]);
 
-            fputcsv($output, [
-                'Product Name',
-                'Category',
-                'Variant Name',
-                'Yarn Color',
-                'Size',
-                'Material / Yarn Type',
-                'Design / Style',
-                'Set Quantity',
-                'Packaging Option',
-                'Price',
-                'Stock',
-                'Status',
-                'Availability Status',
-                'SKU',
-                'Image Path',
-            ]);
+            foreach ($variants as $variant) {
+                $stock = (int) ($variant?->stock ?? $product->stock ?? 0);
 
-            foreach ($products as $product) {
-                $variants = $product->variants->isNotEmpty() ? $product->variants : collect([null]);
-
-                foreach ($variants as $variant) {
-                    fputcsv($output, [
-                        $product->name,
-                        $product->category?->name,
-                        $variant?->name ?? $product->name,
-                        $variant?->yarn_color ?? '',
-                        $variant?->size ?? '',
-                        $variant?->material ?? '',
-                        $variant?->design_style ?? '',
-                        $variant?->set_quantity ?? '',
-                        $variant?->packaging_option ?? '',
-                        number_format((float) ($variant?->price ?? $product->price), 2, '.', ''),
-                        (int) ($variant?->stock ?? $product->stock ?? 0),
-                        $variant?->status ?? ($product->is_active ? 'active' : 'inactive'),
-                        $variant ? $variant->availability_label : (($product->is_active && (int) $product->stock > 0) ? 'Available' : 'Out of Stock'),
-                        $variant?->sku ?? '',
-                        $variant?->image_path ?? $product->image ?? '',
-                    ]);
+                if ($stock <= 0) {
+                    $outOfStockCount++;
+                } elseif ($stock <= 5) {
+                    $lowStockCount++;
                 }
-            }
 
-            fclose($output);
-        }, $filename, [
-            'Content-Type' => 'text/csv',
+                $totalStock += max(0, $stock);
+
+                $rows[] = [
+                    $product->name,
+                    $product->category?->name,
+                    $variant?->name ?? $product->name,
+                    $variant?->yarn_color ?? '',
+                    $variant?->size ?? '',
+                    $variant?->material ?? '',
+                    $variant?->design_style ?? '',
+                    $variant?->set_quantity ?? '',
+                    $variant?->packaging_option ?? '',
+                    $variant?->sku ?? '',
+                    (float) ($variant?->price ?? $product->price),
+                    $stock,
+                    $variant?->status ?? ($product->is_active ? 'active' : 'inactive'),
+                    $variant ? $variant->availability_label : (($product->is_active && (int) $product->stock > 0) ? 'Available' : 'Out of Stock'),
+                ];
+            }
+        }
+
+        $columns = [
+            'Product Name',
+            'Category',
+            'Variant Name',
+            'Yarn Color',
+            'Size',
+            'Material',
+            'Style',
+            'Set Quantity',
+            'Packaging',
+            'SKU',
+            'Price',
+            'Stock',
+            'Status',
+            'Availability',
+        ];
+
+        $metadata = [
+            'Generated Date' => now()->format('Y-m-d H:i:s'),
+            'Total Products' => (string) $products->count(),
+            'Total Variants' => (string) $products->sum(fn (Product $product) => $product->variants->count()),
+            'Total Stock' => (string) $totalStock,
+            'Low Stock Count' => (string) $lowStockCount,
+            'Out of Stock Count' => (string) $outOfStockCount,
+        ];
+
+        $html = $this->buildExcelHtml(
+            'Crafted Pieces Product Inventory Report',
+            $metadata,
+            $columns,
+            $rows,
+            [10]
+        );
+
+        return response($html, 200, [
+            'Content-Type' => 'application/vnd.ms-excel; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="crafted_pieces_products_report_' . now()->format('Y-m-d') . '.xls"',
+            'Pragma' => 'no-cache',
+            'Expires' => '0',
         ]);
     }
 
@@ -408,5 +435,51 @@ class AdminProductController extends Controller
         }
 
         return $storedPath;
+    }
+
+    private function buildExcelHtml(string $title, array $metadata, array $columns, array $rows, array $currencyColumnIndexes = []): string
+    {
+        $html = '<html><head><meta charset="UTF-8"><style>'
+            . 'body{font-family:Calibri,Arial,sans-serif;background:#ffffff;color:#3f1d28;}'
+            . '.title{font-size:20px;font-weight:700;color:#650c2a;padding:14px 10px;border-bottom:2px solid #f3c9d9;}'
+            . '.meta{background:#fff6fa;color:#3f1d28;border:1px solid #f3c9d9;padding:6px 10px;}'
+            . 'table{border-collapse:collapse;width:100%;margin-top:12px;}'
+            . 'th{background:#650c2a;color:#ffffff;font-weight:700;text-align:center;border:1px solid #f3c9d9;padding:8px;}'
+            . 'td{border:1px solid #f3c9d9;padding:7px;color:#3f1d28;vertical-align:top;}'
+            . 'tr.alt td{background:#fff6fa;}'
+            . '.num{text-align:right;}'
+            . '</style></head><body>';
+
+        $html .= '<table><tr><td class="title" colspan="' . count($columns) . '">' . $this->escapeExcel($title) . '</td></tr>';
+
+        foreach ($metadata as $label => $value) {
+            $html .= '<tr><td class="meta" colspan="2"><strong>' . $this->escapeExcel((string) $label) . ':</strong> ' . $this->escapeExcel((string) $value) . '</td>'
+                . '<td class="meta" colspan="' . max(1, count($columns) - 2) . '"></td></tr>';
+        }
+
+        $html .= '<tr>';
+        foreach ($columns as $column) {
+            $html .= '<th>' . $this->escapeExcel($column) . '</th>';
+        }
+        $html .= '</tr>';
+
+        foreach ($rows as $index => $row) {
+            $html .= '<tr' . ($index % 2 === 1 ? ' class="alt"' : '') . '>';
+            foreach ($row as $columnIndex => $value) {
+                $isCurrency = in_array($columnIndex, $currencyColumnIndexes, true);
+                $cellValue = $isCurrency ? 'PHP ' . number_format((float) $value, 2) : (string) $value;
+                $html .= '<td' . ($isCurrency || is_numeric($value) ? ' class="num"' : '') . '>' . $this->escapeExcel($cellValue) . '</td>';
+            }
+            $html .= '</tr>';
+        }
+
+        $html .= '</table></body></html>';
+
+        return $html;
+    }
+
+    private function escapeExcel(string $value): string
+    {
+        return htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
     }
 }

@@ -164,7 +164,6 @@
 
     async function sendMessage()
     {
-        console.log('SEND MESSAGE TRIGGERED');
         const message = chatbotInput.value.trim();
 
         if (!message) return;

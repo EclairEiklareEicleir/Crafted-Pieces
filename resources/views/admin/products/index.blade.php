@@ -21,7 +21,7 @@
 
         <div class="flex flex-wrap gap-3">
             <x-back-button href="{{ route('admin.dashboard') }}" label="Back to Dashboard" />
-            <a href="{{ route('admin.products.export') }}" data-no-loading="true" class="brand-btn-secondary whitespace-nowrap px-5 py-2 text-sm">Export CSV</a>
+            <a href="{{ route('admin.products.export') }}" data-no-loading="true" class="brand-btn-secondary whitespace-nowrap px-5 py-2 text-sm">Export Excel</a>
             <a href="{{ route('admin.products.create') }}" class="brand-btn-primary whitespace-nowrap px-5 py-2 text-sm">Create Product</a>
         </div>
 

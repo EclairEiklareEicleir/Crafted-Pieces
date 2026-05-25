@@ -38,7 +38,7 @@
         <div class="flex flex-wrap items-center gap-3 xl:justify-end">
             <x-back-button href="{{ route('admin.dashboard') }}" label="Back to Dashboard" />
             <a href="{{ route('admin.orders.index') }}" class="brand-btn-secondary px-5 py-2 text-sm">Active Orders</a>
-            <a href="{{ route('admin.history.export', request()->query()) }}" data-no-loading="true" class="brand-btn-primary px-5 py-2 text-sm">Export CSV</a>
+            <a href="{{ route('admin.history.export', request()->query()) }}" data-no-loading="true" class="brand-btn-primary px-5 py-2 text-sm">Export Excel</a>
         </div>
     </div>
 

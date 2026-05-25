@@ -17,7 +17,6 @@ class AccountController extends Controller
 
     public function update(Request $request)
     {
-        // dd(Auth::user());
         $user = Auth::user();
 
         $validated = $request->validate([
@@ -28,7 +27,7 @@ class AccountController extends Controller
         /** @var User $user */
         $user->update($validated);
         Auth::setUser($user->fresh());
-        
+
         return back()->with('success', 'Account updated successfully.');
     }
 
