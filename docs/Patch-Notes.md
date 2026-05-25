@@ -211,3 +211,4 @@
 ## 24/05/26: Minor UI Modification
 - Minor fix in Admin Order UI
 - Adding total revenue to bottom of Order History
+- Cleaned the laravel project, removing unnecessary and unused files.
